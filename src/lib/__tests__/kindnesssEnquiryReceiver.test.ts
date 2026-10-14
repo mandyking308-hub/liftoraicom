@@ -43,13 +43,13 @@ const deps = (store: HandoffStore, resolve = async () => ({ kind: "matched" as c
 describe("Kindnesss enquiry receiver (offline integration contract)", () => {
   it("default OFF: returns 503 and writes nothing", async () => {
     const m = memStore(); const s = await signed(event());
-    const r = await handleKindnesssEnquiry(s.raw, s.headers, deps(m.store, undefined, undefined as unknown as string));
+    const r = await handleKindnesssEnquiry(s.raw, s.headers, { ...deps(m.store), enabledFlag: undefined });
     expect(r.status).toBe(503); expect(m.rows.size).toBe(0); expect(m.audits).toEqual([]);
   });
 
   it("missing secret fails closed with no record", async () => {
     const m = memStore(); const s = await signed(event());
-    const r = await handleKindnesssEnquiry(s.raw, s.headers, deps(m.store, undefined, "true", undefined));
+    const r = await handleKindnesssEnquiry(s.raw, s.headers, { ...deps(m.store), secret: undefined });
     expect(r).toMatchObject({ status: 503, body: { reason: "missing_secret" } }); expect(m.rows.size).toBe(0);
   });
 
