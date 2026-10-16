@@ -27,3 +27,29 @@ describe("GIAS validation helpers", () => {
     expect(inferSnapshotDateFromFilename("gias.csv")).toBeNull();
   });
 });
+
+import { buildGiasGroupQuery, sanitiseFilterText, GIAS_GROUPS } from "@/lib/gias/giasSearch";
+import { navGroups } from "@/components/founder/FounderLayout";
+
+describe("GIAS group filter", () => {
+  it("accepts Independent schools with bounded range", () => {
+    const g = buildGiasGroupQuery({ group: "Independent schools", status: "Open", page: 3, pageSize: 25 });
+    expect(g).toMatchObject({ group: "Independent schools", _status: "Open", from: 50, to: 74 });
+    expect(GIAS_GROUPS).toContain("Independent schools");
+  });
+  it("rejects unknown groups and caps page size", () => {
+    expect(() => buildGiasGroupQuery({ group: "Anything" })).toThrow();
+    expect(buildGiasGroupQuery({ group: "Academies", pageSize: 9999 }).to).toBe(99);
+  });
+  it("sanitises filter-breaking characters", () => {
+    expect(sanitiseFilterText("a,b(c)%*:d")).toBe("a b c d");
+  });
+});
+
+describe("Founder navigation", () => {
+  it("links School Register (GIAS) once to /founder/gias-search", () => {
+    const items = navGroups.flatMap((g) => g.items).filter((i) => i.to === "/founder/gias-search");
+    expect(items).toHaveLength(1);
+    expect(items[0].label).toBe("School Register (GIAS)");
+  });
+});

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { GIAS_FACT_LABEL, safeWebsite, searchGias, type GiasSearchParams } from "@/lib/gias/giasSearch";
+import { GIAS_GROUPS, GIAS_FACT_LABEL, safeWebsite, searchGias, type GiasSearchParams } from "@/lib/gias/giasSearch";
 
 const PAGE_SIZE = 25;
 
@@ -30,23 +30,35 @@ export default function GiasSearch() {
         <div>
           <h1 className="text-2xl font-semibold">School register search (GIAS)</h1>
           <p className="text-sm text-muted-foreground">
-            Founder/admin only. Institutional records only — no contacts or people. Every fact is labelled “{GIAS_FACT_LABEL}”. Not linked to CRM or outreach.
+            Founder/admin only. Institutional records only — no contacts or people. Not linked to CRM or outreach.
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground" data-testid="gias-disclaimer">
+            Source: DfE Get Information About Schools (GIAS) bulk data, founder-attested as licensed for internal use. Every fact is {GIAS_FACT_LABEL.toLowerCase()}. Internal use only — not externally legally verified and not for customer-facing release.
           </p>
         </div>
         <Card>
           <CardHeader>
             <CardTitle>Search</CardTitle>
-            <CardDescription>Name, town, postcode or URN, with optional filters.</CardDescription>
+            <CardDescription>Name, town, postcode or URN, with optional filters. For open independent schools choose group “Independent schools” and status “Open”.</CardDescription>
           </CardHeader>
           <CardContent>
             <form
-              className="grid gap-3 md:grid-cols-6"
+              className="grid gap-3 md:grid-cols-7"
               onSubmit={(e) => { e.preventDefault(); setParams({ ...draft, page: 1, pageSize: PAGE_SIZE }); }}
             >
               <div className="md:col-span-2">{field("q", "Name, town, postcode or URN")}</div>
               {field("status", "Status (e.g. Open)")}
               {field("phase", "Phase")}
               {field("county", "County")}
+              <select
+                aria-label="Establishment group"
+                className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                value={draft.group ?? ""}
+                onChange={(e) => setDraft({ ...draft, group: e.target.value })}
+              >
+                <option value="">All groups</option>
+                {GIAS_GROUPS.map((g) => <option key={g} value={g}>{g}</option>)}
+              </select>
               <Button type="submit">Search</Button>
             </form>
           </CardContent>
@@ -56,9 +68,7 @@ export default function GiasSearch() {
             {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
             {error && <p className="text-sm text-destructive">Search unavailable: {(error as Error).message}</p>}
             {!isLoading && !error && total === 0 && (
-              <p className="text-sm text-muted-foreground">
-                No records found. If this is unexpected, the GIAS rows may not have been imported yet — the register only shows what a confirmed import has loaded.
-              </p>
+              <p className="text-sm text-muted-foreground">No matching records for these filters.</p>
             )}
             {total > 0 && (
               <>
