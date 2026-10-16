@@ -1,58 +1,12 @@
-# Read-only audit: 30 Sep 2026 Family Office Symposium, batch 1 (30 names)
+# GIAS release verification — results and optional next step
 
-No edits, writes, or provider actions were made. Nothing further to build; this is the findings report.
+## Verified (read-only, 16 Oct 2026)
+- liftoraicom.lovable.app and liftorai.com serve the same bundle (`index-BSaS8J5W.js`), which contains the new strings: "School Register (GIAS)", "Establishment group", "No matching records for these filters", and the `/founder/gias-search` route.
+- Signed out, `/founder/gias-search` redirects to `/founder/login`. The school register page does not render.
 
-## Result table
+## Not verified
+- Deployment ID `6d7696c6-…` and SHA `d8a1014f…` were not matched directly. Hosting exposes no build ID, so these are inferred from the matching strings.
+- Founder-only controls (menu link, group filter, results) were not checked while signed in, because no signed-in session was available.
 
-All 30 names: NOT PRESENT (exact, accent-normalised, and first-3-letters + surname likely matches) in `relationship_intelligence_contacts`. None found in `contacts` by surname/name pattern either.
-
-| Name | Present | Org | Symposium event attached | Notes/evidence | LinkedIn state | Duplicate |
-|---|---|---|---|---|---|---|
-| Adam Wethered | No | - | - | - | - | No |
-| Alan Crook | No | - | - | - | - | No |
-| Alan Zhang | No | - | - | - | - | No |
-| Chris Rossbach | No | - | - | - | - | No |
-| Alexandra Caminer | No | - | - | - | - | No |
-| Simon Paul | No | - | - | - | - | No |
-| Laura Payne | No | - | - | - | - | No |
-| James Wilcox | No | - | - | - | - | No |
-| Mary D'Souza | No | - | - | - | - | No |
-| Alexandre Andreani | No | - | - | - | - | No |
-| Anmol Goel | No | - | - | - | - | No |
-| George Egan | No | - | - | - | - | No |
-| William Hajj | No | - | - | - | - | No |
-| Rebekah Tobias | No | - | - | - | - | No |
-| Sean Curry | No | - | - | - | - | No |
-| Tolga Akar | No | - | - | - | - | No |
-| Jonathan Damsgaard | No | - | - | - | - | No |
-| Neetu Puranikmath | No | - | - | - | - | No |
-| Dylan Grice | No | - | - | - | - | No |
-| Philippe Chaudhry | No | - | - | - | - | No |
-| Remi Casals | No | - | - | - | - | No |
-| Richard Young | No | - | - | - | - | No |
-| Rob Waterhouse | No | - | - | - | - | No |
-| Robert Crenian | No | - | - | - | - | No |
-| Alex Hoffman | No | - | - | - | - | No |
-| Ali Arat | No | - | - | - | - | No |
-| Andrew Wynn | No | - | - | - | - | No |
-| Camilla Mazzolini | No | - | - | - | - | No |
-| Daniel Nye | No | - | - | - | - | No |
-| David Dinwoodie | No | - | - | - | - | No |
-
-## Totals (batch 1, 30 names)
-
-- Present: 0
-- Missing: 30
-- Symposium-event attached: 0
-- Richly enriched: 0
-- LinkedIn verified: 0 / unverified: 0 (no records)
-- Duplicates/conflicts: 0
-
-## Event-history check
-
-- No contact notes, source evidence or source notes mention "Family Office Symposium" or "Carlton Tower".
-- The only event-history hit for "family office" is an unrelated meeting event (Simon Livesey, P2P Family Office Network). It is not the 30 Sep symposium.
-
-## Method
-
-Name match on `relationship_intelligence_contacts.contact_name` (lowercased, accents folded, plus first-3-letters + surname fallback), `contacts.name` surname/name pattern, and text search of source_evidence / founder_notes / source_notes / event summaries and metadata.
+## Optional next step (only if approved)
+- Mint a read-only founder browser session for the founder account, open `/founder/gias-search` on the live site, select "Independent schools" + "Open", and confirm the page shows 1,573 records. This would not edit files, change data, deploy, send anything or change gates.
