@@ -1,6 +1,22 @@
 # GIAS establishment search — schema and import procedure (16 Oct 2026)
 
-Status: schema + search + founder UI implemented. **Ingest BLOCKED: no source file is accessible to the Lovable process. 0 rows imported (confirmed by database count).**
+Status: schema + search + founder UI implemented. **Data populated (16 Oct 2026)** by a separate database operator, batch `5bf59621-3bdb-4b0c-81a0-3b2b557490b3` = `applied`.
+
+## Live population — independently verified by read-only DB query (not browser E2E), 16 Oct 2026
+| Check | Result |
+|---|---|
+| Total rows / distinct URNs | 52,591 / 52,591 |
+| Open | 27,158 |
+| Open + group "Independent schools" | 1,573 |
+| fact_verification_status other than gias_sourced_not_school_confirmed | 0 |
+| RLS read policy | founder/admin, authenticated role only |
+
+Source registry `10eb00f4-…` stays internal (customer_visible=false, agent_visible=false). Historical note: the earlier "0 rows imported / ingest blocked" status was accurate before this batch and is superseded, not deleted.
+
+## UI (founder only)
+- Nav: "School Register (GIAS)" under Opportunity → `/founder/gias-search` (FounderRoute guard).
+- Group filter (e.g. "Independent schools" + status "Open" = 1,573): direct RLS-bound read of `gias_establishments`, allowlisted groups, page size ≤100. Existing `gias_search` RPC unchanged; no migration.
+- Limitation: signed-in founder browser check of the page was not run in this change; verification is DB counts + offline tests.
 
 ## Scope and provenance
 - Source registry row: `knowledge_source_registry` `10eb00f4-453f-4f93-baa3-98e288e7b6ea` (approval_status left `unreviewed`, unchanged).
