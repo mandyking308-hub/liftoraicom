@@ -77,6 +77,7 @@ export function inferSnapshotDateFromFilename(filename: string): string | null {
 
 export async function searchGias(p: GiasSearchParams) {
   if (blank(p.group)) return searchGiasByGroup(p);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- GIAS objects are not in generated types
   const { data, error } = await (supabase as any).rpc("gias_search", buildGiasSearchArgs(p));
   if (error) throw error;
   const rows = (data ?? []) as GiasRow[];
@@ -103,6 +104,7 @@ const GIAS_COLUMNS = "urn, establishment_name, establishment_status, establishme
 /** Group filter path: direct read on gias_establishments, still founder/admin-only via RLS. */
 async function searchGiasByGroup(p: GiasSearchParams) {
   const g = buildGiasGroupQuery(p);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- GIAS objects are not in generated types
   let query = (supabase as any).from("gias_establishments").select(GIAS_COLUMNS, { count: "exact" })
     .eq("source_registry_id", GIAS_SOURCE_REGISTRY_ID).eq("establishment_group", g.group);
   if (g._status) query = query.eq("establishment_status", g._status);
