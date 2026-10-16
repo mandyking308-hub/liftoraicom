@@ -3,6 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 export const GIAS_SOURCE_REGISTRY_ID = "10eb00f4-453f-4f93-baa3-98e288e7b6ea";
 export const GIAS_FACT_LABEL = "GIAS-sourced, not school-confirmed";
 export const GIAS_MAX_PAGE_SIZE = 100;
+export const GIAS_BATCH_ID = "5bf59621-3bdb-4b0c-81a0-3b2b557490b3";
+export const GIAS_GROUPS = [
+  "Independent schools", "Academies", "Local authority maintained schools", "Special schools",
+  "Free Schools", "Welsh schools", "Colleges", "Universities", "Other types", "Online provider",
+] as const;
 
 export interface GiasSearchParams {
   q?: string;
@@ -10,6 +15,8 @@ export interface GiasSearchParams {
   phase?: string;
   type?: string;
   county?: string;
+  /** establishment_group, e.g. "Independent schools". Uses an RLS-bound direct table read. */
+  group?: string;
   page?: number;
   pageSize?: number;
 }
@@ -69,8 +76,43 @@ export function inferSnapshotDateFromFilename(filename: string): string | null {
 }
 
 export async function searchGias(p: GiasSearchParams) {
+  if (blank(p.group)) return searchGiasByGroup(p);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- GIAS objects are not in generated types
   const { data, error } = await (supabase as any).rpc("gias_search", buildGiasSearchArgs(p));
   if (error) throw error;
   const rows = (data ?? []) as GiasRow[];
   return { rows, total: rows[0]?.total_count ?? 0 };
+}
+
+/** Strips characters that would break a PostgREST or()/ilike filter. */
+export function sanitiseFilterText(q: string): string {
+  return q.replace(/[,()%*\\:"']/g, " ").replace(/\s+/g, " ").trim();
+}
+
+/** Builds the group-filtered query args (exact-match filters, bounded range). */
+export function buildGiasGroupQuery(p: GiasSearchParams) {
+  const a = buildGiasSearchArgs(p);
+  const group = blank(p.group);
+  if (!group || !(GIAS_GROUPS as readonly string[]).includes(group)) throw new Error("Unknown establishment group");
+  const q = a._q ? sanitiseFilterText(a._q) : null;
+  const from = (a._page - 1) * a._page_size;
+  return { ...a, group, q: q || null, from, to: from + a._page_size - 1 };
+}
+
+const GIAS_COLUMNS = "urn, establishment_name, establishment_status, establishment_type, phase, town, county, postcode, website, source_snapshot_date, fact_verification_status, review_flags";
+
+/** Group filter path: direct read on gias_establishments, still founder/admin-only via RLS. */
+async function searchGiasByGroup(p: GiasSearchParams) {
+  const g = buildGiasGroupQuery(p);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- GIAS objects are not in generated types
+  let query = (supabase as any).from("gias_establishments").select(GIAS_COLUMNS, { count: "exact" })
+    .eq("source_registry_id", GIAS_SOURCE_REGISTRY_ID).eq("establishment_group", g.group);
+  if (g._status) query = query.eq("establishment_status", g._status);
+  if (g._phase) query = query.eq("phase", g._phase);
+  if (g._type) query = query.eq("establishment_type", g._type);
+  if (g._county) query = query.ilike("county", g._county);
+  if (g.q) query = query.or(`establishment_name.ilike.%${g.q}%,town.ilike.%${g.q}%,postcode.ilike.%${g.q}%,urn.eq.${g.q}`);
+  const { data, error, count } = await query.order("establishment_name").range(g.from, g.to);
+  if (error) throw error;
+  return { rows: (data ?? []) as GiasRow[], total: count ?? 0 };
 }
