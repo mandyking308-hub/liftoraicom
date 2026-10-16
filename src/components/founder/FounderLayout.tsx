@@ -15,7 +15,7 @@ type NavGroup = { label: string; icon: any; defaultOpen?: boolean; items: NavIte
  * docs/liftor-master-site-lifecycle-map.md §I so daily founder use is navigable
  * without scrolling through hundreds of unrelated routes.
  */
-const navGroups: NavGroup[] = [
+export const navGroups: NavGroup[] = [
   {
     label: "Control / Command Centre", icon: Command, defaultOpen: true,
     items: [
@@ -43,6 +43,7 @@ const navGroups: NavGroup[] = [
       { label: "Demos", to: "/founder/demos", icon: MonitorPlay },
       { label: "Relationship Intelligence", to: "/founder/relationship-intelligence", icon: Network },
       { label: "Strategic Organisations & Networks", to: "/founder/strategic-organisations", icon: Building2 },
+      { label: "School Register (GIAS)", to: "/founder/gias-search", icon: BookOpen },
       { label: "Funding Radar", to: "/founder/funding-radar/shortlist", icon: Radar },
       { label: "PR Radar", to: "/founder/global-pr-radar", icon: Megaphone },
     ],
