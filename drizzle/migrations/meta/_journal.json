@@ -85,6 +85,13 @@
       "when": 1791465905917,
       "tag": "0011_smartlead_snapshot_plain_text",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792155122293,
+      "tag": "0012_gias_establishment_search",
+      "breakpoints": true
     }
   ]
 }

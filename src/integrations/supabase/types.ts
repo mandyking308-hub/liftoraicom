@@ -30417,6 +30417,297 @@ export type Database = {
         }
         Relationships: []
       }
+      gias_establishments: {
+        Row: {
+          country_label: string | null
+          county: string | null
+          created_at: string
+          establishment_group: string | null
+          establishment_name: string
+          establishment_status: string | null
+          establishment_type: string | null
+          fact_verification_status: string
+          id: string
+          last_batch_id: string | null
+          locality: string | null
+          phase: string | null
+          postcode: string | null
+          review_flags: string[]
+          rights_provenance: string
+          row_hash: string
+          snapshot_date_basis: string
+          source_filename: string
+          source_registry_id: string
+          source_snapshot_date: string | null
+          town: string | null
+          updated_at: string
+          urn: string
+          website: string | null
+        }
+        Insert: {
+          country_label?: string | null
+          county?: string | null
+          created_at?: string
+          establishment_group?: string | null
+          establishment_name: string
+          establishment_status?: string | null
+          establishment_type?: string | null
+          fact_verification_status?: string
+          id?: string
+          last_batch_id?: string | null
+          locality?: string | null
+          phase?: string | null
+          postcode?: string | null
+          review_flags?: string[]
+          rights_provenance?: string
+          row_hash: string
+          snapshot_date_basis?: string
+          source_filename: string
+          source_registry_id: string
+          source_snapshot_date?: string | null
+          town?: string | null
+          updated_at?: string
+          urn: string
+          website?: string | null
+        }
+        Update: {
+          country_label?: string | null
+          county?: string | null
+          created_at?: string
+          establishment_group?: string | null
+          establishment_name?: string
+          establishment_status?: string | null
+          establishment_type?: string | null
+          fact_verification_status?: string
+          id?: string
+          last_batch_id?: string | null
+          locality?: string | null
+          phase?: string | null
+          postcode?: string | null
+          review_flags?: string[]
+          rights_provenance?: string
+          row_hash?: string
+          snapshot_date_basis?: string
+          source_filename?: string
+          source_registry_id?: string
+          source_snapshot_date?: string | null
+          town?: string | null
+          updated_at?: string
+          urn?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gias_establishments_last_batch_id_fkey"
+            columns: ["last_batch_id"]
+            isOneToOne: false
+            referencedRelation: "gias_import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gias_import_batches: {
+        Row: {
+          applied_at: string | null
+          block_reasons: string[]
+          created_at: string
+          created_by: string | null
+          duplicate_urns_in_file: number
+          expected_row_count: number
+          file_sha256: string
+          id: string
+          inserted_rows: number
+          invalid_rows: number
+          rolled_back_at: string | null
+          snapshot_date_basis: string
+          source_filename: string
+          source_registry_id: string
+          source_snapshot_date: string | null
+          staged_rows: number
+          status: string
+          unchanged_rows: number
+          updated_rows: number
+          valid_rows: number
+          validated_at: string | null
+        }
+        Insert: {
+          applied_at?: string | null
+          block_reasons?: string[]
+          created_at?: string
+          created_by?: string | null
+          duplicate_urns_in_file?: number
+          expected_row_count: number
+          file_sha256: string
+          id?: string
+          inserted_rows?: number
+          invalid_rows?: number
+          rolled_back_at?: string | null
+          snapshot_date_basis?: string
+          source_filename: string
+          source_registry_id: string
+          source_snapshot_date?: string | null
+          staged_rows?: number
+          status?: string
+          unchanged_rows?: number
+          updated_rows?: number
+          valid_rows?: number
+          validated_at?: string | null
+        }
+        Update: {
+          applied_at?: string | null
+          block_reasons?: string[]
+          created_at?: string
+          created_by?: string | null
+          duplicate_urns_in_file?: number
+          expected_row_count?: number
+          file_sha256?: string
+          id?: string
+          inserted_rows?: number
+          invalid_rows?: number
+          rolled_back_at?: string | null
+          snapshot_date_basis?: string
+          source_filename?: string
+          source_registry_id?: string
+          source_snapshot_date?: string | null
+          staged_rows?: number
+          status?: string
+          unchanged_rows?: number
+          updated_rows?: number
+          valid_rows?: number
+          validated_at?: string | null
+        }
+        Relationships: []
+      }
+      gias_import_changes: {
+        Row: {
+          action: string
+          batch_id: string
+          before_row: Json | null
+          source_registry_id: string
+          urn: string
+        }
+        Insert: {
+          action: string
+          batch_id: string
+          before_row?: Json | null
+          source_registry_id: string
+          urn: string
+        }
+        Update: {
+          action?: string
+          batch_id?: string
+          before_row?: Json | null
+          source_registry_id?: string
+          urn?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gias_import_changes_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "gias_import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gias_import_staging: {
+        Row: {
+          batch_id: string
+          country_label: string | null
+          county: string | null
+          establishment_group: string | null
+          establishment_name: string | null
+          establishment_status: string | null
+          establishment_type: string | null
+          locality: string | null
+          phase: string | null
+          postcode: string | null
+          row_hash: string | null
+          row_number: number
+          town: string | null
+          urn: string | null
+          validation_errors: string[]
+          validation_status: string
+          website: string | null
+        }
+        Insert: {
+          batch_id: string
+          country_label?: string | null
+          county?: string | null
+          establishment_group?: string | null
+          establishment_name?: string | null
+          establishment_status?: string | null
+          establishment_type?: string | null
+          locality?: string | null
+          phase?: string | null
+          postcode?: string | null
+          row_hash?: string | null
+          row_number: number
+          town?: string | null
+          urn?: string | null
+          validation_errors?: string[]
+          validation_status?: string
+          website?: string | null
+        }
+        Update: {
+          batch_id?: string
+          country_label?: string | null
+          county?: string | null
+          establishment_group?: string | null
+          establishment_name?: string | null
+          establishment_status?: string | null
+          establishment_type?: string | null
+          locality?: string | null
+          phase?: string | null
+          postcode?: string | null
+          row_hash?: string | null
+          row_number?: number
+          town?: string | null
+          urn?: string | null
+          validation_errors?: string[]
+          validation_status?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gias_import_staging_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "gias_import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gias_source_decisions: {
+        Row: {
+          created_at: string
+          decided_by_label: string
+          decision: string
+          id: string
+          recorded_by: string | null
+          scope_note: string
+          source_registry_id: string
+        }
+        Insert: {
+          created_at?: string
+          decided_by_label: string
+          decision: string
+          id?: string
+          recorded_by?: string | null
+          scope_note: string
+          source_registry_id: string
+        }
+        Update: {
+          created_at?: string
+          decided_by_label?: string
+          decision?: string
+          id?: string
+          recorded_by?: string | null
+          scope_note?: string
+          source_registry_id?: string
+        }
+        Relationships: []
+      }
       global_audit_events: {
         Row: {
           action_summary: string
@@ -74328,6 +74619,128 @@ export type Database = {
       get_outreach_send_cron_status: { Args: never; Returns: Json }
       get_proposal_by_token: { Args: { _token: string }; Returns: Json }
       get_system_mode: { Args: never; Returns: string }
+      gias_apply_batch: {
+        Args: { _batch_id: string }
+        Returns: {
+          applied_at: string | null
+          block_reasons: string[]
+          created_at: string
+          created_by: string | null
+          duplicate_urns_in_file: number
+          expected_row_count: number
+          file_sha256: string
+          id: string
+          inserted_rows: number
+          invalid_rows: number
+          rolled_back_at: string | null
+          snapshot_date_basis: string
+          source_filename: string
+          source_registry_id: string
+          source_snapshot_date: string | null
+          staged_rows: number
+          status: string
+          unchanged_rows: number
+          updated_rows: number
+          valid_rows: number
+          validated_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "gias_import_batches"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      gias_rollback_batch: {
+        Args: { _batch_id: string }
+        Returns: {
+          applied_at: string | null
+          block_reasons: string[]
+          created_at: string
+          created_by: string | null
+          duplicate_urns_in_file: number
+          expected_row_count: number
+          file_sha256: string
+          id: string
+          inserted_rows: number
+          invalid_rows: number
+          rolled_back_at: string | null
+          snapshot_date_basis: string
+          source_filename: string
+          source_registry_id: string
+          source_snapshot_date: string | null
+          staged_rows: number
+          status: string
+          unchanged_rows: number
+          updated_rows: number
+          valid_rows: number
+          validated_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "gias_import_batches"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      gias_search: {
+        Args: {
+          _county?: string
+          _page?: number
+          _page_size?: number
+          _phase?: string
+          _q?: string
+          _status?: string
+          _type?: string
+        }
+        Returns: {
+          county: string
+          establishment_name: string
+          establishment_status: string
+          establishment_type: string
+          fact_verification_status: string
+          phase: string
+          postcode: string
+          review_flags: string[]
+          source_snapshot_date: string
+          total_count: number
+          town: string
+          urn: string
+          website: string
+        }[]
+      }
+      gias_validate_batch: {
+        Args: { _batch_id: string }
+        Returns: {
+          applied_at: string | null
+          block_reasons: string[]
+          created_at: string
+          created_by: string | null
+          duplicate_urns_in_file: number
+          expected_row_count: number
+          file_sha256: string
+          id: string
+          inserted_rows: number
+          invalid_rows: number
+          rolled_back_at: string | null
+          snapshot_date_basis: string
+          source_filename: string
+          source_registry_id: string
+          source_snapshot_date: string | null
+          staged_rows: number
+          status: string
+          unchanged_rows: number
+          updated_rows: number
+          valid_rows: number
+          validated_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "gias_import_batches"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       gsm_mailbox_is_campaign_ready: {
         Args: {
           _active: boolean
