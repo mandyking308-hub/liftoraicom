@@ -39,3 +39,5 @@
 - [ ] Truth labels (BUILT_IN_CODE / LIVE_CONFIGURED / END_TO_END_PROVED / BLOCKED / FAIL_CLOSED / PARTIAL /
       DEAD_OR_UNREACHABLE / HISTORICAL_ONLY / UNKNOWN) applied across coverage matrices
 - [x] Knowledge Base: add 'Education' category (KnowledgeDirectory/KnowledgeDetail)
+
+- [x] Founder-only School Visit Assessments workspace (/founder/school-visits)
