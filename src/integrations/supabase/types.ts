@@ -29431,6 +29431,98 @@ export type Database = {
         }
         Relationships: []
       }
+      founder_school_visit_records: {
+        Row: {
+          contact_followups: Json
+          created_at: string
+          decision: string
+          id: string
+          proposed_entry: string | null
+          record_kind: string
+          school_key: string
+          school_name: string
+          structured_observations: Json
+          template_key: string
+          updated_at: string
+          visit_assessment: Json
+          visit_date: string | null
+          visit_status: string
+        }
+        Insert: {
+          contact_followups?: Json
+          created_at?: string
+          decision?: string
+          id?: string
+          proposed_entry?: string | null
+          record_kind: string
+          school_key: string
+          school_name: string
+          structured_observations?: Json
+          template_key: string
+          updated_at?: string
+          visit_assessment?: Json
+          visit_date?: string | null
+          visit_status?: string
+        }
+        Update: {
+          contact_followups?: Json
+          created_at?: string
+          decision?: string
+          id?: string
+          proposed_entry?: string | null
+          record_kind?: string
+          school_key?: string
+          school_name?: string
+          structured_observations?: Json
+          template_key?: string
+          updated_at?: string
+          visit_assessment?: Json
+          visit_date?: string | null
+          visit_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "founder_school_visit_records_template_key_fkey"
+            columns: ["template_key"]
+            isOneToOne: false
+            referencedRelation: "founder_school_visit_templates"
+            referencedColumns: ["template_key"]
+          },
+        ]
+      }
+      founder_school_visit_templates: {
+        Row: {
+          confidentiality: string
+          created_at: string
+          framework: Json
+          id: string
+          template_key: string
+          template_version: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          confidentiality?: string
+          created_at?: string
+          framework: Json
+          id?: string
+          template_key: string
+          template_version?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          confidentiality?: string
+          created_at?: string
+          framework?: Json
+          id?: string
+          template_key?: string
+          template_version?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fulfilment_shipments: {
         Row: {
           audit_metadata: Json

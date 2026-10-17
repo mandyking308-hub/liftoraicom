@@ -44,6 +44,7 @@ export const navGroups: NavGroup[] = [
       { label: "Relationship Intelligence", to: "/founder/relationship-intelligence", icon: Network },
       { label: "Strategic Organisations & Networks", to: "/founder/strategic-organisations", icon: Building2 },
       { label: "School Register (GIAS)", to: "/founder/gias-search", icon: BookOpen },
+      { label: "School Visit Assessments", to: "/founder/school-visits", icon: ClipboardList },
       { label: "Funding Radar", to: "/founder/funding-radar/shortlist", icon: Radar },
       { label: "PR Radar", to: "/founder/global-pr-radar", icon: Megaphone },
     ],

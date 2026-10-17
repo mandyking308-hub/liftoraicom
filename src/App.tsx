@@ -768,6 +768,7 @@ import PublicUploadPortal from "./pages/portal/Upload";
 import KnowledgeOverview from "./pages/founder/knowledge-governance/Overview";
 import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import GiasSearch from "./pages/founder/GiasSearch";
+import SchoolVisits from "./pages/founder/SchoolVisits";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
 import KnowledgeStale from "./pages/founder/knowledge-governance/Stale";
 import KnowledgeApprovedClaims from "./pages/founder/knowledge-governance/ApprovedClaims";
@@ -1199,6 +1200,7 @@ const App = () => (
             <Route path="/founder/knowledge-governance" element={<FounderRoute><KnowledgeOverview /></FounderRoute>} />
             <Route path="/founder/knowledge-governance/sources" element={<FounderRoute><KnowledgeSources /></FounderRoute>} />
             <Route path="/founder/gias-search" element={<FounderRoute><GiasSearch /></FounderRoute>} />
+            <Route path="/founder/school-visits" element={<FounderRoute><SchoolVisits /></FounderRoute>} />
             <Route path="/founder/knowledge-governance/conflicts" element={<FounderRoute><KnowledgeConflicts /></FounderRoute>} />
             <Route path="/founder/knowledge-governance/stale" element={<FounderRoute><KnowledgeStale /></FounderRoute>} />
             <Route path="/founder/knowledge-governance/approved-claims" element={<FounderRoute><KnowledgeApprovedClaims /></FounderRoute>} />
