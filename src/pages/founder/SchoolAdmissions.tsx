@@ -24,7 +24,7 @@ const diaryLabels: Record<string, string> = { unknown: "Unknown", not_requested:
   offered: "Offered — unconfirmed", awaiting_confirmation: "Awaiting confirmation", confirmed: "Confirmed booking",
   completed: "Completed", cancelled: "Cancelled", conflict: "Date conflict" };
 
-export const admissionsStore: AdmissionsStore = {
+const admissionsStore: AdmissionsStore = {
   async read(id) {
     const { data, error } = await schoolDb.from("founder_school_visit_records").select("structured_observations").eq("id", id).single();
     if (error) throw new Error("Could not read the school. Nothing was saved.");
