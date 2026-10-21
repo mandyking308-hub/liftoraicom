@@ -1,5 +1,9 @@
 # Roadmap
 
+## Private school admissions — 21 Oct 2026
+- [x] Add founder-only admissions tracker and top-level Schools navigation using existing school records.
+- [x] Verify preservation, booking semantics, urgency sorting, filters and guarded access; leave unpublished.
+
 ## Controlled founder sales journey — 21 Oct 2026
 - [x] Audit genuine Smartlead send/reply and Kindnesss Dodo sandbox paths without mutations.
 - [x] Implement and run isolated offline journey contracts and negative tests.
