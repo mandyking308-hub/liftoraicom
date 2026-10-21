@@ -112,7 +112,7 @@ export function founderJourneyLiveReport(input: {
       { stage: "intro_email", status: "BLOCKED" as StageStatus, reason: input.envelope.executionBlocker },
       { stage: "founder_reply", status: "WAITING_FOR_REAL_EVENT" as StageStatus, reason: "no_real_intro_or_reply" },
       { stage: "ai_reply_draft", status: "BLOCKED" as StageStatus, reason: "real_scoped_reply_and_founder_draft_review_required" },
-      { stage: "quote_offer", status: "BLOCKED" as StageStatus, reason: input.offer.ok ? "stripe_fixture_not_dodo_offer_evidence" : input.offer.reason },
+      { stage: "quote_offer", status: "BLOCKED" as StageStatus, reason: input.offer.ok === false ? input.offer.reason : "stripe_fixture_not_dodo_offer_evidence" },
       { stage: "dodo_checkout", status: "BLOCKED" as StageStatus, reason: "liftor_dodo_sandbox_adapter_missing" },
       { stage: "verified_payment_crm_won", status: "BLOCKED" as StageStatus, reason: "authentic_dodo_sandbox_webhook_required_never_browser_return" },
       { stage: "receipt_onboarding", status: "BLOCKED" as StageStatus, reason: "verified_payment_and_school_release_clearance_required" },
