@@ -54,8 +54,10 @@ and database SELECTs avoided those mutations.
 
 Focused run: six files, 110 tests PASS (38 new plus 72 existing), 06:52 UTC.
 Focused ESLint PASS. Initial automatic compilation caught a discriminated-union
-narrowing error; corrected using explicit `ok === false`. Final automatic compilation
-and full-suite results are reported separately after verification.
+narrowing error; corrected using explicit `ok === false`. Automatic compilation
+reported `build OK` at 06:53:39 UTC. Full suite: 81 files, 993 tests PASS at
+06:54 UTC. Rechecked live database: all 19 gates OFF, campaign DRAFTED,
+six leads, zero sent/replies, 3/day. No authenticated live customer flow was exercised.
 
 ## Next executable prerequisites (not launch authorization)
 
