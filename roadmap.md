@@ -1,5 +1,11 @@
 # Roadmap
 
+## Controlled founder sales journey — 21 Oct 2026
+- [x] Audit genuine Smartlead send/reply and Kindnesss Dodo sandbox paths without mutations.
+- [x] Implement and run isolated offline journey contracts and negative tests.
+- [x] Record stage evidence, no-send decision, unchanged gates and executable blockers.
+- [ ] Live founder journey: blocked by missing isolated Smartlead sender/reply proof, approved Kindnesss offer and Dodo sandbox adapter/webhook; real school onboarding also waits on independent release clearance.
+
 ## Done — CRM-Native Education Correction (10 Sep 2026)
 - [x] `organisations` = canonical education account spine (additive education/source fields, safe partial uniqueness)
 - [x] `contacts.organisation_id` FK + minimal education mapping/scoring/reveal fields (keep `company` text)
