@@ -11,7 +11,16 @@ const CAMPAIGN_ID = "4103531";
 const EXPECTED_STEPS = 4;
 const GAP_DAYS = 7;
 // Advisory only; never written here (separate campaign setting, needs its own approval).
-const RECOMMENDED_SCHEDULE = { days_of_the_week: [1, 2, 3, 4, 5], use_lead_timezone: true, note: "Mon-Fri in recipient local time; a +7 step landing on a weekend shifts to Monday." };
+const RECOMMENDED_SCHEDULE = {
+  days_of_the_week: [0, 1, 2, 3, 4, 5, 6], use_lead_timezone: true,
+  weekend_sending: "permitted_by_owner_conditional",
+  conditions: [
+    "Sat/Sun only within a market-appropriate local window in the recipient's own time zone",
+    "Exclude any recipient whose country/region local law or policy restricts weekend B2B email; fall back to Mon-Fri for those",
+    "Recipients with unknown time zone/country: Mon-Fri only until resolved",
+  ],
+  note: "Advisory only. A +7 step keeps the same weekday as step 1. This tool never writes campaign schedule or send settings.",
+};
 const WRITABLE_STATUSES = new Set(["DRAFTED", "PAUSED"]);
 
 const cors = {
@@ -25,11 +34,17 @@ const json = (b: unknown, s = 200) =>
 const esc = (t: string) =>
   t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 const UNSAFE_HTML = /<\s*(script|iframe|object|embed|form|style|link|meta)\b|\son[a-z]+\s*=|javascript:/i;
-// Plain text: every line escaped, line breaks preserved. Authored HTML: passed
-// through only if it contains no active content; otherwise rejected (null).
+// Mixed bodies: plain-text lines are escaped and wrapped (paragraphs preserved);
+// a line starting with a tag is kept verbatim ONLY if the whole body has no
+// active content. Any unsafe markup anywhere rejects the body (null).
 export const toHtml = (body: string): string | null => {
-  if (/<[a-z][\s\S]*>/i.test(body)) return UNSAFE_HTML.test(body) ? null : body;
-  return body.replace(/\r\n?/g, "\n").split("\n").map((l) => (l.trim() ? `<div>${esc(l)}</div>` : "<div><br></div>")).join("");
+  if (UNSAFE_HTML.test(body)) return null;
+  return body.replace(/\r\n?/g, "\n").split("\n").map((l) => {
+    const t = l.trim();
+    if (!t) return "<div><br></div>";
+    if (/^<[a-z\/]/i.test(t)) return t;
+    return `<div>${esc(l)}</div>`;
+  }).join("");
 };
 // Calendar-day gap that lands N Mon-Fri working days after `from` (UTC date).
 export function calendarGapForWorkingDays(from: Date, n: number) {
