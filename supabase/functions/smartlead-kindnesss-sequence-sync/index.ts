@@ -102,13 +102,6 @@ Deno.serve(async (req) => {
   }
   if (KEY.length < 8) return json({ ok: false, error: "smartlead_key_missing" }, 412);
   const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } });
-  // Working-day schedule: only computable from an explicit first-send date.
-  let startDate: Date | null = null;
-  if (input?.start_date) {
-    const m = /^\d{4}-\d{2}-\d{2}$/.test(String(input.start_date)) ? new Date(`${input.start_date}T00:00:00Z`) : null;
-    if (!m || isNaN(m.getTime()) || [0, 6].includes(m.getUTCDay())) return json({ ok: false, error: "start_date_invalid_or_weekend" }, 400);
-    startDate = m;
-  }
 
   // Source (same business, same mapped campaign)
   const { data: d, error: de } = await admin.from("outreach_campaign_drafts")
@@ -119,11 +112,11 @@ Deno.serve(async (req) => {
   }
   const steps: any[] = (d.email_sequence as any)?.steps ?? [];
   const blockers: string[] = [];
-  if (steps.length !== 5) blockers.push(`source_step_count_${steps.length}`);
-  let cursor = startDate ? new Date(startDate) : null;
+  if (steps.length !== EXPECTED_STEPS) blockers.push(`source_step_count_${steps.length}_expected_${EXPECTED_STEPS}`);
   const sendDates: string[] = [];
   const sequences = steps.map((s, i) => {
     const n = Number(s.step ?? i + 1);
+    if (n !== i + 1) blockers.push(`step_order_invalid_at_${i + 1}`);
     const body = String(s.body ?? "");
     if (!body.includes("%unsubscribe-text%")) blockers.push(`step_${n}_missing_unsubscribe`);
     if (!body.includes("%signature%")) blockers.push(`step_${n}_missing_signature`);
@@ -131,11 +124,8 @@ Deno.serve(async (req) => {
     if (n > 1 && String(s.subject ?? "").trim()) blockers.push(`step_${n}_subject_not_blank`);
     const html = toHtml(body);
     if (html === null) blockers.push(`step_${n}_unsafe_html`);
-    const wd = Number(s.wait_business_days ?? 4);
-    let delay = 0;
-    if (n > 1 && cursor) { const g = calendarGapForWorkingDays(cursor, wd); delay = g.gap; cursor = g.next; }
-    else if (n > 1) delay = -1;
-    if (cursor) sendDates.push(cursor.toISOString().slice(0, 10));
+    // Fixed 7 CALENDAR-day gaps between steps (day 0 / +7 / +14 / +21).
+    const delay = n === 1 ? 0 : GAP_DAYS;
     return {
       seq_number: n,
       seq_delay_details: { delay_in_days: delay },
@@ -143,10 +133,7 @@ Deno.serve(async (req) => {
       variants: [{ subject: n === 1 ? String(s.subject) : "", email_body: html ?? "", variant_label: "A" }],
     };
   });
-  if (!startDate) blockers.push("start_date_required_for_working_day_schedule");
-  const scheduleNote = startDate
-    ? "delay_in_days are calendar gaps computed so each follow-up lands 4 Mon-Fri working days after the previous one, ONLY if email 1 actually goes out on start_date. Bank holidays, a later start, or Smartlead sending-window shifts invalidate it; schedule remains a launch blocker until confirmed at go-live."
-    : "No start_date given; Smartlead delay_in_days counts calendar days and cannot express working days. Schedule blocked.";
+  const scheduleNote = `delay_in_days are ${GAP_DAYS} calendar days (day 0/+7/+14/+21). Weekend avoidance in the recipient's local time is a SEPARATE campaign schedule setting (recommended_schedule_setting) and is NOT written by this tool.`;
 
   // Remote campaign status immediately before any write
   const camp = await sl(`/campaigns/${CAMPAIGN_ID}`, KEY);
