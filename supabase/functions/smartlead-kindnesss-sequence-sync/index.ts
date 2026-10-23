@@ -1,4 +1,4 @@
-// Founder/admin-only. Writes the five Kindnesss draft steps into ONE existing
+// Founder/admin-only. Writes EXACTLY the four Kindnesss draft steps into ONE existing
 // Smartlead campaign (4103531) ONLY when its remote status is DRAFTED/PAUSED
 // immediately before the write. Never creates campaigns, adds leads, changes
 // campaign status, schedule, senders, provider flags or gates. Never sends.
@@ -8,6 +8,10 @@ const BASE = "https://server.smartlead.ai/api/v1";
 const DRAFT_ID = "71719d7d-bd95-42e1-b73e-dfb6d890d0d6";
 const BUSINESS_ID = "640de582-a112-4d16-a221-03c27f00c6ec";
 const CAMPAIGN_ID = "4103531";
+const EXPECTED_STEPS = 4;
+const GAP_DAYS = 7;
+// Advisory only; never written here (separate campaign setting, needs its own approval).
+const RECOMMENDED_SCHEDULE = { days_of_the_week: [1, 2, 3, 4, 5], use_lead_timezone: true, note: "Mon-Fri in recipient local time; a +7 step landing on a weekend shifts to Monday." };
 const WRITABLE_STATUSES = new Set(["DRAFTED", "PAUSED"]);
 
 const cors = {
@@ -113,7 +117,6 @@ Deno.serve(async (req) => {
   const steps: any[] = (d.email_sequence as any)?.steps ?? [];
   const blockers: string[] = [];
   if (steps.length !== EXPECTED_STEPS) blockers.push(`source_step_count_${steps.length}_expected_${EXPECTED_STEPS}`);
-  const sendDates: string[] = [];
   const sequences = steps.map((s, i) => {
     const n = Number(s.step ?? i + 1);
     if (n !== i + 1) blockers.push(`step_order_invalid_at_${i + 1}`);
@@ -145,8 +148,8 @@ Deno.serve(async (req) => {
   const base = {
     mode, campaign_id: CAMPAIGN_ID, remote_status_before: remoteStatus || null,
     remote_sequence_count_before: Array.isArray(before.data) ? before.data.length : null,
-    source_step_count: steps.length, schedule_status: startDate ? "computed_from_start_date_unconfirmed" : "blocked_no_start_date",
-    schedule_note: scheduleNote, start_date: startDate?.toISOString().slice(0, 10) ?? null, planned_send_dates: sendDates,
+    source_step_count: steps.length, gap_days: GAP_DAYS, schedule_note: scheduleNote,
+    recommended_schedule_setting: RECOMMENDED_SCHEDULE, schedule_written: false,
     proposed: sequences.map((s) => ({ seq_number: s.seq_number, subject: s.variants[0].subject, delay_in_days: s.seq_delay_details.delay_in_days, body_chars: s.variants[0].email_body.length })),
     sends_triggered: false, leads_changed: false, campaign_status_changed: false,
   };
@@ -167,7 +170,7 @@ Deno.serve(async (req) => {
   const campAfter = await sl(`/campaigns/${CAMPAIGN_ID}`, KEY);
   const v = Array.isArray(after.data) ? verify(after.data, sequences) : { count: null, pass: false, checks: [] };
   return json({
-    ok: v.pass, ...base, write_http_status: w.status,
+    ok: v.pass, stale_remote_steps_remaining: Array.isArray(after.data) && after.data.length > EXPECTED_STEPS, ...base, write_http_status: w.status,
     remote_status_after: String(campAfter.data?.status ?? "").toUpperCase() || null,
     readback: v,
   });
