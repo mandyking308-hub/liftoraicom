@@ -3,3 +3,4 @@
 - Smartlead sequence writes go only through smartlead-kindnesss-sequence-sync (founder/admin, single allowlisted draft->campaign, remote DRAFTED/PAUSED check, confirm phrase, read-back), because sequence writes must never change status, leads or senders.
 - The founder sales journey contract is offline-only, imports existing approval and stop rules, and has no sender/payment adapter; passing fixtures must never authorize external actions or represent a Dodo-paid CRM sale.
 - School admissions uses the existing school record JSONB under FounderRoute and RLS; ID-scoped compare-and-set saves preserve sibling observations and reject concurrent changes without new tables or external integrations.
+- Kindnesss Apollo CSV retention uses authenticated founder/admin transactional RPCs over existing Apollo lead/run tables; exact person-ID matching and append-only source evidence preserve email data without CRM promotion or outreach authorization.

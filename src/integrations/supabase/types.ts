@@ -74882,6 +74882,11 @@ export type Database = {
       is_internal_identity: { Args: { _email: string }; Returns: boolean }
       is_kill_switch_active: { Args: never; Returns: boolean }
       is_oversight_reviewer: { Args: never; Returns: boolean }
+      kindnesss_apollo_csv_import: {
+        Args: { p_preview?: boolean; p_rows: Json; p_sha256: string }
+        Returns: Json
+      }
+      kindnesss_apollo_retention_export: { Args: never; Returns: Json }
       list_inbox_credentials_public: {
         Args: { _inbox_id: string }
         Returns: {
