@@ -1,9 +1,10 @@
 # Roadmap
 
 ## Kindnesss Apollo retention
-- [ ] Verify existing retention and provenance; keep paid enrichment and waterfall off.
-- [ ] Add founder-only idempotent CSV retention and complete audited download using existing tables.
-- [ ] Test live readback and document external Apollo CSV reconciliation/completeness limits.
+- [x] Verify existing retention and provenance; keep paid enrichment and waterfall off.
+- [x] Add founder-only idempotent CSV retention and complete audited download using existing tables.
+- [x] Test live readback and document external Apollo CSV reconciliation/completeness limits.
+- [ ] Import external Apollo exports: waiting for the founder’s 1,893-list and 1,250-contact CSV files.
 
 ## Private school admissions — 21 Oct 2026
 - [x] Add founder-only admissions tracker and top-level Schools navigation using existing school records.
