@@ -5,7 +5,7 @@ export type RetainedApolloRow = {
   company: string; email: string; email_status: string; enriched_at: string;
 };
 const aliases: Record<keyof RetainedApolloRow, string[]> = {
-  apollo_person_id: ['apollo_person_id', 'person id', 'apollo id', 'person_id'],
+  apollo_person_id: ['apollo_person_id', 'apollo person_id', 'apollo person id', 'person id', 'apollo id', 'person_id'],
   first_name: ['first_name', 'first name'], last_name: ['last_name', 'last name'],
   title: ['title'], company: ['company', 'company name', 'organization', 'organisation'],
   email: ['email', 'work email'], email_status: ['email_status', 'email status', 'email verification status'],
@@ -13,7 +13,7 @@ const aliases: Record<keyof RetainedApolloRow, string[]> = {
 };
 export function parseApolloRetentionCsv(text: string): RetainedApolloRow[] {
   const parsed = Papa.parse<Record<string, string>>(text, { header: true, skipEmptyLines: 'greedy', transformHeader: h => h.replace(/^\uFEFF/, '').trim().toLowerCase() });
-  if (parsed.errors.length) throw new Error('Invalid CSV structure. No rows imported.');
+  if (parsed.errors.some(e => e.code !== 'UndetectableDelimiter')) throw new Error('Invalid CSV structure. No rows imported.');
   const fields = parsed.meta.fields ?? [];
   if (!aliases.apollo_person_id.some(a => fields.includes(a))) throw new Error('An Apollo person ID column is required; names are never used to match.');
   if (!parsed.data.length || parsed.data.length > 10000) throw new Error('Select a CSV containing 1–10,000 rows.');
