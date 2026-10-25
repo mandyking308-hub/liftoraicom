@@ -20,6 +20,7 @@ import { Link } from "react-router-dom";
 import { NeonCandyMonitor } from "@/components/founder/outreach/NeonCandyMonitor";
 import { WeekendPool } from "@/components/founder/outreach/WeekendPool";
 import ApolloCreditFirewallPanel from "@/components/founder/outreach/ApolloCreditFirewallPanel";
+import ApolloRetentionPanel from "@/components/founder/outreach/ApolloRetentionPanel";
 
 
 const MUSIC_TARGET_KEYWORDS = [
@@ -974,6 +975,7 @@ export default function ApolloIntegration() {
         </div>
 
         <ApolloCreditFirewallPanel />
+        <ApolloRetentionPanel />
 
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
