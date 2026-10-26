@@ -89,9 +89,10 @@ Deno.serve(async (req) => {
 
   // Queue presence by contact id (for already_queued / already_sent)
   const contactIds = (contactsByEmail ?? []).map((c) => c.id);
-  const { data: queueRows } = await admin.from("email_queue")
+  const { data: queueRows, error: qErr } = await admin.from("email_queue")
     .select("contact_id,status,sequence_step,delivery_kind")
     .in("contact_id", contactIds.length ? contactIds : ["00000000-0000-0000-0000-000000000000"]);
+  if (qErr) return json({ ok: false, error: "queue_lookup_failed", applied: 0 }, 503);
   const queueByContact = new Map<string, any[]>();
   for (const q of queueRows ?? []) {
     if (!queueByContact.has(q.contact_id)) queueByContact.set(q.contact_id, []);
@@ -150,10 +151,8 @@ Deno.serve(async (req) => {
     if (cByPerson && cByPerson.id !== c?.id) { flags.add("duplicate_person_id"); dupContact ??= cByPerson.id; }
 
     const evts = emailEvents.get(email) ?? new Set<string>();
-    if (evts.has("bounced") || c?.hard_bounced) flags.add("bounced");
-    if (evts.has("replied")) flags.add("replied");
-    if (evts.has("unsubscribed") || c?.is_globally_suppressed || c?.sendable_status === "suppressed") flags.add("suppressed");
-    if (String(c?.status ?? "").toUpperCase() === "DO_NOT_CONTACT") flags.add("suppressed");
+    for (const f of evts) flags.add(f); // bounced | replied | unsubscribed | suppressed | previously_emailed | duplicate_crm_email
+    if (evts.has("replied") || evts.has("previously_emailed")) flags.add("already_contacted");
 
     const cQueue = c ? (queueByContact.get(c.id) ?? []) : [];
     if (cQueue.some((q) => q.status === "sent" && q.delivery_kind === "smtp_real")) flags.add("already_sent");
