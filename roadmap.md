@@ -60,3 +60,5 @@
 
 - [x] Founder-only lossless Apollo contact intelligence archive (75 columns, chunked idempotent import, readiness separate from sending)
 - [ ] Founder uploads the real 7,046-row Apollo CSV via /founder/outreach/apollo (blocked: needs founder upload)
+- [ ] Kindnesss five-touch draft (Days 0/7/14/21/28), four-touch kept as backup, no remote sync
+- [ ] Founder-only archive-to-CRM promotion dry-run (counts only, no contact creation)
