@@ -57,3 +57,6 @@
 - [x] Knowledge Base: add 'Education' category (KnowledgeDirectory/KnowledgeDetail)
 
 - [x] Founder-only School Visit Assessments workspace (/founder/school-visits)
+
+- [x] Founder-only lossless Apollo contact intelligence archive (75 columns, chunked idempotent import, readiness separate from sending)
+- [ ] Founder uploads the real 7,046-row Apollo CSV via /founder/outreach/apollo (blocked: needs founder upload)
