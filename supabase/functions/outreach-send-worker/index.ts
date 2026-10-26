@@ -480,12 +480,26 @@ Deno.serve(async (req) => {
         .eq("step_number", item.sequence_step)
         .maybeSingle();
 
-      // Re-check: skip if a reply has already arrived for this contact
-      const { data: replyEvt } = await supabase.from("email_events")
-        .select("id").eq("contact_id", item.contact_id).eq("event_type", "replied").limit(1);
-      if (replyEvt && replyEvt.length) {
+      // Re-check: stop if a reply or bounce has arrived for this contact.
+      // Fails closed: a failed lookup holds the item instead of sending.
+      const { data: stopEvt, error: stopErr } = await supabase.from("email_events")
+        .select("event_type").eq("contact_id", item.contact_id).in("event_type", ["replied", "bounced"]).limit(1);
+      if (stopErr || !Array.isArray(stopEvt)) {
         await supabase.from("email_queue")
-          .update({ status: "blocked", block_reason: "REPLY_RECEIVED" })
+          .update({ status: "blocked", block_reason: "EMAIL_HISTORY_UNAVAILABLE" })
+          .eq("id", item.id);
+        blocked += 1;
+        touchedCampaigns.add(item.campaign_id);
+        continue;
+      }
+      if (stopEvt.length) {
+        const reason = stopEvt[0].event_type === "bounced" ? "BOUNCED" : "REPLY_RECEIVED";
+        // Cancel this AND every remaining step for the contact.
+        await supabase.from("email_queue")
+          .update({ status: "blocked", block_reason: reason })
+          .eq("contact_id", item.contact_id).eq("status", "pending");
+        await supabase.from("email_queue")
+          .update({ status: "blocked", block_reason: reason })
           .eq("id", item.id);
         blocked += 1;
         touchedCampaigns.add(item.campaign_id);
