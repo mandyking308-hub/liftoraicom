@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { EmailHistoryLookupError, loadEmailHistory, supabaseEmailHistoryDeps } from "../_shared/emailHistory.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -71,31 +72,27 @@ Deno.serve(async (req) => {
   const emails = Array.from(new Set((rows ?? []).map((r) => (r.email ?? "").toLowerCase()).filter(Boolean)));
   const personIds = Array.from(new Set((rows ?? []).map((r) => r.apollo_person_id).filter(Boolean)));
 
-  // Existing contacts by email
-  const { data: contactsByEmail } = await admin.from("contacts")
-    .select("id,email,status,sendable_status,hard_bounced,is_globally_suppressed,apollo_person_id")
-    .in("email", emails.length ? emails : ["__none__"]);
+  // Existing contacts + past email history (bounced/replied/unsubscribed).
+  // Fails closed: any lookup error aborts the scan; nothing is rated clean.
+  let history;
+  try {
+    history = await loadEmailHistory(emails, supabaseEmailHistoryDeps(admin));
+  } catch (e) {
+    return json({ ok: false, error: e instanceof EmailHistoryLookupError ? e.message : "email_history_lookup_failed", applied: 0 }, 503);
+  }
+  const contactsByEmail = history.contacts;
   const contactByEmail = new Map<string, any>();
-  for (const c of contactsByEmail ?? []) contactByEmail.set((c.email ?? "").toLowerCase(), c);
+  for (const [k, cs] of history.contactsByEmail) contactByEmail.set(k, cs[0]);
   const contactByPerson = new Map<string, any>();
   for (const c of contactsByEmail ?? []) if (c.apollo_person_id) contactByPerson.set(c.apollo_person_id, c);
-
-  // Email events: bounced/replied/unsubscribed
-  const { data: events } = await admin.from("email_events")
-    .select("recipient_email,event_type")
-    .in("recipient_email", emails.length ? emails : ["__none__"]);
-  const emailEvents = new Map<string, Set<string>>();
-  for (const e of events ?? []) {
-    const k = (e.recipient_email ?? "").toLowerCase();
-    if (!emailEvents.has(k)) emailEvents.set(k, new Set());
-    emailEvents.get(k)!.add(String(e.event_type));
-  }
+  const emailEvents = history.byEmail;
 
   // Queue presence by contact id (for already_queued / already_sent)
   const contactIds = (contactsByEmail ?? []).map((c) => c.id);
-  const { data: queueRows } = await admin.from("email_queue")
+  const { data: queueRows, error: qErr } = await admin.from("email_queue")
     .select("contact_id,status,sequence_step,delivery_kind")
     .in("contact_id", contactIds.length ? contactIds : ["00000000-0000-0000-0000-000000000000"]);
+  if (qErr) return json({ ok: false, error: "queue_lookup_failed", applied: 0 }, 503);
   const queueByContact = new Map<string, any[]>();
   for (const q of queueRows ?? []) {
     if (!queueByContact.has(q.contact_id)) queueByContact.set(q.contact_id, []);
@@ -154,10 +151,8 @@ Deno.serve(async (req) => {
     if (cByPerson && cByPerson.id !== c?.id) { flags.add("duplicate_person_id"); dupContact ??= cByPerson.id; }
 
     const evts = emailEvents.get(email) ?? new Set<string>();
-    if (evts.has("bounced") || c?.hard_bounced) flags.add("bounced");
-    if (evts.has("replied")) flags.add("replied");
-    if (evts.has("unsubscribed") || c?.is_globally_suppressed || c?.sendable_status === "suppressed") flags.add("suppressed");
-    if (String(c?.status ?? "").toUpperCase() === "DO_NOT_CONTACT") flags.add("suppressed");
+    for (const f of evts) flags.add(f); // bounced | replied | unsubscribed | suppressed | previously_emailed | duplicate_crm_email
+    if (evts.has("replied") || evts.has("previously_emailed")) flags.add("already_contacted");
 
     const cQueue = c ? (queueByContact.get(c.id) ?? []) : [];
     if (cQueue.some((q) => q.status === "sent" && q.delivery_kind === "smtp_real")) flags.add("already_sent");
