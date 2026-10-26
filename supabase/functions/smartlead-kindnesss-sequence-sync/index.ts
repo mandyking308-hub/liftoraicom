@@ -1,4 +1,4 @@
-// Founder/admin-only. Writes EXACTLY the four Kindnesss draft steps into ONE existing
+// Founder/admin-only. Writes EXACTLY the five Kindnesss draft steps into ONE existing
 // Smartlead campaign (4103531) ONLY when its remote status is DRAFTED/PAUSED
 // immediately before the write. Never creates campaigns, adds leads, changes
 // campaign status, schedule, senders, provider flags or gates. Never sends.
@@ -8,7 +8,7 @@ const BASE = "https://server.smartlead.ai/api/v1";
 const DRAFT_ID = "71719d7d-bd95-42e1-b73e-dfb6d890d0d6";
 const BUSINESS_ID = "640de582-a112-4d16-a221-03c27f00c6ec";
 const CAMPAIGN_ID = "4103531";
-const EXPECTED_STEPS = 4;
+const EXPECTED_STEPS = 5; // days 0/7/14/21/28 — must match src/lib/kindnesss/sequencePlan.ts
 const GAP_DAYS = 7;
 // Advisory only; never written here (separate campaign setting, needs its own approval).
 const RECOMMENDED_SCHEDULE = {
@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
     if (n > 1 && String(s.subject ?? "").trim()) blockers.push(`step_${n}_subject_not_blank`);
     const html = toHtml(body);
     if (html === null) blockers.push(`step_${n}_unsafe_html`);
-    // Fixed 7 CALENDAR-day gaps between steps (day 0 / +7 / +14 / +21).
+    // Fixed 7 CALENDAR-day gaps between steps (day 0 / 7 / 14 / 21 / 28).
     const delay = n === 1 ? 0 : GAP_DAYS;
     return {
       seq_number: n,
@@ -151,7 +151,7 @@ Deno.serve(async (req) => {
       variants: [{ subject: n === 1 ? String(s.subject) : "", email_body: html ?? "", variant_label: "A" }],
     };
   });
-  const scheduleNote = `delay_in_days are ${GAP_DAYS} calendar days (day 0/+7/+14/+21). Weekend avoidance in the recipient's local time is a SEPARATE campaign schedule setting (recommended_schedule_setting) and is NOT written by this tool.`;
+  const scheduleNote = `delay_in_days are ${GAP_DAYS} calendar days (day 0/7/14/21/28). Weekend avoidance in the recipient's local time is a SEPARATE campaign schedule setting (recommended_schedule_setting) and is NOT written by this tool.`;
 
   // Remote campaign status immediately before any write
   const camp = await sl(`/campaigns/${CAMPAIGN_ID}`, KEY);
