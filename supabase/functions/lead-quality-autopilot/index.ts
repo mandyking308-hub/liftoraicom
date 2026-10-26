@@ -134,39 +134,41 @@ Deno.serve(async (req) => {
     const emails = Array.from(new Set((rawRows ?? []).map((r) => (r.email ?? "").toLowerCase()).filter(Boolean)));
     const personIds = Array.from(new Set((rawRows ?? []).map((r) => r.apollo_person_id).filter(Boolean)));
 
-    const { data: contactsByEmail } = await admin.from("contacts")
-      .select("id,email,status,sendable_status,hard_bounced,is_globally_suppressed,apollo_person_id")
-      .in("email", emails.length ? emails : ["__none__"]);
+    // Past email history: fail closed. On any lookup error the whole scan is
+    // skipped (no lead is rated) and the error is recorded without PII.
+    let history: Awaited<ReturnType<typeof loadEmailHistory>> | null = null;
+    let historyError: string | null = null;
+    try {
+      history = await loadEmailHistory(emails, supabaseEmailHistoryDeps(admin));
+    } catch (e) {
+      historyError = e instanceof EmailHistoryLookupError ? e.message : "email_history_lookup_failed";
+    }
+    const contactsByEmail = history?.contacts ?? [];
     const contactByEmail = new Map<string, any>();
     const contactByPerson = new Map<string, any>();
-    for (const c of contactsByEmail ?? []) {
-      contactByEmail.set((c.email ?? "").toLowerCase(), c);
-      if (c.apollo_person_id) contactByPerson.set(c.apollo_person_id, c);
-    }
-    if (personIds.length) {
-      const { data: extraByPerson } = await admin.from("contacts")
+    if (history) for (const [k, cs] of history.contactsByEmail) contactByEmail.set(k, cs[0]);
+    for (const c of contactsByEmail) if (c.apollo_person_id) contactByPerson.set(c.apollo_person_id, c);
+    if (history && personIds.length) {
+      const { data: extraByPerson, error: pErr } = await admin.from("contacts")
         .select("id,email,status,apollo_person_id").in("apollo_person_id", personIds);
+      if (pErr) historyError = "contacts_by_person_lookup_failed";
       for (const c of extraByPerson ?? []) if (c.apollo_person_id) contactByPerson.set(c.apollo_person_id, c);
     }
+    const emailEvents = history?.byEmail ?? new Map<string, Set<string>>();
 
-    const { data: events } = await admin.from("email_events")
-      .select("recipient_email,event_type")
-      .in("recipient_email", emails.length ? emails : ["__none__"]);
-    const emailEvents = new Map<string, Set<string>>();
-    for (const e of events ?? []) {
-      const k = (e.recipient_email ?? "").toLowerCase();
-      if (!emailEvents.has(k)) emailEvents.set(k, new Set());
-      emailEvents.get(k)!.add(String(e.event_type));
-    }
-
-    const contactIds = (contactsByEmail ?? []).map((c) => c.id);
-    const { data: queueRows } = await admin.from("email_queue")
+    const contactIds = contactsByEmail.map((c) => c.id);
+    const { data: queueRows, error: qErr } = await admin.from("email_queue")
       .select("contact_id,status,delivery_kind")
       .in("contact_id", contactIds.length ? contactIds : ["00000000-0000-0000-0000-000000000000"]);
+    if (qErr) historyError ??= "queue_lookup_failed";
     const queueByContact = new Map<string, any[]>();
     for (const q of queueRows ?? []) {
       if (!queueByContact.has(q.contact_id)) queueByContact.set(q.contact_id, []);
       queueByContact.get(q.contact_id)!.push(q);
+    }
+    if (historyError) {
+      (details.steps as any[]).push({ step: "cheap_scan_full", scanned: 0, held: true, error: historyError });
+      counters.scanned_count = 0;
     }
 
     const domainCounts = new Map<string, number>();
