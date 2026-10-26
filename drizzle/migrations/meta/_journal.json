@@ -113,6 +113,13 @@
       "when": 1792922869153,
       "tag": "0015_kindnesss_apollo_retention_integrity",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1793028317758,
+      "tag": "0016_kindnesss_apollo_contact_intelligence",
+      "breakpoints": true
     }
   ]
 }
