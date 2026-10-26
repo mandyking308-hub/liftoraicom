@@ -75128,6 +75128,10 @@ export type Database = {
         Returns: Json
       }
       kindnesss_apollo_retention_export: { Args: never; Returns: Json }
+      kindnesss_email_candidate_pool: {
+        Args: { p_include_rows?: boolean }
+        Returns: Json
+      }
       list_inbox_credentials_public: {
         Args: { _inbox_id: string }
         Returns: {
