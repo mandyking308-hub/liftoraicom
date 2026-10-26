@@ -21,7 +21,7 @@ export default function GsmSenderPreflightPanel() {
     const [m, d, i] = await Promise.all([
       db.from('gsm_mailboxes').select('id,email,provider,estate_classification,sending_domain_id,smartlead_email_account_id,smtp_status,imap_status,smartlead_status,warmup_status,readiness_state,provider_health,health_score,quarantined_reason,retired,active,last_provider_check_at').eq('estate_classification', 'gsm').order('email'),
       db.from('gsm_sending_domains').select('id,domain,estate_classification,spf_ok,dkim_ok,dmarc_ok'),
-      db.from('inboxes').select('email_address,from_email,provider_type'),
+      db.from('inboxes').select('email_address,from_email,estate_key').neq('estate_key', 'gsm'),
     ]);
     setBusy(false);
     if (m.error || d.error) return toast({ title: 'Mailboxes unavailable', description: (m.error ?? d.error).message, variant: 'destructive' });
@@ -55,7 +55,7 @@ export default function GsmSenderPreflightPanel() {
         <Button size="sm" onClick={liveCheck} disabled={busy}><Radio className="mr-2 h-4 w-4" />Live Winnr warm-up check (read-only)</Button>
       </div>
     </div>
-    <p className="text-sm text-muted-foreground">Senders come only from the GSM Winnr estate under the Global Solutions Management LLC sending identity. GHAT, simulated inbox records and NeonCandy are never selectable. Stored "warming" is not readiness: a sender is suggested only with a live Winnr read under {LIVE_FRESH_HOURS}h old, live health ≥ {MIN_LIVE_HEALTH}, verified DNS, Smartlead connected and campaign_ready set. Nothing here activates or sends.</p>
+    <p className="text-sm text-muted-foreground">Senders come only from the GSM Winnr estate under the Global Solutions Management LLC sending identity. GHAT and NeonCandy are never selectable, and the simulated inbox records (including the two labelled Kindnesss) are never used as a sender source. Stored "warming" is not readiness: a sender is suggested only with a live Winnr read under {LIVE_FRESH_HOURS}h old, live health ≥ {MIN_LIVE_HEALTH}, verified DNS, Smartlead connected and campaign_ready set. Nothing here activates or sends.</p>
     <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
       {[['GSM addresses', mbx.length], ['Domains', domainCount], ['With Smartlead ID', mbx.filter(m => m.smartlead_email_account_id).length], ['Stored "warming" (last sync)', storedWarming],
         ['Marked campaign_ready', ready], ['Live warm-up ON', liveOn ?? 'not checked'], ['Suggested eligible senders', s.eligible], ['Last stored provider sync', lastSync ? new Date(lastSync).toISOString().slice(0, 16).replace('T', ' ') + ' UTC' : '—']]

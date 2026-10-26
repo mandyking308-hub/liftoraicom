@@ -16,7 +16,7 @@ const run = (m: GsmMailboxRow, live: Parameters<typeof evaluateSenders>[2] = fre
 
 describe('Kindnesss GSM sender preflight', () => {
   it('eligible only with fresh live warm-up, health and campaign_ready', () => expect(run(mb()).eligible).toBe(true));
-  it('simulated inbox address excluded', () => expect(run(mb(), fresh, ['A@gsmlabs.co']).reasons).toContain('simulated_inbox_record'));
+  it('simulated inbox address excluded', () => expect(run(mb(), fresh, ['A@gsmlabs.co']).reasons).toContain('excluded_inbox_record'));
   it('GHAT excluded', () => expect(run(mb({ estate_classification: 'ghat', sending_domain_id: 'd2' })).eligible).toBe(false));
   it('stored warming without a live read is not ready', () => expect(run(mb(), null).reasons).toContain('live_warmup_not_verified_fresh'));
   it('stale live read (>24h) is not ready', () => expect(run(mb(), { ...fresh, observed_at: '2026-10-23T15:33:55Z' }).eligible).toBe(false));

@@ -32,7 +32,7 @@ export function evaluateSenders(
     const d = m.sending_domain_id ? dom.get(m.sending_domain_id) : undefined;
     const l = liveBy.get(email) ?? null;
     const r: string[] = [];
-    if (sim.has(email)) r.push('simulated_inbox_record');
+    if (sim.has(email)) r.push('excluded_inbox_record');
     if (m.provider !== 'winnr') r.push('not_winnr_provider');
     if (m.estate_classification !== 'gsm') r.push(`estate_${m.estate_classification}_excluded`);
     if (!d || d.estate_classification !== 'gsm') r.push('domain_not_gsm');
