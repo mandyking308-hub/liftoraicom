@@ -24,6 +24,7 @@ import ApolloRetentionPanel from "@/components/founder/outreach/ApolloRetentionP
 import ApolloIntelligencePanel from "@/components/founder/outreach/ApolloIntelligencePanel";
 import KindnesssOutreachReadinessPanel from "@/components/founder/outreach/KindnesssOutreachReadinessPanel";
 import KindnesssEmailPoolPanel from "@/components/founder/outreach/KindnesssEmailPoolPanel";
+import GsmSenderPreflightPanel from "@/components/founder/outreach/GsmSenderPreflightPanel";
 
 
 const MUSIC_TARGET_KEYWORDS = [
@@ -982,6 +983,7 @@ export default function ApolloIntegration() {
         <KindnesssEmailPoolPanel />
         <ApolloIntelligencePanel />
         <KindnesssOutreachReadinessPanel />
+        <GsmSenderPreflightPanel />
 
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
