@@ -27,7 +27,7 @@ describe('Apollo intelligence CSV (synthetic)', () => {
   it('flags NeonCandy list membership, missing and duplicate IDs', () => {
     const p = parseApolloIntelligenceCsv(csv([
       row({ 'Apollo Contact Id': 'a1', Lists: 'Kindnesss; NeonCandy UK' }),
-      row({ 'Apollo Contact Id': 'a1' }), row({}),
+      row({ 'Apollo Contact Id': 'a1' }), row({ 'First Name': 'NoId' }),
     ]));
     expect(p.neonCandyLists).toBe(1);
     expect(p.duplicateContactIds).toBe(1);
