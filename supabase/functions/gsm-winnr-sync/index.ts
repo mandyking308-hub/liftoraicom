@@ -355,6 +355,14 @@ Deno.serve(async (req) => {
       estate_counts,
       would_upsert_domains: estateDomains.length,
       would_upsert_mailboxes: estateMailboxes.length,
+      // Read-only per-address warm-up truth for the requested estate (no secrets).
+      live_warming_ok: warmingCall.ok,
+      live_warming: warmingCall.ok
+        ? estateMailboxes.map((m) => {
+          const w = warmingByEmail.get(m.email.toLowerCase());
+          return { email: m.email.toLowerCase(), warmup_status: w?.warmup_status ?? "not_started", health_score: w?.health_score ?? null };
+        })
+        : [],
       message: "Read-only. Nothing was written and no credentials were stored.",
     });
   }
