@@ -40,7 +40,7 @@ export default function KindnesssOutreachReadinessPanel() {
       </li>)}
     </ol>
     <div className="space-y-2">
-      <Button variant="outline" onClick={runDry}>Preview archive → CRM promotion (counts only)</Button>
+      <Button variant="outline" onClick={runDry}>Preview CRM promotion (counts only; 'eligible_for_review' is a strict subset, not the audience)</Button>
       {dry && <pre className="max-h-72 overflow-auto whitespace-pre-wrap text-sm text-muted-foreground" aria-label="Promotion dry run">{JSON.stringify(dry, null, 2)}</pre>}
     </div>
   </section>;
