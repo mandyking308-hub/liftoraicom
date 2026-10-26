@@ -21,6 +21,7 @@ import { NeonCandyMonitor } from "@/components/founder/outreach/NeonCandyMonitor
 import { WeekendPool } from "@/components/founder/outreach/WeekendPool";
 import ApolloCreditFirewallPanel from "@/components/founder/outreach/ApolloCreditFirewallPanel";
 import ApolloRetentionPanel from "@/components/founder/outreach/ApolloRetentionPanel";
+import ApolloIntelligencePanel from "@/components/founder/outreach/ApolloIntelligencePanel";
 
 
 const MUSIC_TARGET_KEYWORDS = [
@@ -976,6 +977,7 @@ export default function ApolloIntegration() {
 
         <ApolloCreditFirewallPanel />
         <ApolloRetentionPanel />
+        <ApolloIntelligencePanel />
 
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>

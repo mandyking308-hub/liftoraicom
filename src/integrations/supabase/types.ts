@@ -4501,6 +4501,111 @@ export type Database = {
         }
         Relationships: []
       }
+      apollo_contact_intelligence: {
+        Row: {
+          apollo_account_id: string | null
+          apollo_contact_id: string
+          business_id: string
+          company: string | null
+          contact_id: string | null
+          created_at: string
+          first_batch_id: string
+          first_name: string | null
+          founder_mark: string | null
+          founder_marked_at: string | null
+          founder_marked_by: string | null
+          id: string
+          last_name: string | null
+          last_seen_batch_id: string
+          link_method: string | null
+          lists: string | null
+          primary_email: string | null
+          primary_email_status: string | null
+          raw_row: Json
+          raw_row_sha256: string
+          readiness_reasons: string[]
+          readiness_status: string
+          secondary_email: string | null
+          source_row_number: number
+          tertiary_email: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          apollo_account_id?: string | null
+          apollo_contact_id: string
+          business_id: string
+          company?: string | null
+          contact_id?: string | null
+          created_at?: string
+          first_batch_id: string
+          first_name?: string | null
+          founder_mark?: string | null
+          founder_marked_at?: string | null
+          founder_marked_by?: string | null
+          id?: string
+          last_name?: string | null
+          last_seen_batch_id: string
+          link_method?: string | null
+          lists?: string | null
+          primary_email?: string | null
+          primary_email_status?: string | null
+          raw_row: Json
+          raw_row_sha256: string
+          readiness_reasons?: string[]
+          readiness_status?: string
+          secondary_email?: string | null
+          source_row_number: number
+          tertiary_email?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          apollo_account_id?: string | null
+          apollo_contact_id?: string
+          business_id?: string
+          company?: string | null
+          contact_id?: string | null
+          created_at?: string
+          first_batch_id?: string
+          first_name?: string | null
+          founder_mark?: string | null
+          founder_marked_at?: string | null
+          founder_marked_by?: string | null
+          id?: string
+          last_name?: string | null
+          last_seen_batch_id?: string
+          link_method?: string | null
+          lists?: string | null
+          primary_email?: string | null
+          primary_email_status?: string | null
+          raw_row?: Json
+          raw_row_sha256?: string
+          readiness_reasons?: string[]
+          readiness_status?: string
+          secondary_email?: string | null
+          source_row_number?: number
+          tertiary_email?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apollo_contact_intelligence_first_batch_id_fkey"
+            columns: ["first_batch_id"]
+            isOneToOne: false
+            referencedRelation: "apollo_intel_import_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apollo_contact_intelligence_last_seen_batch_id_fkey"
+            columns: ["last_seen_batch_id"]
+            isOneToOne: false
+            referencedRelation: "apollo_intel_import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       apollo_credit_ledger: {
         Row: {
           apollo_person_ids: string[]
@@ -4601,6 +4706,121 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      apollo_intel_import_batches: {
+        Row: {
+          business_id: string
+          created_at: string
+          created_by: string
+          expected_rows: number
+          file_name: string | null
+          file_sha256: string
+          finalized_at: string | null
+          header: Json
+          header_mapping: Json
+          id: string
+          reconciliation: Json | null
+          status: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          created_by: string
+          expected_rows: number
+          file_name?: string | null
+          file_sha256: string
+          finalized_at?: string | null
+          header: Json
+          header_mapping?: Json
+          id?: string
+          reconciliation?: Json | null
+          status?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          created_by?: string
+          expected_rows?: number
+          file_name?: string | null
+          file_sha256?: string
+          finalized_at?: string | null
+          header?: Json
+          header_mapping?: Json
+          id?: string
+          reconciliation?: Json | null
+          status?: string
+        }
+        Relationships: []
+      }
+      apollo_intel_import_rows: {
+        Row: {
+          apollo_contact_id: string | null
+          batch_id: string
+          created_at: string
+          outcome: string
+          raw_row_sha256: string
+          row_number: number
+        }
+        Insert: {
+          apollo_contact_id?: string | null
+          batch_id: string
+          created_at?: string
+          outcome: string
+          raw_row_sha256: string
+          row_number: number
+        }
+        Update: {
+          apollo_contact_id?: string | null
+          batch_id?: string
+          created_at?: string
+          outcome?: string
+          raw_row_sha256?: string
+          row_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apollo_intel_import_rows_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "apollo_intel_import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      apollo_intel_quarantine: {
+        Row: {
+          batch_id: string
+          created_at: string
+          id: string
+          raw_row: Json
+          reason: string
+          row_number: number
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          id?: string
+          raw_row: Json
+          reason: string
+          row_number: number
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          id?: string
+          raw_row?: Json
+          reason?: string
+          row_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apollo_intel_quarantine_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "apollo_intel_import_batches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       apollo_leads: {
         Row: {
@@ -74463,6 +74683,26 @@ export type Database = {
       apollo_encrypt_key: {
         Args: { enc_key: string; plain: string }
         Returns: string
+      }
+      apollo_intel_finalize: { Args: { p_batch_id: string }; Returns: Json }
+      apollo_intel_import_chunk: {
+        Args: {
+          p_expected_rows: number
+          p_file_name: string
+          p_file_sha256: string
+          p_header: Json
+          p_preview: boolean
+          p_rows: Json
+        }
+        Returns: Json
+      }
+      apollo_intel_mark: {
+        Args: { p_id: string; p_mark: string }
+        Returns: Json
+      }
+      apollo_intel_readiness: {
+        Args: { p_contact: string; p_mark: string; r: Json }
+        Returns: Record<string, unknown>
       }
       apply_reply_stop_suppression: {
         Args: {
