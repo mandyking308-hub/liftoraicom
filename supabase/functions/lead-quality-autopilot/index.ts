@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { EmailHistoryLookupError, loadEmailHistory, supabaseEmailHistoryDeps } from "../_shared/emailHistory.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -178,7 +179,7 @@ Deno.serve(async (req) => {
     }
 
     let scanned = 0;
-    for (const r of rawRows ?? []) {
+    for (const r of historyError ? [] : (rawRows ?? [])) {
       const flags = new Set<string>(r.risk_flags ?? []);
       const email = (r.email ?? "").toLowerCase();
       const hasEmail = !!email;
@@ -194,9 +195,8 @@ Deno.serve(async (req) => {
       if (cByPerson && cByPerson.id !== c?.id) { flags.add("duplicate_person_id"); dupContact ??= cByPerson.id; }
 
       const evts = emailEvents.get(email) ?? new Set<string>();
-      if (evts.has("bounced") || c?.hard_bounced) flags.add("bounced");
-      if (evts.has("unsubscribed") || c?.is_globally_suppressed || c?.sendable_status === "suppressed") flags.add("suppressed");
-      if (String(c?.status ?? "").toUpperCase() === "DO_NOT_CONTACT") flags.add("suppressed");
+      for (const f of evts) flags.add(f);
+      if (evts.has("replied") || evts.has("previously_emailed")) flags.add("already_contacted");
       const cQueue = c ? (queueByContact.get(c.id) ?? []) : [];
       if (cQueue.some((q) => q.status === "sent" && q.delivery_kind === "smtp_real")) flags.add("already_sent");
       if (cQueue.some((q) => q.status === "pending")) flags.add("already_queued");
