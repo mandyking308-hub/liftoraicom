@@ -22,6 +22,7 @@ import { WeekendPool } from "@/components/founder/outreach/WeekendPool";
 import ApolloCreditFirewallPanel from "@/components/founder/outreach/ApolloCreditFirewallPanel";
 import ApolloRetentionPanel from "@/components/founder/outreach/ApolloRetentionPanel";
 import ApolloIntelligencePanel from "@/components/founder/outreach/ApolloIntelligencePanel";
+import KindnesssOutreachReadinessPanel from "@/components/founder/outreach/KindnesssOutreachReadinessPanel";
 
 
 const MUSIC_TARGET_KEYWORDS = [
@@ -978,6 +979,7 @@ export default function ApolloIntegration() {
         <ApolloCreditFirewallPanel />
         <ApolloRetentionPanel />
         <ApolloIntelligencePanel />
+        <KindnesssOutreachReadinessPanel />
 
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
