@@ -64,3 +64,5 @@
 - [x] Founder-only archive-to-CRM promotion dry-run (counts only, no contact creation)
 - [ ] Reversible archive-to-CRM promotion action (blocked: founder review of dry-run counts + lawful basis decision)
 - [ ] Deploy 5-step sequence tool + remote read-back (blocked: founder approval of five-touch copy)
+- [x] Founder email-audience counts + full deduped candidate export (not limited to eligible_for_review)
+- [ ] Send all eligible prospects over time (blocked: founder to supply real Kindnesss sender mailboxes; legal basis per contact; webhook signing key)

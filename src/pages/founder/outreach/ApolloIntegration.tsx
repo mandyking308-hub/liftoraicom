@@ -23,6 +23,7 @@ import ApolloCreditFirewallPanel from "@/components/founder/outreach/ApolloCredi
 import ApolloRetentionPanel from "@/components/founder/outreach/ApolloRetentionPanel";
 import ApolloIntelligencePanel from "@/components/founder/outreach/ApolloIntelligencePanel";
 import KindnesssOutreachReadinessPanel from "@/components/founder/outreach/KindnesssOutreachReadinessPanel";
+import KindnesssEmailPoolPanel from "@/components/founder/outreach/KindnesssEmailPoolPanel";
 
 
 const MUSIC_TARGET_KEYWORDS = [
@@ -978,6 +979,7 @@ export default function ApolloIntegration() {
 
         <ApolloCreditFirewallPanel />
         <ApolloRetentionPanel />
+        <KindnesssEmailPoolPanel />
         <ApolloIntelligencePanel />
         <KindnesssOutreachReadinessPanel />
 

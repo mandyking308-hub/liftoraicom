@@ -134,6 +134,20 @@
       "when": 1793031850584,
       "tag": "0018_apollo_intel_promotion_dry_run",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793032509987,
+      "tag": "0019_kindnesss_email_candidate_pool",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1793032524908,
+      "tag": "0020_kindnesss_pool_segment_word_boundaries",
+      "breakpoints": true
     }
   ]
 }
