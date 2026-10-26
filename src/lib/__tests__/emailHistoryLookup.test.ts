@@ -10,7 +10,7 @@ const C = (id: string, email: string, extra: Partial<HistoryContact> = {}): Hist
 
 function deps(contacts: HistoryContact[], events: { contact_id: string; event_type: string }[]): EmailHistoryDeps {
   return {
-    fetchContactsByEmails: async (emails) => ({ data: contacts.filter((c) => emails.includes(c.email ?? "")), error: null }),
+    fetchContactsByEmails: async (emails) => ({ data: contacts.filter((c) => emails.includes((c.email ?? "").toLowerCase())), error: null }),
     fetchEventsByContactIds: async (ids) => ({ data: events.filter((e) => ids.includes(e.contact_id)), error: null }),
   };
 }

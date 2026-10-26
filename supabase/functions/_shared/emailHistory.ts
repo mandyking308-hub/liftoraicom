@@ -50,7 +50,7 @@ export type EmailHistory = {
 
 export const normEmail = (e: string | null | undefined) => (e ?? "").trim().toLowerCase();
 
-const CHUNK = 200;
+const CHUNK = 50;
 
 async function settle<T>(stage: "contacts" | "email_events", p: Promise<QueryResult<T>>): Promise<T[]> {
   let r: QueryResult<T>;
@@ -64,8 +64,8 @@ async function settle<T>(stage: "contacts" | "email_events", p: Promise<QueryRes
 
 export async function loadEmailHistory(rawEmails: string[], deps: EmailHistoryDeps): Promise<EmailHistory> {
   const lower = Array.from(new Set(rawEmails.map(normEmail).filter(Boolean)));
-  // Query both the original casing and lowercase, since contacts.email is not normalised.
-  const variants = Array.from(new Set([...rawEmails.map((e) => (e ?? "").trim()).filter(Boolean), ...lower]));
+  // Adapter must match case-insensitively (contacts.email is not normalised).
+  const variants = lower;
   const contacts: HistoryContact[] = [];
   for (let i = 0; i < variants.length; i += CHUNK) {
     contacts.push(...await settle("contacts", deps.fetchContactsByEmails(variants.slice(i, i + CHUNK))));
@@ -112,9 +112,15 @@ export async function loadEmailHistory(rawEmails: string[], deps: EmailHistoryDe
 // deno-lint-ignore no-explicit-any
 export function supabaseEmailHistoryDeps(admin: any): EmailHistoryDeps {
   return {
-    fetchContactsByEmails: (emails) => admin.from("contacts")
-      .select("id,email,status,sendable_status,hard_bounced,is_globally_suppressed,unsubscribed_at,apollo_person_id")
-      .in("email", emails),
+    // Case-insensitive exact match: ilike with LIKE wildcards escaped; emails
+    // containing PostgREST filter delimiters are rejected (fail closed).
+    fetchContactsByEmails: async (emails) => {
+      if (emails.some((e) => /[,()"]/.test(e))) return { data: null, error: { code: "unsafe_email_filter" } };
+      const esc = (e: string) => e.replace(/[\\%_]/g, (m) => "\\" + m);
+      return await admin.from("contacts")
+        .select("id,email,status,sendable_status,hard_bounced,is_globally_suppressed,unsubscribed_at,apollo_person_id")
+        .or(emails.map((e) => `email.ilike.${esc(e)}`).join(","));
+    },
     fetchEventsByContactIds: (ids) => admin.from("email_events")
       .select("contact_id,event_type").in("contact_id", ids).in("event_type", ["bounced", "replied", "sent", "delivered"]),
   };
