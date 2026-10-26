@@ -74700,6 +74700,7 @@ export type Database = {
         Args: { p_id: string; p_mark: string }
         Returns: Json
       }
+      apollo_intel_promotion_dry_run: { Args: never; Returns: Json }
       apollo_intel_readiness: {
         Args: { p_contact: string; p_mark: string; r: Json }
         Returns: Record<string, unknown>

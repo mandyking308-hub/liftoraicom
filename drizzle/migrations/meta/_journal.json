@@ -127,6 +127,13 @@
       "when": 1793028453049,
       "tag": "0017_fix_apollo_intel_readiness_arrays",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1793031850584,
+      "tag": "0018_apollo_intel_promotion_dry_run",
+      "breakpoints": true
     }
   ]
 }
