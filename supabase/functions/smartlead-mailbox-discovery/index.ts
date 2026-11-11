@@ -75,6 +75,30 @@ Deno.serve(async (req) => {
     return json({ ok: false, error: "smartlead_api_key_missing" }, 400);
   }
 
+  // Read-only signature inspection for explicitly listed account IDs (max 5).
+  // Returns sender name and signature presence/brand markers only; never mutates.
+  if (body.signature_check === true) {
+    const ids: string[] = (Array.isArray(body.account_ids) ? body.account_ids : [])
+      .map((x: unknown) => String(x)).filter((x: string) => /^\d{1,12}$/.test(x)).slice(0, 5);
+    if (!ids.length) return json({ ok: false, error: "account_ids_required" }, 400);
+    const results = [];
+    for (const id of ids) {
+      const r = await fetch(`https://server.smartlead.ai/api/v1/email-accounts/${id}?api_key=${encodeURIComponent(apiKey)}`);
+      let a: any = {};
+      try { a = await r.json(); } catch { /* */ }
+      const sig = typeof a?.signature === "string" ? a.signature : "";
+      const text = sig.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      results.push({
+        account_id: id, http_status: r.status, signature_field_present: a && "signature" in a,
+        from_name: a?.from_name ?? null, from_email: a?.from_email ?? null,
+        has_signature: text.length > 0, signature_text_length: text.length,
+        signature_text: text.slice(0, 400),
+        mentions_kindnesss: /kindnesss/i.test(text), mentions_unsubscribe: /unsubscribe/i.test(sig),
+      });
+    }
+    return json({ ok: true, read_only: true, results });
+  }
+
   const url = `https://server.smartlead.ai/api/v1/email-accounts?api_key=${encodeURIComponent(apiKey)}`;
   const resp = await fetch(url, { method: "GET" });
   const status = resp.status;
