@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { renderStepPreview, footerQa } from "@/lib/kindnesss/emailPreview";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 // Founder-only, read-only review of the Kindnesss launch kit saved in existing
@@ -91,13 +92,42 @@ export default function KindnesssLaunchKitPanel() {
             <AccordionItem key={d.id} value={d.id}>
               <AccordionTrigger className={d.status === "archived" ? "text-muted-foreground" : ""}>{d.status === "archived" ? "History: " : "Current email campaign: "}{d.campaign_name} · {d.status}{d.external_send_blocked ? " · blocked" : ""}</AccordionTrigger>
               <AccordionContent>
+                {d.status !== "archived" && d.email_sequence?.metadata?.branding_footer_qa && (
+                  <div className="mb-3 rounded-md border border-border p-2 space-y-1">
+                    <div className="flex flex-wrap items-center gap-2 font-medium">Branding and footer QA <Badge variant="outline">{d.email_sequence.metadata.branding_footer_qa.status}</Badge></div>
+                    <div className="text-xs text-muted-foreground">{d.email_sequence.metadata.branding_footer_qa.signature_strategy_reason}</div>
+                    <div className="text-xs"><span className="text-destructive font-medium">Postal address: {d.email_sequence.metadata.branding_footer_qa.postal_address_status}</span> — {d.email_sequence.metadata.branding_footer_qa.postal_address_note}</div>
+                    <div className="flex flex-wrap gap-1">{(d.email_sequence.metadata.branding_footer_qa.send_blockers ?? []).map((b: string) => <Badge key={b} variant="destructive">{b}</Badge>)}</div>
+                  </div>
+                )}
                 {stepsOf(d).map((g) => (
                   <div key={g.label} className="mb-3">
                     <div className="mb-1 text-muted-foreground">{g.label} · {g.steps.length} emails</div>
                     {g.steps.map((s) => (
                       <div key={s.step} className="mb-2 rounded-md border border-border p-2">
                         <div className="font-medium">Day {s.day ?? "?"} · {s.subject || "(same thread)"}</div>
-                        <pre className="mt-1 whitespace-pre-wrap font-sans text-muted-foreground">{plain(s.body)}</pre>
+                        {d.status === "archived" ? (
+                          <pre className="mt-1 whitespace-pre-wrap font-sans text-muted-foreground">{plain(s.body)}</pre>
+                        ) : (() => {
+                          const qa = footerQa(s.body);
+                          const ok = qa.signoffs === 1 && qa.unsubscribeTags === 1 && qa.signaturePlaceholders === 0 && qa.hasCompanyAttribution;
+                          return (
+                            <div className="mt-2 space-y-2">
+                              <div className="flex flex-wrap gap-1">
+                                <Badge variant={ok ? "secondary" : "destructive"}>{ok ? "Footer QA pass" : "Footer QA fail"}</Badge>
+                                <Badge variant="outline">sign-offs {qa.signoffs}</Badge>
+                                <Badge variant="outline">unsubscribe tags {qa.unsubscribeTags}</Badge>
+                                <Badge variant="outline">%signature% {qa.signaturePlaceholders}</Badge>
+                                <Badge variant="outline">links {qa.links.length}</Badge>
+                              </div>
+                              <div className="text-xs text-muted-foreground">Preview only (first name fallback "there"). Nothing is sent.</div>
+                              <div className="flex flex-wrap gap-3">
+                                <iframe title={`Email ${s.step} desktop preview`} sandbox="" srcDoc={renderStepPreview(s.body)} className="h-[520px] w-full max-w-[620px] rounded-md border border-border bg-background" />
+                                <iframe title={`Email ${s.step} mobile preview`} sandbox="" srcDoc={renderStepPreview(s.body)} className="h-[520px] w-[375px] rounded-md border border-border bg-background" />
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     ))}
                   </div>
