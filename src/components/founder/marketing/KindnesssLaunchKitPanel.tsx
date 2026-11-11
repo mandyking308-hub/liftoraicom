@@ -41,10 +41,7 @@ export default function KindnesssLaunchKitPanel() {
   const defs: Record<string, string> = m.reason_code_definitions ?? {};
 
   const stepsOf = (d: Draft): { label: string; steps: Step[] }[] => {
-    const out = [{ label: "Active steps", steps: (d.email_sequence?.steps ?? []) as Step[] }];
-    const pv = d.email_sequence?.metadata?.launch_kit_proposed_version;
-    if (pv) out.push({ label: `Proposed ${pv.version} (not active)`, steps: pv.steps });
-    return out;
+    return [{ label: d.status === "archived" ? "Archived steps (history only)" : "Current steps", steps: (d.email_sequence?.steps ?? []) as Step[] }];
   };
 
   return (
@@ -90,9 +87,9 @@ export default function KindnesssLaunchKitPanel() {
             </AccordionContent>
           </AccordionItem>
 
-          {drafts.map((d) => (
+          {[...drafts.filter((d) => d.status !== "archived"), ...drafts.filter((d) => d.status === "archived")].map((d) => (
             <AccordionItem key={d.id} value={d.id}>
-              <AccordionTrigger>{d.campaign_name} · {d.status}{d.external_send_blocked ? " · blocked" : ""}</AccordionTrigger>
+              <AccordionTrigger className={d.status === "archived" ? "text-muted-foreground" : ""}>{d.status === "archived" ? "History: " : "Current email campaign: "}{d.campaign_name} · {d.status}{d.external_send_blocked ? " · blocked" : ""}</AccordionTrigger>
               <AccordionContent>
                 {stepsOf(d).map((g) => (
                   <div key={g.label} className="mb-3">
