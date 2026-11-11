@@ -25,8 +25,7 @@ describe("Kindnesss email preview", () => {
   });
 });
 
-import { readFileSync } from "node:fs";
-const v2 = readFileSync(new URL("./fixtures/kindnesssFooterV2.html", import.meta.url), "utf8");
+import v2 from "./fixtures/kindnesssFooterV2.html?raw";
 const above = "Dear {{first_name}},\n\nApproved paragraph.\n\nKind regards,\n\n";
 describe("Kindnesss footer v2 (logo + disclaimers)", () => {
   const qa = footerQa(above + v2);
