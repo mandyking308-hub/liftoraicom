@@ -110,7 +110,7 @@ export default function KindnesssLaunchKitPanel() {
                           <pre className="mt-1 whitespace-pre-wrap font-sans text-muted-foreground">{plain(s.body)}</pre>
                         ) : (() => {
                           const qa = footerQa(s.body);
-                          const ok = qa.signoffs === 1 && qa.unsubscribeTags === 1 && qa.signaturePlaceholders === 0 && qa.hasCompanyAttribution;
+                          const ok = qa.signoffs === 1 && qa.unsubscribeTags === 1 && qa.signaturePlaceholders === 0 && qa.hasCompanyAttribution && qa.hasLogo && qa.disclaimers === 4 && !qa.forbiddenSchoolText;
                           return (
                             <div className="mt-2 space-y-2">
                               <div className="flex flex-wrap gap-1">
@@ -119,6 +119,8 @@ export default function KindnesssLaunchKitPanel() {
                                 <Badge variant="outline">unsubscribe tags {qa.unsubscribeTags}</Badge>
                                 <Badge variant="outline">%signature% {qa.signaturePlaceholders}</Badge>
                                 <Badge variant="outline">links {qa.links.length}</Badge>
+                                <Badge variant="outline">logo {qa.hasLogo ? "PNG" : "missing"}</Badge>
+                                <Badge variant="outline">disclaimers {qa.disclaimers}/4</Badge>
                               </div>
                               <div className="text-xs text-muted-foreground">Preview only (first name fallback "there"). Nothing is sent.</div>
                               <div className="flex flex-wrap gap-3">

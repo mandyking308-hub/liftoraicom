@@ -10,6 +10,9 @@ export function footerQa(body: string) {
     unsubscribeTags: count(/%unsubscribe-text%/g),
     signaturePlaceholders: count(/%signature%/g),
     hasCompanyAttribution: body.includes("A product of Global Solutions Management LLC"),
+    hasLogo: body.includes('src="https://joinkindnesss.com/kindnesss-email-logo.png"') && /alt="Kindnesss[^"]*"/.test(body),
+    disclaimers: ["Commercial transparency:", "Confidentiality:", "Email security:", "consider the environment before printing"].filter((d) => body.includes(d)).length,
+    forbiddenSchoolText: /school hours|police|999|accepts? no liability/i.test(body),
     links: [...body.matchAll(/https?:\/\/[^\s"'<)]+/g)].map((m) => m[0].replace(/[.,]$/, "")),
   };
 }

@@ -24,3 +24,26 @@ describe("Kindnesss email preview", () => {
     expect([qa.signoffs, qa.unsubscribeTags, qa.signaturePlaceholders, qa.hasCompanyAttribution]).toEqual([1, 1, 0, true]);
   });
 });
+
+import { readFileSync } from "node:fs";
+const v2 = readFileSync("/tmp/k/f1.html", "utf8");
+const above = "Dear {{first_name}},\n\nApproved paragraph.\n\nKind regards,\n\n";
+describe("Kindnesss footer v2 (logo + disclaimers)", () => {
+  const qa = footerQa(above + v2);
+  it("has one sign-off, one unsubscribe tag, zero %signature%", () => {
+    expect([qa.signoffs, qa.unsubscribeTags, qa.signaturePlaceholders]).toEqual([1, 1, 0]);
+  });
+  it("has the real PNG logo with alt text and all four disclaimers", () => {
+    expect(qa.hasLogo).toBe(true);
+    expect(qa.disclaimers).toBe(4);
+  });
+  it("contains no school-hours, police or blanket-liability text", () => {
+    expect(qa.forbiddenSchoolText).toBe(false);
+  });
+  it("links privacy, legal, privacy-request and site", () => {
+    for (const l of ["https://joinkindnesss.com/privacy", "https://joinkindnesss.com/legal", "https://joinkindnesss.com/privacy-request", "https://joinkindnesss.com"]) expect(qa.links).toContain(l);
+  });
+  it("detects a school-style police disclaimer", () => {
+    expect(footerQa(v2 + " contact the police on 999").forbiddenSchoolText).toBe(true);
+  });
+});
