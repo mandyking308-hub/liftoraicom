@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
 import MarketingContentFunnelPanel from "@/components/founder/marketing/MarketingContentFunnelPanel";
+import KindnesssLaunchKitPanel from "@/components/founder/marketing/KindnesssLaunchKitPanel";
 import CompetitorLearningPositioningPanel from "@/components/founder/strategy/CompetitorLearningPositioningPanel";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -112,6 +113,7 @@ export default function MarketingHub() {
           </CardContent>
         </Card>
 
+        <KindnesssLaunchKitPanel />
         <MarketingContentFunnelPanel />
         <CompetitorLearningPositioningPanel />
       </div>
