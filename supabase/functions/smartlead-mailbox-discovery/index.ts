@@ -176,5 +176,15 @@ async function signatureCheck(body: any, apiKey: string) {
         mentions_kindnesss: /kindnesss/i.test(text), mentions_unsubscribe: /unsubscribe/i.test(sig),
       });
     }
-    return json({ ok: true, read_only: true, results });
+    let campaign: Record<string, unknown> | null = null;
+    if (/^\d{1,12}$/.test(String(body.campaign_id ?? ""))) {
+      const r = await fetch(`https://server.smartlead.ai/api/v1/campaigns/${body.campaign_id}?api_key=${encodeURIComponent(apiKey)}`);
+      let c: any = {};
+      try { c = await r.json(); } catch { /* */ }
+      campaign = { http_status: r.status, status: c?.status ?? null };
+      for (const k of ["unsubscribe_text", "send_as_plain_text", "force_plain_text", "track_settings", "stop_lead_settings", "enable_ai_esp_matching", "follow_up_percentage", "max_leads_per_day", "add_unsubscribe_tag", "insert_unsubscribe_link"]) {
+        if (c && k in c) campaign[k] = c[k];
+      }
+    }
+    return json({ ok: true, read_only: true, results, campaign });
 }
