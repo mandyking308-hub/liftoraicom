@@ -1,7 +1,7 @@
 -- KND-003 LIFTOR PRIVACY METADATA RECEIVER — REVIEW ONLY, NOT APPLIED.
 -- Dedicated privacy workstream: no commercial receipts, contacts, BCRs, sender identities,
 -- requester identity, request details, notes, child data or external response capability.
--- Requires the existing public.businesses and public.data_privacy_requests tables.
+-- Requires the existing public.businesses, public.data_privacy_requests and public.user_roles tables.
 
 create table public.kindnesss_privacy_request_links (
   id uuid primary key default gen_random_uuid(),
@@ -45,10 +45,40 @@ create policy "founder admin read Kindnesss privacy deliveries"
 on public.kindnesss_privacy_notification_deliveries for select to authenticated
 using (public.has_role(auth.uid(), 'founder') or public.has_role(auth.uid(), 'admin'));
 
+-- Mutable Liftor-internal work tracking is separate from immutable delivery receipts.
+-- It deliberately has no identity-verification, requester-approval or canonical closure field.
+create table public.kindnesss_privacy_case_operations (
+  privacy_request_id uuid primary key references public.data_privacy_requests(id) on delete restrict,
+  business_id uuid not null references public.businesses(id) on delete restrict,
+  owner_user_id uuid,
+  operational_status text not null default 'unacknowledged' check (operational_status in (
+    'unacknowledged', 'acknowledged', 'in_progress', 'waiting_on_kindnesss', 'blocked'
+  )),
+  operator_acknowledged_at timestamptz,
+  operator_acknowledged_by uuid,
+  due_at timestamptz not null,
+  last_delivery_at timestamptz not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  updated_by uuid,
+  constraint kindnesss_privacy_operator_ack_consistency check (
+    (operational_status = 'unacknowledged' and operator_acknowledged_at is null and operator_acknowledged_by is null)
+    or (operational_status <> 'unacknowledged' and operator_acknowledged_at is not null and operator_acknowledged_by is not null)
+  )
+);
+grant select on public.kindnesss_privacy_case_operations to authenticated;
+grant select, insert, update on public.kindnesss_privacy_case_operations to service_role;
+alter table public.kindnesss_privacy_case_operations enable row level security;
+create policy "founder admin read Kindnesss privacy operations"
+on public.kindnesss_privacy_case_operations for select to authenticated
+using (public.has_role(auth.uid(), 'founder') or public.has_role(auth.uid(), 'admin'));
+
 create index kindnesss_privacy_delivery_request_idx
   on public.kindnesss_privacy_notification_deliveries (business_id, request_ref, received_at desc);
 create index kindnesss_privacy_delivery_received_idx
   on public.kindnesss_privacy_notification_deliveries (received_at desc);
+create index kindnesss_privacy_operations_due_idx
+  on public.kindnesss_privacy_case_operations (business_id, operational_status, due_at);
 
 create or replace function public.kindnesss_privacy_metadata_immutable()
 returns trigger language plpgsql set search_path = public as $$
@@ -62,6 +92,36 @@ for each row execute function public.kindnesss_privacy_metadata_immutable();
 create trigger kindnesss_privacy_deliveries_immutable
 before update or delete on public.kindnesss_privacy_notification_deliveries
 for each row execute function public.kindnesss_privacy_metadata_immutable();
+
+-- Liftor can triage work but cannot take over Kindnesss requester/child-case authority.
+create or replace function public.kindnesss_privacy_case_authority_guard()
+returns trigger language plpgsql set search_path = public as $$
+begin
+  if tg_op = 'DELETE' then
+    if old.request_source = 'kindnesss_privacy_metadata' then
+      raise exception 'Kindnesss authoritative privacy cases cannot be deleted in Liftor';
+    end if;
+    return old;
+  end if;
+  if old.request_source = 'kindnesss_privacy_metadata' and (
+    new.business_id is distinct from old.business_id
+    or new.contact_id is distinct from old.contact_id
+    or new.request_type is distinct from old.request_type
+    or new.request_status is distinct from old.request_status
+    or new.request_source is distinct from old.request_source
+    or new.request_summary is distinct from old.request_summary
+    or new.due_date is distinct from old.due_date
+    or new.completed_at is distinct from old.completed_at
+    or new.metadata is distinct from old.metadata
+  ) then
+    raise exception 'Kindnesss admin authority required for case status, identity, scope or closure changes';
+  end if;
+  return new;
+end $$;
+
+create trigger kindnesss_privacy_case_authority_guard
+before update or delete on public.data_privacy_requests
+for each row execute function public.kindnesss_privacy_case_authority_guard();
 
 -- One transaction creates/reuses the founder workstream case and records each delivery.
 -- A per-business advisory lock makes duplicate events and same-request events deterministic.
@@ -143,6 +203,14 @@ begin
     _kind, _request_ref, _request_type, _due_at, v_privacy_request_id
   ) returning id into v_delivery_id;
 
+  insert into public.kindnesss_privacy_case_operations (
+    privacy_request_id, business_id, operational_status, due_at, last_delivery_at
+  ) values (
+    v_privacy_request_id, _business_id, 'unacknowledged', _due_at, now()
+  ) on conflict on constraint kindnesss_privacy_case_operations_pkey do update set
+    due_at = excluded.due_at,
+    last_delivery_at = excluded.last_delivery_at;
+
   return query select v_delivery_id, v_privacy_request_id, false;
 end $$;
 
@@ -150,3 +218,73 @@ revoke all on function public.receive_kindnesss_privacy_notification(text,uuid,u
 from public, anon, authenticated;
 grant execute on function public.receive_kindnesss_privacy_notification(text,uuid,uuid,integer,text,timestamptz,text,uuid,text,timestamptz)
 to service_role;
+
+-- Explicit founder/admin human triage with compare-and-set protection.
+-- No parameter can approve/reject the requester, verify identity or close the canonical case.
+create or replace function public.review_kindnesss_privacy_case_operations(
+  _privacy_request_id uuid,
+  _owner_user_id uuid,
+  _operational_status text,
+  _expected_updated_at timestamptz
+) returns setof public.kindnesss_privacy_case_operations
+language plpgsql security definer set search_path = public as $$
+declare
+  v_operation public.kindnesss_privacy_case_operations%rowtype;
+begin
+  if auth.uid() is null or not (
+    public.has_role(auth.uid(), 'founder') or public.has_role(auth.uid(), 'admin')
+  ) then
+    raise exception 'founder or admin privacy review required' using errcode = '42501';
+  end if;
+  if _operational_status not in (
+    'unacknowledged', 'acknowledged', 'in_progress', 'waiting_on_kindnesss', 'blocked'
+  ) then
+    raise exception 'Kindnesss admin authority required for approval, identity verification or closure';
+  end if;
+  if _owner_user_id is null or not (
+    public.has_role(_owner_user_id, 'founder') or public.has_role(_owner_user_id, 'admin')
+  ) then
+    raise exception 'privacy owner must be a founder or admin';
+  end if;
+  if _expected_updated_at is null then
+    raise exception 'privacy operation compare-and-set token required';
+  end if;
+
+  select o.* into v_operation
+  from public.kindnesss_privacy_case_operations o
+  join public.data_privacy_requests r on r.id = o.privacy_request_id
+  where o.privacy_request_id = _privacy_request_id
+    and o.business_id = '640de582-a112-4d16-a221-03c27f00c6ec'::uuid
+    and r.business_id = o.business_id
+    and r.request_source = 'kindnesss_privacy_metadata'
+  for update of o;
+  if not found then
+    raise exception 'Kindnesss privacy operation not found';
+  end if;
+  if v_operation.updated_at <> _expected_updated_at then
+    raise exception 'stale privacy operation review; refresh before saving';
+  end if;
+
+  update public.kindnesss_privacy_case_operations o
+  set owner_user_id = _owner_user_id,
+      operational_status = _operational_status,
+      operator_acknowledged_at = case
+        when _operational_status = 'unacknowledged' then null
+        else coalesce(o.operator_acknowledged_at, now())
+      end,
+      operator_acknowledged_by = case
+        when _operational_status = 'unacknowledged' then null
+        else coalesce(o.operator_acknowledged_by, auth.uid())
+      end,
+      updated_at = now(),
+      updated_by = auth.uid()
+  where o.privacy_request_id = _privacy_request_id
+  returning o.* into v_operation;
+
+  return next v_operation;
+end $$;
+
+revoke all on function public.review_kindnesss_privacy_case_operations(uuid,uuid,text,timestamptz)
+from public, anon;
+grant execute on function public.review_kindnesss_privacy_case_operations(uuid,uuid,text,timestamptz)
+to authenticated, service_role;

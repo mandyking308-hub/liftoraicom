@@ -20,6 +20,9 @@
 - [x] Add review-only founder-only delivery/workstream SQL and a reference-only Communications Centre privacy lane.
 - [x] Prove signed delivery, validation, dedupe, retries, isolation, RLS and no-send/no-PII behavior with disposable tests.
 - [x] Run full verification, record BUILT / SOURCE TESTED / HOSTED QA / LIVE VERIFIED evidence, and commit without activation.
+- [x] Separate privacy cases from the sales inbox into a dedicated founder/admin operations queue.
+- [x] Add review-only operator ownership, acknowledgement, triage, due-alert and Kindnesss-only authority controls.
+- [x] Run synthetic UI, full-suite and disposable PostgreSQL verification; refresh evidence and commit without activation.
 
 ## Kindnesss Apollo retention
 - [x] Verify existing retention and provenance; keep paid enrichment and waterfall off.

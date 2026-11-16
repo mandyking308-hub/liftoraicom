@@ -67,7 +67,7 @@ describe("founder unified inbox", () => {
     expect(screen.queryByLabelText("Draft body (not saved)")).not.toBeInTheDocument();
   });
 
-  it("shows privacy delivery references separately with unavailable activation and no sales reply controls", async () => {
+  it("excludes privacy deliveries from sales rows and links only to the separate privacy queue", async () => {
     load.mockResolvedValue({
       ...snapshot,
       rows: [{ id: "privacy-delivery", source: "privacy", channel: "privacy_notification", businessId: "business-a", receivedAt: new Date().toISOString(), status: "new_request", subject: "Privacy notification · deletion", threadReference: "opaque-request-ref", mailboxId: null, mailboxIdentity: "Signed Kindnesss metadata", replied: false, optOut: false, needsReview: true, failed: false, quarantine: false, quarantineReason: null, reference: "privacy-case-ref", privacy: true }],
@@ -78,9 +78,9 @@ describe("founder unified inbox", () => {
     expect(diagnostic).toHaveTextContent("Not configured");
     expect(diagnostic).toHaveTextContent("not proof that no privacy requests exist");
     expect(diagnostic).not.toHaveTextContent("Failed0");
-    fireEvent.click(screen.getByRole("button", { name: "Review" }));
-    expect(screen.getByTestId("inbox-drilldown")).toHaveTextContent("Metadata-only privacy handling");
-    expect(screen.getByTestId("inbox-drilldown")).toHaveTextContent("privacy-case-ref");
+    expect(screen.queryByText("Privacy notification · deletion")).not.toBeInTheDocument();
+    expect(screen.getByTestId("privacy-separation")).toHaveTextContent("Privacy is not a sales conversation");
+    expect(screen.getByRole("link", { name: "Open separate privacy operations" })).toHaveAttribute("href", "/founder/communications/privacy");
     expect(screen.queryByLabelText("Draft body (not saved)")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /^Send$/ })).not.toBeInTheDocument();
   });

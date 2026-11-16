@@ -6,6 +6,7 @@ import { MessagesSquare, ArrowLeft, ShieldAlert } from "lucide-react";
 
 export const COMM_NAV = [
   { to: "/founder/communications/inbox",       label: "Unified Inbox" },
+  { to: "/founder/communications/privacy",     label: "Privacy · separate" },
   { to: "/founder/communications",             label: "Overview" },
   { to: "/founder/communications/ledger",      label: "Ledger" },
   { to: "/founder/communications/by-contact",  label: "By contact" },

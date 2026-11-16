@@ -75,7 +75,7 @@ describe.skipIf(!DATABASE_URL).sequential("disposable PostgreSQL Kindnesss priva
   }, 60_000);
 
   beforeEach(async () => {
-    await pool.query("truncate public.kindnesss_privacy_notification_deliveries, public.kindnesss_privacy_request_links, public.data_privacy_requests, public.user_roles, public.businesses restart identity cascade");
+    await pool.query("truncate public.kindnesss_privacy_notification_deliveries, public.kindnesss_privacy_case_operations, public.kindnesss_privacy_request_links, public.data_privacy_requests, public.user_roles, public.businesses restart identity cascade");
     await pool.query("insert into public.businesses(id,name) values ($1,'Kindnesss active synthetic'),($2,'Other synthetic business')", [BUSINESS_A, BUSINESS_B]);
     await pool.query("insert into public.user_roles(user_id,role) values ($1,'founder'),($2,'admin'),($3,'client')", [FOUNDER, ADMIN, TEAM]);
   });
@@ -163,6 +163,8 @@ describe.skipIf(!DATABASE_URL).sequential("disposable PostgreSQL Kindnesss priva
     expect(await countFor(ADMIN)).toBe(1);
     expect(await countFor(TEAM)).toBe(0);
     expect(await asUser("authenticated", TEAM, async (client) => (await client.query("select count(*)::int as count from public.data_privacy_requests")).rows[0].count)).toBe(0);
+    expect(await asUser("authenticated", FOUNDER, async (client) => (await client.query("select count(*)::int as count from public.kindnesss_privacy_case_operations")).rows[0].count)).toBe(1);
+    expect(await asUser("authenticated", TEAM, async (client) => (await client.query("select count(*)::int as count from public.kindnesss_privacy_case_operations")).rows[0].count)).toBe(0);
     await expect(asUser("anon", null, (client) => client.query("select * from public.kindnesss_privacy_notification_deliveries"))).rejects.toThrow(/permission denied/);
     await expect(asUser("authenticated", TEAM, (client) => client.query("insert into public.kindnesss_privacy_notification_deliveries(source,business_id,event_id,schema_version,event_type,occurred_at,kind,request_ref,request_type,due_at,privacy_request_id) select 'kindnesss',business_id,gen_random_uuid(),1,event_type,now(),kind,request_ref,request_type,due_at,privacy_request_id from public.kindnesss_privacy_notification_deliveries"))).rejects.toThrow(/permission denied/);
   });
@@ -173,5 +175,81 @@ describe.skipIf(!DATABASE_URL).sequential("disposable PostgreSQL Kindnesss priva
     await expect(pool.query("delete from public.kindnesss_privacy_notification_deliveries")).rejects.toThrow(/immutable/);
     await expect(pool.query("update public.kindnesss_privacy_request_links set request_ref=gen_random_uuid()")).rejects.toThrow(/immutable/);
     expect((await pool.query("select request_status,completed_at from public.data_privacy_requests")).rows[0]).toEqual({ request_status: "received", completed_at: null });
+  });
+
+  it("separates delivery and operator acknowledgement while preserving Kindnesss-only authority", async () => {
+    const first = buildPrivacyEvent(outbox());
+    const accepted = await receive(request(first));
+    const caseId = String(accepted.body.privacy_request_id);
+    const initial = (await pool.query(`select operational_status,owner_user_id,operator_acknowledged_at,to_char(updated_at at time zone 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') as token from public.kindnesss_privacy_case_operations`)).rows[0];
+    expect(initial).toMatchObject({ operational_status: "unacknowledged", owner_user_id: null, operator_acknowledged_at: null });
+    const tokenCheck = (await pool.query(
+      "select updated_at = $1::text::timestamptz as matches,updated_at::text as stored,($1::text::timestamptz)::text as parsed from public.kindnesss_privacy_case_operations",
+      [initial.token],
+    )).rows[0];
+    expect(tokenCheck.parsed).toBe(tokenCheck.stored);
+    expect(tokenCheck.matches).toBe(true);
+
+    const reviewed = await asUser("authenticated", FOUNDER, (client) => client.query(
+      "select * from public.review_kindnesss_privacy_case_operations($1,$2,$3,$4::text::timestamptz)",
+      [caseId, FOUNDER, "acknowledged", initial.token],
+    ));
+    expect(reviewed.rows[0]).toMatchObject({ privacy_request_id: caseId, owner_user_id: FOUNDER, operational_status: "acknowledged", updated_by: FOUNDER });
+    expect(reviewed.rows[0].operator_acknowledged_at).toBeTruthy();
+    expect((await pool.query("select request_status,completed_at from public.data_privacy_requests")).rows[0]).toEqual({ request_status: "received", completed_at: null });
+
+    await expect(asUser("authenticated", FOUNDER, (client) => client.query(
+      "select * from public.review_kindnesss_privacy_case_operations($1,$2,$3,$4::text::timestamptz)",
+      [caseId, FOUNDER, "closed", reviewed.rows[0].updated_at],
+    ))).rejects.toThrow(/Kindnesss admin authority/);
+    await expect(asUser("authenticated", FOUNDER, (client) => client.query(
+      "select * from public.review_kindnesss_privacy_case_operations($1,$2,$3,$4::text::timestamptz)",
+      [caseId, TEAM, "in_progress", reviewed.rows[0].updated_at],
+    ))).rejects.toThrow(/founder or admin/);
+    await expect(asUser("authenticated", TEAM, (client) => client.query(
+      "select * from public.review_kindnesss_privacy_case_operations($1,$2,$3,$4::text::timestamptz)",
+      [caseId, FOUNDER, "in_progress", reviewed.rows[0].updated_at],
+    ))).rejects.toThrow(/founder or admin privacy review/);
+    await expect(asUser("authenticated", FOUNDER, (client) => client.query(
+      "update public.data_privacy_requests set request_status='completed',completed_at=now() where id=$1", [caseId],
+    ))).rejects.toThrow(/Kindnesss admin authority/);
+    await expect(asUser("authenticated", FOUNDER, (client) => client.query(
+      "delete from public.data_privacy_requests where id=$1", [caseId],
+    ))).rejects.toThrow(/cannot be deleted/);
+  });
+
+  it("uses compare-and-set for triage and preserves it across later deliveries and duplicates", async () => {
+    const requestRef = randomUUID();
+    const first = buildPrivacyEvent(outbox(randomUUID(), requestRef, "new_request"));
+    const accepted = await receive(request(first));
+    const caseId = String(accepted.body.privacy_request_id);
+    const initial = (await pool.query(`select to_char(updated_at at time zone 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') as token from public.kindnesss_privacy_case_operations`)).rows[0];
+    const reviewed = await asUser("authenticated", ADMIN, (client) => client.query(
+      "select * from public.review_kindnesss_privacy_case_operations($1,$2,$3,$4::text::timestamptz)",
+      [caseId, ADMIN, "in_progress", initial.token],
+    ));
+    const reviewUpdatedAt = reviewed.rows[0].updated_at;
+
+    await expect(asUser("authenticated", FOUNDER, (client) => client.query(
+      "select * from public.review_kindnesss_privacy_case_operations($1,$2,$3,$4::text::timestamptz)",
+      [caseId, FOUNDER, "blocked", initial.token],
+    ))).rejects.toThrow(/stale privacy operation review/);
+
+    const secondOutbox = outbox(randomUUID(), requestRef, "overdue");
+    secondOutbox.payload = { kind: "overdue", request_ref: requestRef, request_type: "deletion", due_at: "2026-12-20T10:00:00.000Z" };
+    const second = buildPrivacyEvent(secondOutbox);
+    expect((await receive(request(second))).status).toBe(202);
+    expect((await receive(request(second))).status).toBe(200);
+    const operation = (await pool.query("select owner_user_id,operational_status,due_at::text as due_at,updated_at from public.kindnesss_privacy_case_operations")).rows[0];
+    expect(operation).toMatchObject({ owner_user_id: ADMIN, operational_status: "in_progress", updated_at: reviewUpdatedAt });
+    expect(operation.due_at).toContain("2026-12-20");
+    expect((await pool.query("select count(*)::int as count from public.kindnesss_privacy_notification_deliveries")).rows[0].count).toBe(2);
+  });
+
+  it("denies direct authenticated writes to operator tracking even for founders", async () => {
+    await receive(request(buildPrivacyEvent(outbox())));
+    await expect(asUser("authenticated", FOUNDER, (client) => client.query(
+      "update public.kindnesss_privacy_case_operations set operational_status='blocked'",
+    ))).rejects.toThrow(/permission denied/);
   });
 });

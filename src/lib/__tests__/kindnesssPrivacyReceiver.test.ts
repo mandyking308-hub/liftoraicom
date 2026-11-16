@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -75,6 +75,11 @@ function receive(req: ReturnType<typeof request>, store: PrivacyNotificationStor
 }
 
 describe("KND-003 exact Kindnesss privacy sender to Liftor receiver", () => {
+  it("pins the verbatim Kindnesss sender fixture to the reviewed cross-repository snapshot", () => {
+    const source = readFileSync("src/lib/__tests__/fixtures/kindnesss/liftor-privacy-outbound.server.ts");
+    expect(createHash("sha256").update(source).digest("hex")).toBe("24719b0e32a52d3d9409172ec19670b0eeb139391fc82ad54fc0002a69778902");
+  });
+
   it("accepts the exact ten-key signed bytes only after durable storage and dedupes by event ID", async () => {
     const store = memoryStore();
     const event = buildPrivacyEvent(outbox());

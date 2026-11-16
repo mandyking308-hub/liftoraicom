@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { AlertTriangle, Inbox as InboxIcon, LockKeyhole, MailWarning, ShieldQuestion } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -114,7 +115,7 @@ export default function CommsInbox() {
   return (
     <CommsLayout
       title="Unified Inbox"
-      subtitle="Founder/admin view across existing communications plus a separate reference-only Kindnesss privacy lane. Read-only: no ingestion, provider mutation, privacy resolution or external reply is activated."
+      subtitle="Founder/admin view across existing commercial communications. Privacy work is kept in a separate metadata-only queue. No ingestion, provider mutation or external reply is activated."
     >
       <Card className="tech-card p-4 flex items-start gap-3" data-testid="phase1-read-only">
         <LockKeyhole className="h-5 w-5 shrink-0 text-primary" />
@@ -122,6 +123,14 @@ export default function CommsInbox() {
           <p className="font-semibold">Source-only Phase 1 · durable fan-in disabled</p>
           <p className="text-muted-foreground">Existing records remain in their original paths. New signed fan-in requires the pending schema, deployed adapter and explicit feature flag. No auto-reply, campaign, queue or provider setting is changed here.</p>
         </div>
+      </Card>
+
+      <Card className="tech-card p-4 flex items-center justify-between gap-3 flex-wrap" data-testid="privacy-separation">
+        <div className="text-xs">
+          <p className="font-semibold">Privacy is not a sales conversation</p>
+          <p className="text-muted-foreground">Kindnesss privacy references, ownership and due alerts are excluded from these commercial rows.</p>
+        </div>
+        <Link to="/founder/communications/privacy" className="text-xs text-primary hover:underline">Open separate privacy operations</Link>
       </Card>
 
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">

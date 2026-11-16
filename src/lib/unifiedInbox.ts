@@ -143,7 +143,6 @@ export async function loadUnifiedInboxSnapshot(): Promise<UnifiedInboxSnapshot> 
     multiResult,
     channelsResult,
     handoffResult,
-    privacyResult,
     privacyDeliveriesResult,
     draftsResult,
     sendersResult,
@@ -165,7 +164,6 @@ export async function loadUnifiedInboxSnapshot(): Promise<UnifiedInboxSnapshot> 
     queryRows<any>(() => sb.from("multi_channel_inbound_events").select("id,business_id,channel_key,provider_type,external_event_id,external_thread_id,subject,processed_status,founder_review_required,received_at,matched_conversation_id").order("received_at", { ascending: false }).limit(500)),
     queryRows<any>(() => sb.from("communication_channels").select("channel_key,channel_label,provider_type,live_connected,enabled").limit(100)),
     queryRows<any>(() => sb.from("inbound_handoff_events").select("id,business_id,status,route,quarantine_reason,last_error,received_at,processed_at").order("received_at", { ascending: false }).limit(500)),
-    queryRows<any>(() => sb.from("data_privacy_requests").select("id,business_id,request_type,request_status,request_source,created_at").order("created_at", { ascending: false }).limit(200)),
     queryRows<any>(() => sb.from("kindnesss_privacy_notification_deliveries").select("id,business_id,event_id,request_ref,kind,request_type,occurred_at,due_at,received_at,privacy_request_id").order("received_at", { ascending: false }).limit(200)),
     queryRows<ExistingDraft>(() => sb.from("communication_records").select("id,business_id,subject,communication_status,approval_item_id,created_at").eq("direction", "outbound").in("communication_status", ["draft", "approval_required"]).order("created_at", { ascending: false }).limit(200)),
     queryRows<SenderMailbox>(() => sb.from("gsm_mailboxes").select("id,email,estate_classification,active,retired,readiness_state,provider_health,last_provider_check_at").limit(500)),
@@ -309,49 +307,9 @@ export async function loadUnifiedInboxSnapshot(): Promise<UnifiedInboxSnapshot> 
     privacy: false,
   }));
 
-  const privacyRows: UnifiedInboxRow[] = privacyResult.data.map((request) => ({
-    id: `privacy:${request.id}`,
-    source: "privacy",
-    channel: "privacy_case",
-    businessId: request.business_id,
-    receivedAt: request.created_at,
-    status: request.request_status,
-    subject: `Privacy request · ${request.request_type}`,
-    threadReference: null,
-    mailboxId: null,
-    mailboxIdentity: request.request_source,
-    replied: false,
-    optOut: false,
-    needsReview: true,
-    failed: false,
-    quarantine: !request.business_id,
-    quarantineReason: !request.business_id ? "business_scope_missing" : null,
-    reference: request.id,
-    privacy: true,
-  }));
-
-  const privacyDeliveryRows: UnifiedInboxRow[] = privacyDeliveriesResult.data.map((delivery) => ({
-    id: `privacy-delivery:${delivery.id}`,
-    source: "privacy",
-    channel: "privacy_notification",
-    businessId: delivery.business_id,
-    receivedAt: delivery.received_at ?? delivery.occurred_at,
-    status: delivery.kind,
-    subject: `Privacy notification · ${delivery.request_type}`,
-    threadReference: delivery.request_ref,
-    mailboxId: null,
-    mailboxIdentity: "Signed Kindnesss metadata",
-    replied: false,
-    optOut: false,
-    needsReview: true,
-    failed: false,
-    quarantine: !delivery.business_id,
-    quarantineReason: !delivery.business_id ? "business_scope_missing" : null,
-    reference: delivery.privacy_request_id ?? delivery.id,
-    privacy: true,
-  }));
-
-  const rows = [...ledgerRows, ...legacyRows, ...providerRows, ...multiRows, ...handoffRows, ...privacyRows, ...privacyDeliveryRows]
+  // Privacy delivery/case references never enter the commercial unified sales rows.
+  // Their dedicated founder/admin operations queue reads the privacy candidate directly.
+  const rows = [...ledgerRows, ...legacyRows, ...providerRows, ...multiRows, ...handoffRows]
     .sort((a, b) => Date.parse(b.receivedAt) - Date.parse(a.receivedAt));
 
   const enabledConnections = connectionsResult.data.filter((connection) => connection.is_enabled && connection.inbound_receiver_enabled);
@@ -476,6 +434,7 @@ export function filterInboxRows(
   filters: { businessId?: string; source?: string; view?: "all" | "unassigned" | "needs_review" | "failed" | "quarantine" },
 ): UnifiedInboxRow[] {
   return rows.filter((row) => {
+    if (row.privacy) return false;
     if (filters.businessId && row.businessId !== filters.businessId) return false;
     if (filters.source && row.source !== filters.source) return false;
     if (filters.view === "unassigned" && row.businessId) return false;
