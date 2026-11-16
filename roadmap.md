@@ -6,6 +6,8 @@
 - [x] Add review-only replies, sender selection, privacy isolation and internal reply/opt-out follow-up blockers.
 - [x] Add isolated isolation/concurrency/retry/safety tests; run focused and existing checks without live writes or deployment.
 - [x] Record exact evidence, activation prerequisites and remaining controls; commit the completed source changes.
+- [x] Correct the review-only sender-evidence trigger/finaliser contradiction and add its write-once regression contract.
+- [x] Document the Smartlead Standard Webhooks mismatch with a fail-closed synthetic fixture and signed-test activation blocker.
 
 ## Kindnesss Apollo retention
 - [x] Verify existing retention and provenance; keep paid enrichment and waterfall off.

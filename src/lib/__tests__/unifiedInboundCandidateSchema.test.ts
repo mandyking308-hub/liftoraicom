@@ -52,4 +52,22 @@ describe("unified inbound pending schema and unchanged provider boundary", () =>
     expect(smartleadNormalizer).toContain("reply_opens_conversation_and_stops_automation");
     expect(smartleadReceiver).not.toMatch(/fetch\s*\(/);
   });
+
+  it("locks the claim-NULL to verified-sender finalisation regression contract to one scoped write", () => {
+    // Static candidate contract only: no SQL is executed outside an isolated PostgreSQL migration test.
+    expect(sql).toContain("original_sender_mailbox text,");
+    expect(sql).toContain("old.original_sender_mailbox is null\n      and new.original_sender_mailbox is not null");
+    expect(sql).toContain("old.original_sender_mailbox is not null\n      and old.original_sender_mailbox is distinct from new.original_sender_mailbox");
+    for (const setting of ["finalise_receipt_id", "finalise_lease_token", "finalise_source"]) {
+      expect(sql).toContain(`unified_inbound.${setting}`);
+    }
+    expect(sql).toContain("new.business_id is distinct from old.authenticated_business_id");
+    expect(sql).toContain("select * into v_receipt from public.unified_inbound_receipts");
+    expect(sql).toContain("r.id = _receipt_id and r.lease_token = _lease_token and r.lease_until > now()");
+    expect(sql).toContain("when r.original_sender_mailbox is null then _original_sender_mailbox");
+    expect(sql).toContain("else r.original_sender_mailbox end");
+    expect(sql).toContain("lease_until = null");
+    expect(sql).toContain("authenticated business scope mismatch");
+    expect(sql).not.toContain("original_sender_mailbox = coalesce(_original_sender_mailbox, r.original_sender_mailbox)");
+  });
 });

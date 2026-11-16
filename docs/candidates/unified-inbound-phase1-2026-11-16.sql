@@ -104,7 +104,23 @@ begin
     or old.content_reference is distinct from new.content_reference
     or old.contact_id is distinct from new.contact_id
     or old.source_mailbox_id is distinct from new.source_mailbox_id
-    or old.original_sender_mailbox is distinct from new.original_sender_mailbox then
+    or (old.original_sender_mailbox is not null
+      and old.original_sender_mailbox is distinct from new.original_sender_mailbox)
+    or (old.original_sender_mailbox is null
+      and new.original_sender_mailbox is not null
+      and (
+        current_setting('unified_inbound.finalise_receipt_id', true) is distinct from old.id::text
+        or current_setting('unified_inbound.finalise_lease_token', true) is distinct from old.lease_token::text
+        or current_setting('unified_inbound.finalise_source', true) is distinct from old.source
+        or old.lease_until is null
+        or old.lease_until <= now()
+        or new.lease_token is distinct from old.lease_token
+        or new.lease_until is not null
+        or new.status <> 'processed'
+        or new.business_id is distinct from old.authenticated_business_id
+        or new.route_evidence is null
+        or new.thread_key is null
+      )) then
     raise exception 'immutable inbound receipt evidence';
   end if;
   new.updated_at = now();
@@ -202,13 +218,45 @@ create or replace function public.finalise_unified_inbound_receipt(
   _error_code text
 ) returns void
 language plpgsql security definer set search_path = public as $$
+declare
+  v_receipt public.unified_inbound_receipts%rowtype;
 begin
+  select * into v_receipt from public.unified_inbound_receipts r
+  where r.id = _receipt_id and r.lease_token = _lease_token and r.lease_until > now()
+  for update;
+  if not found then raise exception 'stale or missing receipt lease'; end if;
+
+  if _business_id is not null and _business_id is distinct from v_receipt.authenticated_business_id then
+    raise exception 'authenticated business scope mismatch';
+  end if;
+  if _status = 'processed' and (_business_id is null or _route_evidence is null or _thread_key is null) then
+    raise exception 'verified scoped route required';
+  end if;
+  if _original_sender_mailbox is not null and (
+    _status <> 'processed' or _business_id is null or _route_evidence is null or _thread_key is null
+  ) then
+    raise exception 'verified sender requires a processed scoped route';
+  end if;
+  if v_receipt.original_sender_mailbox is not null
+    and _original_sender_mailbox is not null
+    and v_receipt.original_sender_mailbox is distinct from _original_sender_mailbox then
+    raise exception 'immutable inbound receipt evidence';
+  end if;
+
+  -- Transaction-local evidence ties the sole NULL-to-verified sender transition
+  -- to this exact receipt, source and active lease. It is cleared at commit/rollback.
+  perform set_config('unified_inbound.finalise_receipt_id', _receipt_id::text, true);
+  perform set_config('unified_inbound.finalise_lease_token', _lease_token::text, true);
+  perform set_config('unified_inbound.finalise_source', v_receipt.source, true);
+
   update public.unified_inbound_receipts r set
     status = _status,
     business_id = _business_id,
     route_evidence = _route_evidence,
     thread_key = _thread_key,
-    original_sender_mailbox = coalesce(_original_sender_mailbox, r.original_sender_mailbox),
+    original_sender_mailbox = case
+      when r.original_sender_mailbox is null then _original_sender_mailbox
+      else r.original_sender_mailbox end,
     quarantine_reason = _quarantine_reason,
     next_attempt_at = _next_attempt_at,
     last_error_code = _error_code,

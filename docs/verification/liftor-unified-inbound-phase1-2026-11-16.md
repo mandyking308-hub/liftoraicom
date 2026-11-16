@@ -221,3 +221,48 @@ This is a **plan only**, not executed. Each stage must stop on failure. Live ext
 - Source “last sync” is based on actual available event/poll timestamps; a row timestamp is not presented as proof of current provider health.
 - Signing secret availability, actual signed delivery, provider webhook configuration and one-mailbox end-to-end delivery remain unverified.
 - No external response, marketing auto-reply, campaign activation, provider mutation or unattended follow-up stop/start was introduced.
+
+## 9. Targeted QA correction following independent review
+
+- **QA base revision:** `227f6723a092087bad3b19fa5068318b1fc0e15c`
+- **Scope:** source, review-only SQL and isolated tests only. No production/QA database statement, deployment, publication, email access/send or provider change occurred.
+
+### 9.1 Sender-evidence trigger/finaliser contradiction
+
+The independent finding was correct. The original `unified_inbound_receipt_immutable` trigger rejected every change to `original_sender_mailbox`, while `finalise_unified_inbound_receipt` used `coalesce(_original_sender_mailbox, r.original_sender_mailbox)`. A durable claim that correctly saved NULL before routing could therefore never be finalised with the verified original sender.
+
+`docs/candidates/unified-inbound-phase1-2026-11-16.sql` now implements a narrow write-once transition:
+
+- NULL may become a verified sender only during `finalise_unified_inbound_receipt`, after the exact receipt ID, source and unexpired lease token have been locked and checked.
+- Transaction-local settings connect the trigger exception to that exact finalisation; they disappear at commit or rollback. A direct NULL-to-sender update without this evidence remains rejected.
+- The transition requires a processed route, route evidence, a thread key and `business_id = authenticated_business_id`; a different business is rejected rather than assigned.
+- Once non-NULL, the sender cannot be replaced or erased. Finalisation preserves the existing value and explicitly rejects a conflicting supplied value.
+- Finalisation clears the lease, so replaying the same finaliser fails as a stale lease. The source event, authenticated business and other receipt evidence remain immutable.
+
+`src/lib/__tests__/unifiedInboundCandidateSchema.test.ts` adds the regression contract for claim NULL → verified sender finalise, the single permitted transition, exact lease/source/business binding, stale-lease closure and rejection of later replacement. This is a **static source contract**, not proof of PostgreSQL execution.
+
+**UNVERIFIED:** the candidate was not executed. Actual PL/pgSQL behavior, trigger interaction, transaction-local settings, locking, concurrency, constraints, grants and RLS remain unverified until this candidate and a claim/finalise/replay/replacement regression are run in a disposable isolated PostgreSQL migration test. No live or QA schema was used.
+
+### 9.2 Smartlead Standard Webhooks protocol blocker
+
+The official Smartlead documentation at https://helpcenter.smartlead.ai/en/articles/470-secure-your-smartlead-webhooks-with-signing-hmac was read on 16 November 2026. It specifies Standard Webhooks headers `webhook-id`, `webhook-timestamp` and `webhook-signature`, a `whsec_` base64 key and `v1` signatures. The Standard Webhooks specification was also checked for the signed content and header contract.
+
+The mismatch is confirmed in current source:
+
+- `supabase/functions/_shared/smartleadWebhookAuth.ts` verifies only legacy `X-Smartlead-Signature: sha256=<hex>` using the literal secret and raw-body HMAC.
+- `supabase/functions/smartlead-webhook/index.ts` reads only `x-smartlead-signature` and prefers `x-request-id` for retry idempotency.
+
+The active receiver and authentication helper were deliberately **not modified**. `docs/candidates/smartlead-standard-webhooks-compatibility-2026-11-16.md` now provides the separate-review implementation and activation checklist. `src/lib/__tests__/fixtures/smartleadStandardWebhookContract.ts` and `src/lib/__tests__/smartleadStandardWebhookCompatibility.test.ts` provide a deterministic synthetic `v1` fixture; its signature is independently recomputed and the unchanged legacy verifier is required to reject it.
+
+**Activation remains blocked** until a separately reviewed receiver implementation passes isolated negative/rotation/replay/tenant tests and a signed Smartlead **Send Test** delivery is verified against the exact saved receiver URL. No unsigned, legacy-header or alternate-protocol fallback is authorised by this patch.
+
+### 9.3 QA verification results
+
+- Focused command: `bunx vitest run` on the four original Unified Inbox suites, the new Standard Webhooks contract, `worker3ProviderCore` and `worker3SmartleadReceiverBoundary`.
+- **PASS — 7 files, 53 tests**, 16 November 2026 15:04 UTC. Existing React Router future-flag warnings were non-failing.
+- Complete suite: `bunx vitest run` — **PASS — 93 files, 1,092 tests**, 16 November 2026 15:05 UTC.
+- Touched-file ESLint — **PASS, 0 errors/warnings** for the changed test and fixture TypeScript files.
+- `git diff --check` — **PASS**.
+- Automatic preview build/typecheck — latest observed entry `=== build 2026-11-16T15:06:48Z === build OK`.
+- Active receiver diff check for `smartleadWebhookAuth.ts` and `smartlead-webhook/index.ts` — **empty; both unchanged**.
+- No real signed delivery, schema execution, provider interaction or runtime deployment was performed.
