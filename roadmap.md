@@ -1,5 +1,12 @@
 # Roadmap
 
+## Unified inbound portfolio communications — Phase 1 (16 Nov 2026)
+- [x] Add a founder-only unified inbox over existing communications data, with truthful source health, quarantine and diagnostics.
+- [x] Add source-only, disabled-by-default deterministic Smartlead and Kindnesss fan-in candidates with pending schema.
+- [x] Add review-only replies, sender selection, privacy isolation and internal reply/opt-out follow-up blockers.
+- [x] Add isolated isolation/concurrency/retry/safety tests; run focused and existing checks without live writes or deployment.
+- [x] Record exact evidence, activation prerequisites and remaining controls; commit the completed source changes.
+
 ## Kindnesss Apollo retention
 - [x] Verify existing retention and provenance; keep paid enrichment and waterfall off.
 - [x] Add founder-only idempotent CSV retention and complete audited download using existing tables.

@@ -660,6 +660,7 @@ import IdentityMergeQueue from "./pages/founder/identity-resolution/MergeQueue";
 import IdentityDoNotContact from "./pages/founder/identity-resolution/DoNotContact";
 import IdentitySettings from "./pages/founder/identity-resolution/Settings";
 import CommsOverview from "./pages/founder/communications/Overview";
+import CommsInbox from "./pages/founder/communications/Inbox";
 import CommsLedger from "./pages/founder/communications/Ledger";
 import CommsByContact from "./pages/founder/communications/ByContact";
 import CommsByBusiness from "./pages/founder/communications/ByBusiness";
@@ -1533,6 +1534,7 @@ const App = () => (
             <Route path="/founder/identity-resolution/do-not-contact" element={<FounderRoute><IdentityDoNotContact /></FounderRoute>} />
             <Route path="/founder/identity-resolution/settings" element={<FounderRoute><IdentitySettings /></FounderRoute>} />
             <Route path="/founder/communications" element={<FounderRoute><CommsOverview /></FounderRoute>} />
+            <Route path="/founder/communications/inbox" element={<FounderRoute><CommsInbox /></FounderRoute>} />
             <Route path="/founder/communications/ledger" element={<FounderRoute><CommsLedger /></FounderRoute>} />
             <Route path="/founder/communications/by-contact" element={<FounderRoute><CommsByContact /></FounderRoute>} />
             <Route path="/founder/communications/by-business" element={<FounderRoute><CommsByBusiness /></FounderRoute>} />

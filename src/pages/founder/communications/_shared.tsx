@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { MessagesSquare, ArrowLeft, ShieldAlert } from "lucide-react";
 
 export const COMM_NAV = [
+  { to: "/founder/communications/inbox",       label: "Unified Inbox" },
   { to: "/founder/communications",             label: "Overview" },
   { to: "/founder/communications/ledger",      label: "Ledger" },
   { to: "/founder/communications/by-contact",  label: "By contact" },
@@ -29,7 +30,7 @@ export function CommsLayout({ title, subtitle, children }: { title: string; subt
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <MessagesSquare size={20} className="text-primary" />
             {title}
-            <Badge variant="outline" className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[10px]">Live logging</Badge>
+            <Badge variant="outline" className="text-[10px]">Existing records</Badge>
             <Badge variant="outline" className="bg-yellow-500/15 text-yellow-300 border-yellow-500/30 text-[10px]">
               <ShieldAlert size={9} className="mr-1" /> External send requires approval
             </Badge>
