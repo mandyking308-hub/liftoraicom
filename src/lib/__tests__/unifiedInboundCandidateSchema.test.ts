@@ -24,7 +24,7 @@ describe("unified inbound pending schema and unchanged provider boundary", () =>
   });
 
   it("uses atomic idempotent leased claims and immutable receipt evidence", () => {
-    expect(sql).toContain("unique (source, idempotency_key)");
+    expect(sql).toContain("unique (source, authenticated_business_id, idempotency_key)");
     expect(sql).toContain("on conflict on constraint unified_inbound_receipts_idem do update");
     expect(sql).toContain("r.lease_until <= now()");
     expect(sql).toContain("r.id = _receipt_id and r.lease_token = _lease_token");
@@ -47,7 +47,8 @@ describe("unified inbound pending schema and unchanged provider boundary", () =>
 
   it("leaves the signed Smartlead receiver gates and no-provider-call boundary unchanged", () => {
     expect(smartleadReceiver).toContain("SMARTLEAD_WEBHOOK_RECEIVER_ENABLED");
-    expect(smartleadReceiver).toContain("verifySmartleadWebhookSignature(rawBody, signature, secret)");
+    expect(smartleadReceiver).toContain("verifySmartleadWebhookRequest({");
+    expect(smartleadReceiver).toContain("processSupabaseSmartleadUnifiedInbound");
     expect(smartleadReceiver).toContain("deriveContactMutation(event, payload)");
     expect(smartleadNormalizer).toContain("reply_opens_conversation_and_stops_automation");
     expect(smartleadReceiver).not.toMatch(/fetch\s*\(/);

@@ -114,8 +114,12 @@ describe("Kindnesss enquiry receiver (offline integration contract)", () => {
     expect((await handleKindnesssEnquiry(s.raw, s.headers, deps(m.store, flaky))).status).toBe(202);
   });
 
-  it("no entrypoint is deployed for this receiver", async () => {
-    const { existsSync } = await import("node:fs");
-    expect(existsSync("supabase/functions/kindnesss-enquiry-receiver/index.ts")).toBe(false);
+  it("has a real entrypoint that remains disabled by default and never sends", async () => {
+    const { readFileSync } = await import("node:fs");
+    const entrypoint = readFileSync("supabase/functions/kindnesss-enquiry-receiver/index.ts", "utf8");
+    expect(entrypoint).toContain("KINDNESSS_HANDOFF_RECEIVER_ENABLED");
+    expect(entrypoint).toContain("UNIFIED_INBOUND_FANIN_ENABLED");
+    expect(entrypoint).toContain('enabledFlag !== "true" || fanInEnabledFlag !== "true"');
+    expect(entrypoint).not.toMatch(/\.from\(["']email_queue["']\)|fetch\s*\(/);
   });
 });

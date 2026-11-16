@@ -8,13 +8,25 @@ const campaignDiscovery = readFileSync("supabase/functions/smartlead-campaign-di
 const mappingUi = readFileSync("src/components/founder/integrations/SmartleadCampaignMappingPreview.tsx", "utf8");
 
 describe("Worker 3 Smartlead receiver boundary", () => {
-  it("requires the feature gate and signs the raw request bytes before parsing JSON", () => {
+  it("requires the feature gate and verifies explicit-protocol raw bytes before parsing JSON", () => {
     expect(receiver).toContain("smartleadWebhookReceiverEnabled(Deno.env.get(\"SMARTLEAD_WEBHOOK_RECEIVER_ENABLED\"))");
     expect(receiver).toContain("new Uint8Array(await req.arrayBuffer())");
-    expect(receiver).toContain("verifySmartleadWebhookSignature(rawBody, signature, secret)");
-    expect(receiver.indexOf("verifySmartleadWebhookSignature(rawBody, signature, secret)")).toBeLessThan(
+    expect(receiver).toContain("smartleadWebhookProtocol(connection.settings)");
+    expect(receiver).toContain("verifySmartleadWebhookRequest({");
+    expect(receiver.indexOf("verifySmartleadWebhookRequest({")).toBeLessThan(
       receiver.indexOf("JSON.parse(new TextDecoder().decode(rawBody))"),
     );
+  });
+
+  it("finishes durable fan-in before CRM effects and retries it without replaying those effects", () => {
+    expect(receiver).toContain("processSupabaseSmartleadUnifiedInbound");
+    expect(receiver.indexOf("const unified = await runUnifiedFanIn(eventRowId")).toBeLessThan(
+      receiver.indexOf("const contactMutation = deriveContactMutation(event, payload)"),
+    );
+    expect(receiver.indexOf("const unified = await runUnifiedFanIn(existing.id")).toBeLessThan(
+      receiver.indexOf("duplicate: true"),
+    );
+    expect(receiver).toContain("operational_mutation_applied: false");
   });
 
   it("uses connection-owned secrets and request-scoped idempotency without a global fallback", () => {

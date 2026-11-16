@@ -1,10 +1,10 @@
 /**
- * Unified inbound fan-in decision core — SOURCE CANDIDATE ONLY.
+ * Unified inbound fan-in decision core — used by real default-off receivers.
  *
- * No edge entrypoint imports this module. Authentication is performed by the
- * existing signed Smartlead boundary or the signed Kindnesss handoff boundary
- * before an event reaches this core. This module performs no network or database
- * I/O itself; the injected store must implement the pending atomic claim RPC.
+ * Authentication is performed by the signed Smartlead boundary or the signed
+ * Kindnesss handoff boundary before an event reaches this core. This module
+ * performs no network or database I/O itself; the injected production or
+ * disposable-test store implements the same atomic claim/finalise RPC contract.
  */
 
 export const UNIFIED_INBOUND_FANIN_FLAG = "UNIFIED_INBOUND_FANIN_ENABLED";
@@ -212,9 +212,11 @@ export interface UnifiedReceiptClaim {
   now: string;
 }
 
+export type UnifiedReceiptStatus = "processing" | "processed" | "quarantine" | "retry" | "dead_letter";
+
 export type ClaimResult =
   | { state: "claimed"; receiptId: string; attempts: number; leaseToken: string }
-  | { state: "duplicate"; receiptId: string }
+  | { state: "duplicate"; receiptId: string; status: UnifiedReceiptStatus }
   | { state: "store_unavailable" };
 
 export interface FinaliseReceipt {
@@ -295,7 +297,11 @@ export async function processUnifiedInbound(
   if (claim.state === "store_unavailable") {
     return { status: 503, body: { ok: false, reason: "store_unavailable" } };
   }
-  if (claim.state === "duplicate") return { status: 200, body: { ok: true, duplicate: true } };
+  if (claim.state === "duplicate") {
+    // A retry receipt is durable but unfinished; never acknowledge it as complete.
+    if (claim.status === "retry") return { status: 503, body: { ok: false, reason: "retry" } };
+    return { status: 200, body: { ok: true, duplicate: true } };
+  }
 
   let update: FinaliseReceipt;
   try {

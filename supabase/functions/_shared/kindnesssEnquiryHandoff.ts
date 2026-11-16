@@ -1,10 +1,9 @@
 /**
- * Kindnesss commercial-enquiry inbound handoff — REVIEW-ONLY CANDIDATE.
+ * Kindnesss commercial-enquiry inbound handoff — signed protocol core.
  *
  * Pure, side-effect-free decision core. It performs no database writes, no
- * network calls and reads no secrets itself; a future receiver must inject the
- * secret, the existing-event lookup and the contact lookup. Activation is OFF by
- * default and requires an explicit "true" flag that is not set anywhere.
+ * network calls and reads no secrets itself; the real default-off receiver
+ * injects the secret and durable store. Activation requires explicit flags.
  *
  * Wire format (sender = Kindnesss outbox, never the browser):
  *   POST body: raw JSON (see KindnesssEnquiryEvent)

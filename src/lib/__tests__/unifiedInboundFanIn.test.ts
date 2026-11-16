@@ -12,6 +12,7 @@ import {
   type UnifiedInboundStore,
   type UnifiedReceiptClaim,
   type ThreadProjection,
+  type UnifiedReceiptStatus,
 } from "../../../supabase/functions/_shared/unifiedInboundFanIn";
 import {
   decideFollowupBlock,
@@ -81,7 +82,7 @@ function memoryStore() {
         const leaseExpired = Date.parse(existing.leaseUntil) <= now;
         const retryDue = existing.status === "retry" && existing.route?.nextAttemptAt && Date.parse(existing.route.nextAttemptAt) <= now;
         const reclaimable = existing.attempts < UNIFIED_INBOUND_MAX_ATTEMPTS && leaseExpired && (existing.status === "retry" ? retryDue : existing.status === "processing");
-        if (!reclaimable) return { state: "duplicate", receiptId: existing.id };
+        if (!reclaimable) return { state: "duplicate", receiptId: existing.id, status: existing.status as UnifiedReceiptStatus };
         existing.attempts += 1;
         existing.leaseUntil = receipt.leaseUntil;
         existing.leaseToken = `lease-${++sequence}`;

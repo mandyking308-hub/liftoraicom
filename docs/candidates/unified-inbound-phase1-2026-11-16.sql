@@ -69,7 +69,7 @@ create table public.unified_inbound_receipts (
   internal_followup_blocked_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint unified_inbound_receipts_idem unique (source, idempotency_key),
+  constraint unified_inbound_receipts_idem unique (source, authenticated_business_id, idempotency_key),
   constraint unified_inbound_receipts_thread_business_key unique (business_id, thread_key, source_event_id),
   constraint unified_inbound_receipts_quarantine_unscoped check (status <> 'quarantine' or business_id is null),
   constraint unified_inbound_receipts_routed_scoped check (status <> 'processed' or (business_id is not null and thread_key is not null)),
@@ -169,7 +169,7 @@ create or replace function public.claim_unified_inbound_receipt(
   _original_sender_mailbox text,
   _lease_seconds integer,
   _max_attempts integer
-) returns table(receipt_id uuid, state text, attempts integer, lease_token uuid)
+) returns table(receipt_id uuid, state text, attempts integer, lease_token uuid, receipt_status text)
 language plpgsql security definer set search_path = public as $$
 begin
   if _lease_seconds < 5 or _lease_seconds > 300 or _max_attempts < 1 or _max_attempts > 6 then
@@ -193,13 +193,17 @@ begin
     next_attempt_at = null,
     last_error_code = null
   where r.attempts < _max_attempts
-    and r.lease_until <= now()
-    and (r.status = 'processing' or (r.status = 'retry' and r.next_attempt_at <= now()))
-  returning r.id, 'claimed'::text, r.attempts, r.lease_token;
+    and (
+      (r.status = 'processing' and r.lease_until <= now())
+      or (r.status = 'retry' and r.lease_until is null and r.next_attempt_at <= now())
+    )
+  returning r.id, 'claimed'::text, r.attempts, r.lease_token, r.status;
   if not found then
-    return query select r.id, 'duplicate'::text, r.attempts, r.lease_token
+    return query select r.id, 'duplicate'::text, r.attempts, r.lease_token, r.status
       from public.unified_inbound_receipts r
-      where r.source = _source and r.idempotency_key = _idempotency_key;
+      where r.source = _source
+        and r.authenticated_business_id = _authenticated_business_id
+        and r.idempotency_key = _idempotency_key;
   end if;
 end $$;
 revoke all on function public.claim_unified_inbound_receipt(text,text,text,uuid,text,timestamptz,text,uuid,text,text,integer,integer) from public, anon, authenticated;
@@ -277,7 +281,10 @@ create or replace function public.mark_unified_inbound_read(_receipt_id uuid)
 returns void language plpgsql security definer set search_path = public as $$
 begin
   update public.unified_inbound_receipts r set read_at = coalesce(read_at, now())
-  where r.id = _receipt_id and public.unified_inbound_has_business_access(r.business_id);
+  where r.id = _receipt_id and (
+    public.has_role(auth.uid(), 'founder') or public.has_role(auth.uid(), 'admin')
+    or public.unified_inbound_has_business_access(r.business_id)
+  );
   if not found then raise exception 'receipt not found or inaccessible'; end if;
 end $$;
 revoke all on function public.mark_unified_inbound_read(uuid) from public, anon;
@@ -320,7 +327,7 @@ begin
     or m.last_provider_check_at is null or m.last_provider_check_at < now() - interval '24 hours'
     or m.last_provider_check_at > now()
     or lower(m.email) <> lower(r.original_sender_mailbox)
-    or r.source_mailbox_id is distinct from _mailbox_id::text then
+    or r.source_mailbox_id is distinct from coalesce(m.smartlead_email_account_id, m.provider_mailbox_id) then
     raise exception 'original fresh healthy campaign-ready GSM sender required';
   end if;
   select * into a from public.gsm_mailbox_allocations

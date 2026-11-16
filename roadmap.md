@@ -9,6 +9,12 @@
 - [x] Correct the review-only sender-evidence trigger/finaliser contradiction and add its write-once regression contract.
 - [x] Document the Smartlead Standard Webhooks mismatch with a fail-closed synthetic fixture and signed-test activation blocker.
 
+## Unified inbound durable integration — source and disposable tests (16 Nov 2026)
+- [x] Validate and correct the candidate schema against actual Liftor definitions using disposable PostgreSQL, including RLS and concurrency.
+- [x] Implement disabled-by-default Kindnesss and Smartlead durable receiver adapters with explicit signed protocol handling.
+- [x] Add real sender-to-receiver synthetic integration tests, persistence/recovery, tenant isolation and no-send contracts.
+- [ ] Run focused/full tests, lint and automatic build; record BUILT / SOURCE TESTED / QA TESTED / LIVE VERIFIED evidence and commit.
+
 ## Kindnesss Apollo retention
 - [x] Verify existing retention and provenance; keep paid enrichment and waterfall off.
 - [x] Add founder-only idempotent CSV retention and complete audited download using existing tables.

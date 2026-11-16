@@ -34,9 +34,11 @@ describe("smartlead webhook return loop", () => {
     expect(webhook).toContain("relationshipPatch.campaign_eligible = false");
   });
 
-  it("verifies a per-connection raw-body HMAC and never calls Smartlead", () => {
+  it("verifies an explicit per-connection raw-body protocol and never calls Smartlead", () => {
     expect(webhook).toContain("x-smartlead-signature");
-    expect(webhook).toContain("verifySmartleadWebhookSignature(rawBody, signature, secret)");
+    expect(webhook).toContain("webhook-signature");
+    expect(webhook).toContain("verifySmartleadWebhookRequest({");
+    expect(webhook).toContain("smartleadWebhookProtocol(connection.settings)");
     expect(webhook).toContain('resolveProviderConnectionSecret(connection, "WEBHOOK_SECRET"');
     expect(webhook).toContain("ambiguous_provider_connection");
     expect(webhook).not.toMatch(/fetch\s*\(/);

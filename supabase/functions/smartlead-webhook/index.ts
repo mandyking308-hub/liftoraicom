@@ -17,13 +17,16 @@ import {
   type ScopedLeadMapping,
 } from "../_shared/smartleadCrmAttribution.ts";
 import {
+  smartleadWebhookProtocol,
   smartleadWebhookReceiverEnabled,
-  verifySmartleadWebhookSignature,
+  verifySmartleadWebhookRequest,
+  type SmartleadWebhookHeaders,
 } from "../_shared/smartleadWebhookAuth.ts";
+import { processSupabaseSmartleadUnifiedInbound } from "../_shared/unifiedInboundSmartleadAdapter.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-smartlead-signature, x-request-id",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-smartlead-signature, x-request-id, webhook-id, webhook-timestamp, webhook-signature",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -34,6 +37,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 
 interface SmartleadConnection extends ScopedProviderConnection {
   inbound_receiver_enabled: boolean;
+  settings: unknown;
 }
 
 interface ScopedBcr extends ScopedBusinessContactRelationship {
@@ -75,13 +79,18 @@ Deno.serve(async (req) => {
   if (!supabaseUrl || !serviceKey) return json({ ok: false, error: "receiver_unavailable" }, 503);
 
   const rawBody = new Uint8Array(await req.arrayBuffer());
-  const signature = req.headers.get("x-smartlead-signature");
-  if (!signature) return json({ ok: false, error: "invalid_signature" }, 401);
+  const webhookHeaders: SmartleadWebhookHeaders = {
+    legacySignature: req.headers.get("x-smartlead-signature"),
+    requestId: req.headers.get("x-request-id"),
+    webhookId: req.headers.get("webhook-id"),
+    webhookTimestamp: req.headers.get("webhook-timestamp"),
+    webhookSignature: req.headers.get("webhook-signature"),
+  };
 
   const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
   const { data: connectionRows, error: connectionError } = await admin
     .from("outbound_provider_connections")
-    .select("id,business_id,provider_type,connection_status,is_enabled,inbound_receiver_enabled,mutations_enabled,credential_secret_ref,webhook_secret_ref")
+    .select("id,business_id,provider_type,connection_status,is_enabled,inbound_receiver_enabled,mutations_enabled,credential_secret_ref,webhook_secret_ref,settings")
     .eq("provider_type", "smartlead")
     .eq("connection_status", "verified")
     .eq("is_enabled", true)
@@ -90,11 +99,22 @@ Deno.serve(async (req) => {
   if (connectionError) return json({ ok: false, error: "connection_lookup_failed" }, 503);
 
   const matchedConnections: SmartleadConnection[] = [];
+  let verifiedRequestId: string | null = null;
   for (const rawConnection of connectionRows ?? []) {
     const connection = rawConnection as SmartleadConnection;
+    const protocol = smartleadWebhookProtocol(connection.settings);
+    if (!protocol) continue;
     const secret = resolveProviderConnectionSecret(connection, "WEBHOOK_SECRET", (name) => Deno.env.get(name));
-    if (secret && await verifySmartleadWebhookSignature(rawBody, signature, secret)) {
+    const verification = await verifySmartleadWebhookRequest({
+      protocol,
+      rawBody,
+      headers: webhookHeaders,
+      secret,
+      nowSeconds: Math.floor(Date.now() / 1000),
+    });
+    if (verification.ok) {
       matchedConnections.push(connection);
+      verifiedRequestId = verification.requestId;
     }
   }
 
@@ -114,17 +134,45 @@ Deno.serve(async (req) => {
   }
 
   const event = extractEvent(payload);
-  const requestId = req.headers.get("x-request-id");
+  const requestId = verifiedRequestId;
   const idempotencyKey = buildIdempotencyKey(event, requestId);
+  const runUnifiedFanIn = (eventRowId: string, contactId: string | null) =>
+    processSupabaseSmartleadUnifiedInbound(admin, {
+      connection,
+      event,
+      payload,
+      eventRowId,
+      idempotencyKey,
+      contactId,
+      receivedAt: new Date().toISOString(),
+    }, Deno.env.get("UNIFIED_INBOUND_FANIN_ENABLED"));
   const { data: existing, error: existingError } = await admin
     .from("outbound_provider_events")
-    .select("id,processing_status,operational_mutation_applied")
+    .select("id,processing_status,operational_mutation_applied,contact_id,error,provider_event_type")
     .eq("provider_connection_id", connection.id)
     .eq("idempotency_key", idempotencyKey)
     .maybeSingle();
 
   if (existingError) return json({ ok: false, error: "idempotency_lookup_failed" }, 503);
   if (existing) {
+    if (Deno.env.get("UNIFIED_INBOUND_FANIN_ENABLED") === "true") {
+      const unified = await runUnifiedFanIn(existing.id, existing.contact_id);
+      if (unified.status >= 400) {
+        await admin.from("outbound_provider_events").update({
+          processing_status: "error",
+          error: "unified_inbound_retry",
+        }).eq("id", existing.id).eq("provider_connection_id", connection.id).eq("business_id", connection.business_id);
+        return json({ ok: false, error: "unified_inbound_retry", event_id: existing.id }, 503);
+      }
+      if (existing.error === "unified_inbound_retry") {
+        const recoveredStatus = existing.contact_id || existing.provider_event_type === "mailbox_error" ? "received" : "ignored";
+        await admin.from("outbound_provider_events").update({
+          processing_status: recoveredStatus,
+          error: null,
+        }).eq("id", existing.id).eq("provider_connection_id", connection.id).eq("business_id", connection.business_id);
+        existing.processing_status = recoveredStatus;
+      }
+    }
     return json({
       ok: true,
       duplicate: true,
@@ -317,6 +365,20 @@ Deno.serve(async (req) => {
 
   const eventRowId = inserted?.id ?? null;
   if (!eventRowId) return json({ ok: false, error: "event_log_failed" }, 500);
+
+  // Durable unified routing completes before CRM effects. A retry can therefore
+  // resume fan-in without replaying contact, suppression or mailbox mutations.
+  if (Deno.env.get("UNIFIED_INBOUND_FANIN_ENABLED") === "true") {
+    const unified = await runUnifiedFanIn(eventRowId, attribution?.contactId ?? null);
+    if (unified.status >= 400) {
+      await admin.from("outbound_provider_events").update({
+        processing_status: "error",
+        error: "unified_inbound_retry",
+      }).eq("id", eventRowId).eq("provider_connection_id", connection.id).eq("business_id", connection.business_id);
+      return json({ ok: false, error: "unified_inbound_retry", event_id: eventRowId }, 503);
+    }
+  }
+
   if (!canProcess) {
     return json({
       ok: true,

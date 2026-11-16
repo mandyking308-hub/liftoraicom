@@ -1,37 +1,42 @@
-# Smartlead Standard Webhooks compatibility checklist — review only
+# Smartlead webhook protocol compatibility — source implementation, activation blocked
 
-- **Review date:** 16 November 2026
-- **Status:** NOT IMPLEMENTED IN THE ACTIVE RECEIVER. Source-only contract and synthetic fixture.
-- **Smartlead source:** https://helpcenter.smartlead.ai/en/articles/470-secure-your-smartlead-webhooks-with-signing-hmac
+- **Review and implementation date:** 16 November 2026
+- **Status:** SOURCE IMPLEMENTED; NOT DEPLOYED OR ACTIVATED.
+- **Smartlead signing source:** https://helpcenter.smartlead.ai/en/articles/470-secure-your-smartlead-webhooks-with-signing-hmac
+- **Smartlead legacy/testing source:** https://helpcenter.smartlead.ai/en/articles/403-quick-tips-for-testing-with-sample-webhook-payloads
 - **Protocol source:** https://github.com/standard-webhooks/standard-webhooks/blob/main/spec/standard-webhooks.md
 - **Runtime effect:** none. No secret, connection, provider, deployment or feature flag was changed.
 
-## Confirmed mismatch
+## Confirmed dual-protocol requirement
 
-Smartlead's current documentation specifies `webhook-id`, `webhook-timestamp` and `webhook-signature`, using the Standard Webhooks `v1` HMAC-SHA256 format and a base64-decoded `whsec_` key. The active Liftor source in `supabase/functions/_shared/smartleadWebhookAuth.ts` instead accepts only `X-Smartlead-Signature: sha256=<64 hex characters>` and HMACs the raw body with the secret's literal UTF-8 bytes. `supabase/functions/smartlead-webhook/index.ts` reads only `x-smartlead-signature` and uses `x-request-id` as its preferred retry key.
+Smartlead's current signing document specifies Standard Webhooks headers `webhook-id`, `webhook-timestamp` and `webhook-signature`, using `v1` HMAC-SHA256 and a base64-decoded `whsec_` key. Its sample-payload document still specifies `X-Smartlead-Signature: sha256=<hex>` over the raw body and `X-Request-Id` for idempotency. Both are therefore supported only as explicitly configured, distinct modes; there is no auto-detection or downgrade.
 
-The synthetic Standard Webhooks fixture therefore fails the existing verifier. This is the required fail-closed result, not a working compatibility implementation.
+`supabase/functions/_shared/smartleadWebhookAuth.ts` now implements:
 
-## Required separately reviewed implementation contract
+- `legacy_hex`: literal-secret raw-body HMAC with the legacy hex header and `X-Request-Id` when supplied;
+- `standard_webhooks`: exact raw-byte signed content `<webhook-id>.<webhook-timestamp>.<raw-body>`, a 24–64-byte decoded `whsec_` key, constant-time `v1` comparison, a ±300-second timestamp window, and `webhook-id` as the retry identity;
+- explicit `settings.webhook_protocol` values `legacy_hex` or `standard_webhooks` on each business-owned `outbound_provider_connections` row. Missing, ambiguous or other values fail closed.
 
-- [ ] Verify the exact raw request bytes before JSON parsing; do not reconstruct or normalise the body.
-- [ ] Require all three Standard Webhooks headers. Decode the `whsec_` suffix as base64 and require a 24–64 byte key.
-- [ ] Verify `v1,<base64>` HMAC-SHA256 over `<webhook-id>.<webhook-timestamp>.<raw-body>` using constant-time comparison.
-- [ ] Parse the space-delimited signature list explicitly for secret rotation; never select an unverified signature scheme.
-- [ ] Enforce a documented timestamp tolerance and reject stale or invalid timestamps before any event mutation.
-- [ ] Use the stable `webhook-id` for connection-scoped idempotency and replay handling; do not rely on `x-request-id` for the new protocol.
-- [ ] Preserve exactly-one matching business-owned provider connection and its connection-owned secret. Ambiguous matches remain rejected.
-- [ ] Return `401` for missing or invalid authentication. Never convert authentication failures into accepted/quarantined events.
-- [ ] Update CORS/header handling only as part of the reviewed receiver patch; no runtime header change is made here.
-- [ ] Test missing headers, malformed base64, wrong key lengths, bad signatures, altered raw bytes, stale timestamps, replay, rotation, ambiguous tenants and cross-tenant secrets.
-- [ ] Keep all existing campaign, lead, contact, suppression, approval and send gates unchanged.
+`supabase/functions/smartlead-webhook/index.ts` reads the required headers, verifies before JSON parsing, preserves connection-owned secret resolution and exactly-one matching connection, and includes the new headers in CORS. It remains behind `SMARTLEAD_WEBHOOK_RECEIVER_ENABLED` and each connection's existing enablement controls.
+
+## Implemented source contract
+
+- [x] Verify exact raw request bytes before JSON parsing.
+- [x] Require the explicitly configured protocol; no unsigned or alternate-protocol fallback.
+- [x] Standard Webhooks `whsec_` decoding, `v1` HMAC-SHA256, timestamp tolerance and stable `webhook-id` idempotency.
+- [x] Space-delimited signature parsing for rotation; only verified `v1` candidates are accepted.
+- [x] Legacy raw-body hex HMAC and existing request/event idempotency preserved.
+- [x] Exactly-one matching business-owned connection and connection-owned secret; ambiguous matches rejected.
+- [x] Missing/invalid authentication rejected before durable event or CRM mutation.
+- [x] Existing campaign, lead, contact, suppression, approval and send gates unchanged.
+- [x] Synthetic fixtures cover valid bytes, tampering, stale timestamps, malformed/missing identity, wrong keys and downgrade attempts.
 
 ## Activation gate
 
-Do not enable `SMARTLEAD_WEBHOOK_RECEIVER_ENABLED` or a connection's `inbound_receiver_enabled` for the Standard Webhooks protocol until the reviewed implementation has passed isolated tests and a signed Smartlead **Send Test** delivery has been verified against the exact saved receiver URL. Smartlead documents that test requests contain `"is_test": true`, are sent once and are not retried; the saved URL must match or the test may be unsigned.
+Do not enable `SMARTLEAD_WEBHOOK_RECEIVER_ENABLED` or a connection's `inbound_receiver_enabled` for either protocol until the candidate schema has been reviewed/applied through the protected release process and a signed Smartlead **Send Test** delivery has been verified against the exact saved receiver URL. Smartlead documents that Standard Webhooks test requests contain `"is_test": true`, are sent once and are not retried; the saved URL must match or the test may be unsigned.
 
-No unsigned, legacy-header or alternate-protocol fallback may be added silently. Until that signed test delivery and read-back are verified, activation remains blocked and the existing receiver remains unchanged and default-off.
+No unsigned, legacy-header or alternate-protocol fallback may be added silently. Legacy mode has no documented transport timestamp header, so its replay defence is the existing connection-scoped `X-Request-Id`/provider-event idempotency rather than an invented timestamp requirement. Actual signed delivery, secret availability, provider configuration and production deployment remain UNVERIFIED.
 
 ## Synthetic fixture
 
-`src/lib/__tests__/fixtures/smartleadStandardWebhookContract.ts` contains only a deterministic repeated-byte test key, a synthetic test event and a fixed expected signature. It contains no real credential, customer data or provider identifier. `src/lib/__tests__/smartleadStandardWebhookCompatibility.test.ts` independently recomputes the fixture and proves the unchanged legacy verifier rejects it.
+`src/lib/__tests__/fixtures/smartleadStandardWebhookContract.ts` contains only a deterministic repeated-byte test key, a synthetic test event and a fixed expected signature. It contains no real credential, customer data or provider identifier. `src/lib/__tests__/smartleadStandardWebhookCompatibility.test.ts` independently recomputes the fixture and exercises the real verifier. The disposable PostgreSQL suite separately exercises durable replay and tenant isolation.
