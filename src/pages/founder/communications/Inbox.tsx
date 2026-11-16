@@ -114,7 +114,7 @@ export default function CommsInbox() {
   return (
     <CommsLayout
       title="Unified Inbox"
-      subtitle="Phase 1 founder/admin view across the existing ledger, legacy IMAP, Smartlead events, multi-channel intake and Kindnesss handoff. Read-only: no ingestion, provider mutation or external reply is activated."
+      subtitle="Founder/admin view across existing communications plus a separate reference-only Kindnesss privacy lane. Read-only: no ingestion, provider mutation, privacy resolution or external reply is activated."
     >
       <Card className="tech-card p-4 flex items-start gap-3" data-testid="phase1-read-only">
         <LockKeyhole className="h-5 w-5 shrink-0 text-primary" />

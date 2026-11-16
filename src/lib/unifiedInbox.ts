@@ -144,6 +144,7 @@ export async function loadUnifiedInboxSnapshot(): Promise<UnifiedInboxSnapshot> 
     channelsResult,
     handoffResult,
     privacyResult,
+    privacyDeliveriesResult,
     draftsResult,
     sendersResult,
     allocationsResult,
@@ -165,6 +166,7 @@ export async function loadUnifiedInboxSnapshot(): Promise<UnifiedInboxSnapshot> 
     queryRows<any>(() => sb.from("communication_channels").select("channel_key,channel_label,provider_type,live_connected,enabled").limit(100)),
     queryRows<any>(() => sb.from("inbound_handoff_events").select("id,business_id,status,route,quarantine_reason,last_error,received_at,processed_at").order("received_at", { ascending: false }).limit(500)),
     queryRows<any>(() => sb.from("data_privacy_requests").select("id,business_id,request_type,request_status,request_source,created_at").order("created_at", { ascending: false }).limit(200)),
+    queryRows<any>(() => sb.from("kindnesss_privacy_notification_deliveries").select("id,business_id,event_id,request_ref,kind,request_type,occurred_at,due_at,received_at,privacy_request_id").order("received_at", { ascending: false }).limit(200)),
     queryRows<ExistingDraft>(() => sb.from("communication_records").select("id,business_id,subject,communication_status,approval_item_id,created_at").eq("direction", "outbound").in("communication_status", ["draft", "approval_required"]).order("created_at", { ascending: false }).limit(200)),
     queryRows<SenderMailbox>(() => sb.from("gsm_mailboxes").select("id,email,estate_classification,active,retired,readiness_state,provider_health,last_provider_check_at").limit(500)),
     queryRows<SenderAllocation>(() => sb.from("gsm_mailbox_allocations").select("mailbox_id,business_id,allocation_status,thread_sticky").limit(1000)),
@@ -328,7 +330,28 @@ export async function loadUnifiedInboxSnapshot(): Promise<UnifiedInboxSnapshot> 
     privacy: true,
   }));
 
-  const rows = [...ledgerRows, ...legacyRows, ...providerRows, ...multiRows, ...handoffRows, ...privacyRows]
+  const privacyDeliveryRows: UnifiedInboxRow[] = privacyDeliveriesResult.data.map((delivery) => ({
+    id: `privacy-delivery:${delivery.id}`,
+    source: "privacy",
+    channel: "privacy_notification",
+    businessId: delivery.business_id,
+    receivedAt: delivery.received_at ?? delivery.occurred_at,
+    status: delivery.kind,
+    subject: `Privacy notification · ${delivery.request_type}`,
+    threadReference: delivery.request_ref,
+    mailboxId: null,
+    mailboxIdentity: "Signed Kindnesss metadata",
+    replied: false,
+    optOut: false,
+    needsReview: true,
+    failed: false,
+    quarantine: !delivery.business_id,
+    quarantineReason: !delivery.business_id ? "business_scope_missing" : null,
+    reference: delivery.privacy_request_id ?? delivery.id,
+    privacy: true,
+  }));
+
+  const rows = [...ledgerRows, ...legacyRows, ...providerRows, ...multiRows, ...handoffRows, ...privacyRows, ...privacyDeliveryRows]
     .sort((a, b) => Date.parse(b.receivedAt) - Date.parse(a.receivedAt));
 
   const enabledConnections = connectionsResult.data.filter((connection) => connection.is_enabled && connection.inbound_receiver_enabled);
@@ -381,12 +404,28 @@ export async function loadUnifiedInboxSnapshot(): Promise<UnifiedInboxSnapshot> 
     handoffResult.data.map((event) => ({ receivedAt: event.received_at, status: event.status })),
   );
 
+  const privacyDiagnostic: SourceDiagnostic = {
+    key: "kindnesss_privacy",
+    label: "Kindnesss privacy metadata",
+    health: privacyDeliveriesResult.error ? "unverified" : privacyDeliveriesResult.data.length ? "available" : "not_configured",
+    detail: privacyDeliveriesResult.error
+      ? "Sync missing or schema not deployed; the separate privacy receiver remains disabled and no monitoring is claimed."
+      : privacyDeliveriesResult.data.length
+        ? "Durable metadata receipts are shown by reference only. Current sender/receiver activation still requires separate signed-delivery proof."
+        : "Not configured: no privacy notification deliveries recorded. This is not proof that no privacy requests exist.",
+    lastSync: privacyDeliveriesResult.error ? null : latest(privacyDeliveriesResult.data.map((event) => event.received_at)),
+    failed: null,
+    retry: null,
+    deadLetter: null,
+  };
+
   const errors = [
     businessesResult.error && `Business registry: ${businessesResult.error}`,
     ledgerResult.error && `Communications ledger: ${ledgerResult.error}`,
     legacyResult.error && `Legacy inbound: ${legacyResult.error}`,
     providerResult.error && `Provider events: ${providerResult.error}`,
     multiResult.error && `Multi-channel events: ${multiResult.error}`,
+    privacyDeliveriesResult.error && `Privacy notification deliveries: ${privacyDeliveriesResult.error}`,
     draftsResult.error && `Drafts: ${draftsResult.error}`,
     sendersResult.error && `GSM sender registry: ${sendersResult.error}`,
     allocationsResult.error && `Mailbox allocations: ${allocationsResult.error}`,
@@ -395,7 +434,7 @@ export async function loadUnifiedInboxSnapshot(): Promise<UnifiedInboxSnapshot> 
   return {
     businesses,
     rows,
-    diagnostics: [smartleadDiagnostic, legacyDiagnostic, multiDiagnostic, handoffDiagnostic],
+    diagnostics: [smartleadDiagnostic, legacyDiagnostic, multiDiagnostic, handoffDiagnostic, privacyDiagnostic],
     senders: sendersResult.data,
     allocations: allocationsResult.data,
     drafts: draftsResult.data,
@@ -417,7 +456,7 @@ export interface InboxActor {
 export function visibleRowsForActor(rows: readonly UnifiedInboxRow[], actor: InboxActor): UnifiedInboxRow[] {
   if (actor.founderOrAdmin) return [...rows];
   const allowed = new Set(actor.businessIds ?? []);
-  return rows.filter((row) => row.businessId !== null && allowed.has(row.businessId) && !row.quarantine);
+  return rows.filter((row) => !row.privacy && row.businessId !== null && allowed.has(row.businessId) && !row.quarantine);
 }
 
 export function isVerifiedBusinessScope(row: UnifiedInboxRow, businesses: readonly BusinessRef[]): boolean {

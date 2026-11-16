@@ -37,14 +37,15 @@ describe("founder unified inbox view model", () => {
     expect(rows[0]).not.toHaveProperty("unread");
   });
 
-  it("enforces business-scoped team visibility and founder-only quarantine", () => {
+  it("enforces business-scoped team visibility with founder-only quarantine and privacy references", () => {
     const rows = [
       row({ id: "a", businessId: "business-a" }),
       row({ id: "b", businessId: "business-b" }),
       row({ id: "q", businessId: null, quarantine: true, needsReview: true }),
+      row({ id: "p", businessId: "business-a", source: "privacy", privacy: true, reference: "opaque-request-ref" }),
     ];
     expect(visibleRowsForActor(rows, { founderOrAdmin: false, businessIds: ["business-a"] }).map((item) => item.id)).toEqual(["a"]);
-    expect(visibleRowsForActor(rows, { founderOrAdmin: true })).toHaveLength(3);
+    expect(visibleRowsForActor(rows, { founderOrAdmin: true })).toHaveLength(4);
   });
 
   it("keeps two businesses isolated when the contact reference is shared", () => {

@@ -15,6 +15,12 @@
 - [x] Add real sender-to-receiver synthetic integration tests, persistence/recovery, tenant isolation and no-send contracts.
 - [x] Run focused/full tests, lint and automatic build; record BUILT / SOURCE TESTED / QA TESTED / LIVE VERIFIED evidence and commit.
 
+## KND-003 privacy metadata handoff — source and isolated tests (16 Nov 2026)
+- [x] Match the exact Kindnesss privacy sender signature and ten-field metadata contract in a separate default-off receiver.
+- [x] Add review-only founder-only delivery/workstream SQL and a reference-only Communications Centre privacy lane.
+- [x] Prove signed delivery, validation, dedupe, retries, isolation, RLS and no-send/no-PII behavior with disposable tests.
+- [x] Run full verification, record BUILT / SOURCE TESTED / HOSTED QA / LIVE VERIFIED evidence, and commit without activation.
+
 ## Kindnesss Apollo retention
 - [x] Verify existing retention and provenance; keep paid enrichment and waterfall off.
 - [x] Add founder-only idempotent CSV retention and complete audited download using existing tables.

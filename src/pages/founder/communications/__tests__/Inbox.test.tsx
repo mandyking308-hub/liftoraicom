@@ -67,6 +67,24 @@ describe("founder unified inbox", () => {
     expect(screen.queryByLabelText("Draft body (not saved)")).not.toBeInTheDocument();
   });
 
+  it("shows privacy delivery references separately with unavailable activation and no sales reply controls", async () => {
+    load.mockResolvedValue({
+      ...snapshot,
+      rows: [{ id: "privacy-delivery", source: "privacy", channel: "privacy_notification", businessId: "business-a", receivedAt: new Date().toISOString(), status: "new_request", subject: "Privacy notification · deletion", threadReference: "opaque-request-ref", mailboxId: null, mailboxIdentity: "Signed Kindnesss metadata", replied: false, optOut: false, needsReview: true, failed: false, quarantine: false, quarantineReason: null, reference: "privacy-case-ref", privacy: true }],
+      diagnostics: [{ key: "kindnesss_privacy", label: "Kindnesss privacy metadata", health: "not_configured", detail: "Not configured: no privacy notification deliveries recorded. This is not proof that no privacy requests exist.", lastSync: null, failed: null, retry: null, deadLetter: null }],
+    });
+    renderInbox();
+    const diagnostic = await screen.findByTestId("diagnostic-kindnesss_privacy");
+    expect(diagnostic).toHaveTextContent("Not configured");
+    expect(diagnostic).toHaveTextContent("not proof that no privacy requests exist");
+    expect(diagnostic).not.toHaveTextContent("Failed0");
+    fireEvent.click(screen.getByRole("button", { name: "Review" }));
+    expect(screen.getByTestId("inbox-drilldown")).toHaveTextContent("Metadata-only privacy handling");
+    expect(screen.getByTestId("inbox-drilldown")).toHaveTextContent("privacy-case-ref");
+    expect(screen.queryByLabelText("Draft body (not saved)")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Send$/ })).not.toBeInTheDocument();
+  });
+
   it("provides a local review draft but no save or send path without an approved sender", async () => {
     load.mockResolvedValue(snapshot);
     renderInbox();
