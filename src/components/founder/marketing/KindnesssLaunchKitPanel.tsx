@@ -147,6 +147,9 @@ export default function KindnesssLaunchKitPanel() {
                     {p.post_date} {p.suggested_time?.slice(0, 5)} · {p.content_pillar} · {p.post_type}
                     <Badge variant="outline">{p.approval_status}</Badge>
                     {p.metadata?.demo_or_comparison && <Badge variant="secondary">demo/comparison</Badge>}
+                    {p.metadata?.review_pack && <Badge variant="secondary">Review pack {p.metadata.review_pack}</Badge>}
+                    {p.metadata?.sale_status && <Badge variant="destructive">{p.metadata.sale_status}</Badge>}
+                    {p.metadata?.unsafe_superseded && <Badge variant="destructive">Superseded: {p.metadata.unsafe_superseded}</Badge>}
                   </div>
                   {Object.entries(p.metadata?.platform_variants ?? {}).map(([k, v]) => (
                     <div key={k}><span className="text-muted-foreground">{k}: </span><span className="whitespace-pre-wrap">{v as string}</span></div>
