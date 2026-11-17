@@ -1,4 +1,5 @@
 import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
+import SetupAutofillCard from "@/components/founder/SetupAutofillCard";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
@@ -184,6 +185,25 @@ export default function BusinessSetupTunnel() {
     };
     setState(next); save(next);
     saveRemote(next, counts);
+  }
+
+  function applyAutofill(suggestions: Record<string, Record<string, string>>, overwrite: boolean): number {
+    if (!state) return 0;
+    let filled = 0;
+    const steps = { ...state.steps };
+    (Object.keys(suggestions) as StepKey[]).forEach((k) => {
+      if (!steps[k]) return;
+      const cur = steps[k].fields;
+      const nextFields = { ...cur };
+      Object.entries(suggestions[k]).forEach(([fk, v]) => {
+        if (!overwrite && cur[fk] && cur[fk].trim().length > 1) return;
+        nextFields[fk] = v; filled++;
+      });
+      steps[k] = { ...steps[k], fields: nextFields, status: steps[k].status === "saved" ? "saved" : "in_progress" };
+    });
+    const next: TunnelState = { ...state, steps };
+    setState(next); save(next); saveRemote(next, counts);
+    return filled;
   }
 
   function markStep(stepKey: StepKey, status: "saved" | "skipped") {
@@ -383,6 +403,8 @@ export default function BusinessSetupTunnel() {
         </div>
 
         <Progress value={overall} />
+
+        <SetupAutofillCard businessId={state.businessId} defaultWebsite={state.steps.web?.fields?.website_url} onApply={applyAutofill} />
 
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Step completeness</CardTitle></CardHeader>
