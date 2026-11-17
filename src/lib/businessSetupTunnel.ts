@@ -829,10 +829,9 @@ export function buildPromoteAttempts(state: TunnelState): PromoteAttempt[] {
         business_id: bizId,
         compliance_risk_level: "medium",
         regulated_activity_possible: yesField(state, "identity", "regulated"),
-        handles_children_data: null,
-        handles_health_data: null,
-        handles_financial_data: null,
-        handles_legal_sensitive_data: null,
+        // Sensitive-data flags are non-null in the native schema. Leave them
+        // to their false database defaults until the founder reviews them;
+        // never send null or infer sensitive-data handling during setup sync.
         marketplace_liability: yesField(state, "identity", "marketplace"),
         requires_disclaimers: true,
         founder_confirmed: false,

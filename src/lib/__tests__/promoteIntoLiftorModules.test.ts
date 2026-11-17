@@ -167,6 +167,15 @@ describe("one company setup synchronisation", () => {
     for (const area of MODULE_AREAS) expect(registered.has(area.route)).toBe(true);
   });
 
+  it("leaves sensitive-data flags to non-null database defaults pending founder review", () => {
+    const attempts = buildPromoteAttempts(state());
+    const compliance = attempts.find((x) => x.table === "business_compliance_profiles")!.payload;
+    for (const key of ["handles_children_data", "handles_health_data", "handles_financial_data", "handles_legal_sensitive_data"]) {
+      expect(compliance).not.toHaveProperty(key);
+    }
+    expect(compliance.founder_confirmed).toBe(false);
+  });
+
   it("uses only real spine column names", () => {
     const attempts = buildPromoteAttempts(state());
     const activation = attempts.find((x) => x.table === "business_activation_profiles")!.payload;

@@ -42,3 +42,31 @@ The factory summary is finalised from actual native-record outcomes, not input c
 ## Remaining handoffs
 
 Unification creates the shared internal records. It does not make a company ready to send or launch: recipient clearance, provider mappings, sender booking, customer/partner details, approvals and external gates remain separate founder-controlled work.
+
+## Kindnesss founder-requested live internal sync — 17 November 2026
+
+The founder explicitly asked to synchronise the saved Kindnesss setup across all 14 sections. The action was run through the signed-in founder UI against active Kindnesss `640de582-a112-4d16-a221-03c27f00c6ec` only.
+
+- First pass: 19 native records created and 6 existing records refreshed. Legal & tax failed closed because four non-null sensitive-data flags were supplied as null. No compliance row was created by that failed attempt.
+- Correction: the setup payload now omits those four optional flags so the native schema applies its false defaults pending founder review; it does not infer sensitive-data handling. The focused sync and UI suites passed 12 tests.
+- Idempotent retry: Legal & tax created its compliance profile; the other 25 native records were refreshed without duplicates. The UI reported `Company synchronised: 14 sections connected. Nothing sent or activated.`
+- Final unique outcome across both passes: **20 created, 6 existing records linked/refreshed, 0 blocked sections, 26 native records connected**.
+- Factory run `42524c68-1f89-42d6-a6fb-194e4b2030c0`: draft, internal ready true, external ready false, provider off, 26 materialised items, zero blocked items, zero missing setup sections.
+- Read-back confirmed go-live false; runtime activation, outbound, queue, AI orchestration and AI execution false; the new setup email draft is non-live, send-blocked and has no provider campaign; marketing launch remains false. The factory audit records zero emails, provider calls, Apollo credits, publishing and payments.
+
+| Section | Created | Existing linked/refreshed | Final state |
+|---|---:|---:|---|
+| Daily running | 1 daily runbook | — | Connected; no cron or automatic execution |
+| Radars & prospecting | 1 business context profile | — | Connected; no contacts or eligibility invented |
+| Sales | 1 sales-target record | — | Connected; founder approval required |
+| Email outreach | 1 separate setup-only five-touch draft | — | Connected; non-live, send-blocked, no provider campaign |
+| Social media | 1 optional planning draft | — | Connected; publishing and external scheduling off |
+| Marketing | — | 1 campaign brief | Connected; launch blocked |
+| Customers | 1 generic onboarding template | — | Connected; no customer, invite or external sharing |
+| Money | — | 1 draft cash-flow forecast | Connected; no financial actuals invented |
+| Legal & tax | 1 founder-review compliance profile | — | Connected after correcting the null-field failure |
+| Portfolio & exit | — | 1 closed data-room profile and 1 exit profile | Connected; buyer outreach and data-room opening off |
+| Setup & knowledge | 1 knowledge profile and 9 knowledge assets | — | Connected; shared with internal Brain context |
+| People & suppliers | 1 operating profile | — | Connected; no people, suppliers or assignments invented |
+| AI | 1 AI execution setting | — | Connected; execution off |
+| Platform & security | 1 factory sync run | Activation profile and isolated runtime | Connected; existing safety states preserved |
