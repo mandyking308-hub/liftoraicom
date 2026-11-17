@@ -13,15 +13,10 @@ import { Megaphone } from "lucide-react";
 // nothing is created here. Posting / publishing / external sharing stay
 // off; the marketing surfaces remain draft / manual-export only.
 const MARKETING_HUB_TABS: { label: string; to: string; description: string }[] = [
-  { label: "Marketing Overview",    to: "/founder/marketing",             description: "Content funnel, briefs and competitor learning — drafts only." },
-  { label: "Social",                to: "/founder/social",                description: "Social brain: planning, posts and assets (no publishing)." },
-  { label: "Social Autopilot",      to: "/founder/social-autopilot",      description: "Planning, calendar and queue — publishing stays paused." },
-  { label: "Social Relationships",  to: "/founder/social-relationships",  description: "Networking, conversations and relationship building — founder-gated." },
-  { label: "Campaign Factory",      to: "/founder/campaign-factory",      description: "Internal campaign briefs and assemblies." },
-  { label: "Assets",                to: "/founder/assets",                description: "Creative assets hub — drafts and approved versions." },
-  { label: "Global PR Radar",       to: "/founder/global-pr-radar",       description: "PR signals and watchlist — internal only." },
-  { label: "Channel Strategy",      to: "/founder/channel-strategy",      description: "Channel plan, business mix and recommendations." },
-  { label: "Analytics Attribution", to: "/founder/analytics-attribution", description: "Sources, campaigns, revenue and funnel attribution." },
+  { label: "Marketing Overview", to: "/founder/marketing",             description: "Content funnel, briefs and competitor learning — drafts only." },
+  { label: "Channels",           to: "/founder/channel-strategy",      description: "Channel plan, business mix and recommendations." },
+  { label: "Experiments",        to: "/founder/experiments",           description: "Controlled tests, variants, winners and learnings." },
+  { label: "Attribution",        to: "/founder/analytics-attribution", description: "Sources, campaigns, revenue and funnel attribution." },
 ];
 
 export default function MarketingHub() {
