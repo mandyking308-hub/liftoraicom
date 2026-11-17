@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useQuery } from "@tanstack/react-query";
 import { CommsLayout, Stat } from "./_shared";
 import { Card } from "@/components/ui/card";
@@ -11,6 +12,7 @@ export default function CommsOverview() {
   const { data: threads = [] } = useQuery({ queryKey: ["comm-threads-recent"], queryFn: () => listThreads(10) });
   return (
     <CommsLayout title="Unified Communications Ledger" subtitle="One trail across email, voice, SMS, WhatsApp, social, support, seller, partner and adviser channels. External sends are blocked until approved.">
+      <RelatedToolTabs tabs={[{ to: "/founder/communications", label: "Unified inbox" }, { to: "/founder/conversations", label: "Replies" }]} />
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <Stat label="Records" value={s?.total ?? 0} />
         <Stat label="Drafts" value={s?.drafts ?? 0} tone={s?.drafts ? "warn" : undefined} />

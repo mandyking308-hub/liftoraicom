@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useCallback, useEffect, useState } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -182,6 +183,7 @@ export default function GSMOutboundPage() {
   return (
     <FounderLayout>
       <div className="space-y-6">
+        <RelatedToolTabs tabs={[{ to: "/founder/gsm-outbound", label: "Mailboxes" }, { to: "/founder/sending", label: "Sending health" }, { to: "/founder/sending-infrastructure", label: "Sending infrastructure" }]} />
         <div>
           <h1 className="text-3xl font-semibold">GSM Outbound Infrastructure</h1>
           <p className="text-muted-foreground">

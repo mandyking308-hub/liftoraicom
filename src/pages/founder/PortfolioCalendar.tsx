@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -77,6 +78,7 @@ export default function PortfolioCalendar() {
   return (
     <FounderLayout>
       <div className="space-y-8 p-6">
+        <RelatedToolTabs tabs={[{ to: "/founder/portfolio-calendar", label: "Send calendar" }, { to: "/founder/campaign-factory", label: "Campaign factory" }]} />
         <header>
           <h1 className="text-2xl font-semibold text-foreground">Portfolio launch control</h1>
           <p className="text-sm text-muted-foreground">One shared GSM mailbox pool for every business. Each business campaign is five emails, sent to all its recipients across the whole pool, then it stops and the next business takes its dates. Bookings are plans only — sending stays off.</p>
