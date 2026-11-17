@@ -96,6 +96,8 @@ import ClientOptimisation from "./pages/portal/ClientOptimisation";
 
 // Founder pages
 import FounderOverview from "./pages/founder/FounderOverview";
+import LiftorHQ from "./pages/founder/LiftorHQ";
+import AreaPage from "./pages/founder/AreaPage";
 import FounderProposals from "./pages/founder/FounderProposals";
 import ProposalDetail from "./pages/founder/ProposalDetail";
 import LeadPipeline from "./pages/founder/LeadPipeline";
@@ -966,7 +968,9 @@ const App = () => (
             <Route path="/portal/optimisation" element={<ProtectedRoute><ClientOptimisation /></ProtectedRoute>} />
 
             {/* Founder Console */}
-            <Route path="/founder" element={<FounderRoute><FounderOverview /></FounderRoute>} />
+            <Route path="/founder" element={<FounderRoute><LiftorHQ /></FounderRoute>} />
+            <Route path="/founder/overview" element={<FounderRoute><FounderOverview /></FounderRoute>} />
+            <Route path="/founder/area/:areaKey" element={<FounderRoute><AreaPage /></FounderRoute>} />
             <Route path="/founder/proposals" element={<FounderRoute><FounderProposals /></FounderRoute>} />
             <Route path="/founder/proposals/:id" element={<FounderRoute><ProposalDetail /></FounderRoute>} />
             <Route path="/founder/pipeline" element={<FounderRoute><LeadPipeline /></FounderRoute>} />

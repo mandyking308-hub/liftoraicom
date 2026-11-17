@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, ShieldCheck, LayoutTemplate, Sparkles, BookOpenCheck, ClipboardList, PoundSterling, Brain, Scale, Compass, MessageSquare, FlaskConical, Users, Banknote, Send, MessagesSquare, FileSignature, MonitorPlay, Briefcase, ClipboardCheck, Gavel, TrendingUp, Radar, Siren, Target, Calculator, Trophy, Handshake, Coins, Flame, Swords, Cpu, ChevronDown, ChevronRight, Stethoscope, Megaphone, Settings } from "lucide-react";
+import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, ShieldCheck, LayoutTemplate, Sparkles, BookOpenCheck, ClipboardList, PoundSterling, Brain, Scale, Compass, MessageSquare, FlaskConical, Users, Banknote, Send, MessagesSquare, FileSignature, MonitorPlay, Briefcase, ClipboardCheck, Gavel, TrendingUp, Radar, Siren, Target, Calculator, Trophy, Handshake, Coins, Flame, Swords, Cpu, ChevronDown, ChevronRight, Stethoscope, Megaphone, Settings, ArrowRightCircle } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,162 +15,22 @@ type NavGroup = { label: string; icon: any; defaultOpen?: boolean; items: NavIte
  * docs/liftor-master-site-lifecycle-map.md §I so daily founder use is navigable
  * without scrolling through hundreds of unrelated routes.
  */
+import { founderAreas, areaRoute } from "@/lib/founderAreas";
+
+/**
+ * Sidebar is generated from the founder area registry (src/lib/founderAreas.ts):
+ * Liftor HQ + one collapsed group per area. Older/duplicate pages are only listed on area pages.
+ */
 export const navGroups: NavGroup[] = [
-  {
-    label: "Control / Command Centre", icon: Command, defaultOpen: true,
+  { label: "Liftor HQ", icon: LayoutDashboard, defaultOpen: true, items: [{ label: "Liftor HQ", to: "/founder", icon: LayoutDashboard }] },
+  ...founderAreas.map((a) => ({
+    label: `${a.n}. ${a.title}`,
+    icon: Layers,
     items: [
-      { label: "Portfolio Launch Control", to: "/founder/portfolio-calendar", icon: Rocket },
-      { label: "Start Here", to: "/founder/start-here", icon: Sparkles },
-      { label: "Business Setup Tunnel", to: "/founder/business-setup-tunnel", icon: Workflow },
-      { label: "Outreach Command Centre", to: "/founder/outreach-command-centre", icon: Workflow },
-      { label: "Daily Operator", to: "/founder/daily-operator", icon: ClipboardCheck },
-      { label: "Founder User Guide", to: "/founder/user-guide", icon: BookOpenCheck },
-      { label: "Command Centre", to: "/founder/command-centre", icon: Command },
-      { label: "Overview", to: "/founder", icon: LayoutDashboard },
-      { label: "Priority", to: "/founder/priority", icon: TrendingUp, badge: "priority" },
-      { label: "Decisions", to: "/founder/decisions", icon: Scale },
-      { label: "AI Co-Pilot", to: "/founder/copilot", icon: MessageSquare },
-      { label: "AI Brain", to: "/founder/brain", icon: Brain },
-      { label: "Strategy", to: "/founder/strategy", icon: Compass },
-      { label: "Approval Queue", to: "/founder/ai-cost/approvals", icon: ClipboardCheck },
+      { label: `${a.title} overview`, to: areaRoute(a.key), icon: ArrowRightCircle },
+      ...a.sections.filter((x) => !x.legacy).map((x) => ({ label: x.label, to: x.route, icon: ChevronRight })),
     ],
-  },
-  {
-    label: "Opportunity", icon: Radar,
-    items: [
-      { label: "Lead Pipeline", to: "/founder/pipeline", icon: GitBranch },
-      { label: "Proposals", to: "/founder/proposals", icon: FileInput },
-      { label: "Internal Proposals", to: "/founder/internal-proposals", icon: FileSignature },
-      { label: "Demos", to: "/founder/demos", icon: MonitorPlay },
-      { label: "Relationship Intelligence", to: "/founder/relationship-intelligence", icon: Network },
-      { label: "Strategic Organisations & Networks", to: "/founder/strategic-organisations", icon: Building2 },
-      { label: "Funding Radar", to: "/founder/funding-radar/shortlist", icon: Radar },
-      { label: "PR Radar", to: "/founder/global-pr-radar", icon: Megaphone },
-    ],
-  },
-  {
-    label: "Schools", icon: BookOpen, defaultOpen: true,
-    items: [
-      { label: "Admissions Tracker", to: "/founder/school-admissions", icon: ClipboardCheck },
-      { label: "School Visit Assessments", to: "/founder/school-visits", icon: ClipboardList },
-      { label: "School Register (GIAS)", to: "/founder/gias-search", icon: BookOpen },
-    ],
-  },
-  {
-    label: "Build", icon: Layers,
-    items: [
-      { label: "Quarterly Build Selector", to: "/founder/portfolio-exit/build-selector", icon: Trophy },
-      { label: "Architectures", to: "/founder/architectures", icon: Layers },
-      { label: "Workflows", to: "/founder/workflows", icon: Workflow },
-      { label: "Agents", to: "/founder/agents", icon: Bot },
-      { label: "Processes", to: "/founder/processes", icon: Network },
-      { label: "Templates", to: "/founder/templates", icon: LayoutTemplate },
-      { label: "Projects", to: "/founder/projects", icon: FolderKanban },
-      { label: "Platform Testing", to: "/founder/testing", icon: FlaskConical },
-    ],
-  },
-  {
-    label: "Launch", icon: Rocket,
-    items: [
-      { label: "Deployments", to: "/founder/deployments", icon: Rocket },
-      { label: "Executions", to: "/founder/executions", icon: Play },
-      { label: "Execution Modes", to: "/founder/system/modes", icon: Workflow },
-      { label: "Campaign Factory", to: "/founder/campaign-factory", icon: Rocket },
-      { label: "Release Workflow", to: "/founder/release-workflow", icon: GitBranch },
-    ],
-  },
-  {
-    label: "Operate", icon: Activity,
-    items: [
-      { label: "Operations", to: "/founder/operations", icon: Globe },
-      { label: "Organisations", to: "/founder/organisations", icon: Building2 },
-      { label: "CRM", to: "/founder/crm", icon: Users },
-      { label: "Billionaire Access", to: "/founder/crm/billionaire-access", icon: Coins },
-      { label: "Conversations", to: "/founder/conversations", icon: MessagesSquare },
-      { label: "Outreach", to: "/founder/outreach", icon: Send },
-      { label: "Sending Health", to: "/founder/sending", icon: Radar },
-      { label: "Suppliers", to: "/founder/suppliers", icon: Briefcase },
-      { label: "Assignments", to: "/founder/assignments", icon: ClipboardCheck },
-      { label: "Human Workforce Control", to: "/founder/human-workforce-control", icon: Users },
-      { label: "Worker Manuals", to: "/founder/worker-manuals", icon: BookOpenCheck },
-      { label: "Worker Help Audit", to: "/founder/worker-help-audit", icon: MessagesSquare },
-      { label: "Video SOP Factory", to: "/founder/video-sop-factory", icon: MonitorPlay },
-      { label: "Automation Book", to: "/founder/automation-book", icon: BookOpen },
-      { label: "Manual", to: "/founder/manual", icon: BookOpenCheck },
-      { label: "System Mirror", to: "/founder/manual/full", icon: Layers },
-      // Finance Hub (umbrella entry — sub-routes kept alive in /founder/finance/*,
-      // /founder/revenue, /founder/revenue-autopilot, /founder/quote-to-cash,
-      // /founder/pricing-margin, /founder/collections, /founder/reconciliation,
-      // /founder/portfolio-fx — surfaced as tabs inside Finance Hub).
-      { label: "Finance Hub", to: "/founder/finance", icon: Banknote },
-      { label: "Revenue", to: "/founder/revenue", icon: PoundSterling },
-      // Marketing Hub (umbrella entry — sub-routes kept alive at /founder/social,
-      // /founder/social-autopilot, /founder/campaign-factory, /founder/assets,
-      // /founder/global-pr-radar, /founder/channel-strategy, /founder/analytics-attribution).
-      { label: "Marketing Hub", to: "/founder/marketing", icon: Megaphone },
-    ],
-  },
-  {
-    label: "Scale", icon: TrendingUp,
-    items: [
-      { label: "Analytics", to: "/founder/analytics", icon: BarChart3 },
-      { label: "Optimisation", to: "/founder/optimisation", icon: Zap },
-      { label: "Expansion", to: "/founder/expansion", icon: Sparkles },
-      { label: "Integrations", to: "/founder/integrations", icon: Plug },
-      { label: "AI Runtime", to: "/founder/ai-cost/runtime", icon: Cpu },
-      { label: "AI Orchestration Live", to: "/founder/ai-cost/orchestration-live", icon: Activity },
-      { label: "AI Runtime Health", to: "/founder/ai-cost/health", icon: Activity },
-    ],
-  },
-  {
-    label: "Evidence", icon: FileText,
-    items: [
-      { label: "Documents", to: "/founder/documents", icon: FileText },
-      { label: "Build Log", to: "/founder/build-log", icon: ClipboardList },
-      { label: "Knowledge", to: "/founder/knowledge", icon: BookOpen },
-      { label: "Data Room", to: "/founder/data-room", icon: FileSignature },
-    ],
-  },
-  {
-    label: "Exit", icon: Target,
-    items: [
-      { label: "Portfolio & Exit", to: "/founder/portfolio-exit", icon: Target },
-      { label: "M&A Intelligence", to: "/founder/portfolio-exit/intelligence", icon: Radar },
-      { label: "Exit Valuation", to: "/founder/portfolio-exit/valuation", icon: Calculator },
-      { label: "Execution Handoff", to: "/founder/portfolio-exit/execution-handoff", icon: Handshake },
-      { label: "Buyer Warm-Up", to: "/founder/portfolio-exit/buyer-warmup", icon: Flame },
-      { label: "Investor Intel", to: "/founder/portfolio-exit/investors", icon: Banknote },
-      { label: "Competitor Intel", to: "/founder/portfolio-exit/competitors", icon: Swords },
-      { label: "Operating Panels", to: "/founder/portfolio-exit/operating-panels", icon: Coins },
-      { label: "Data Ingestion", to: "/founder/portfolio-exit/ingestion", icon: FileInput },
-      { label: "Portfolio Manual", to: "/founder/portfolio-exit/manual", icon: BookOpenCheck },
-      { label: "Operating Status", to: "/founder/portfolio-exit/release-gate", icon: Activity },
-    ],
-  },
-  {
-    label: "Governance / Safety", icon: ShieldCheck,
-    items: [
-      { label: "Compliance", to: "/founder/compliance", icon: ShieldCheck },
-      { label: "AI Compliance Control", to: "/founder/ai-compliance", icon: ShieldCheck },
-      { label: "Legal Console", to: "/founder/legal", icon: Gavel },
-      { label: "Healthcare Overlay", to: "/founder/healthcare-overlay", icon: Stethoscope },
-      { label: "Access Control", to: "/founder/access-control", icon: Shield },
-      { label: "Security", to: "/founder/security", icon: ShieldAlert },
-      { label: "AI Cost Governor", to: "/founder/ai-cost", icon: Activity },
-      { label: "AI Bypass Register", to: "/founder/portfolio-exit/ai-bypass-register", icon: ShieldAlert },
-      { label: "Controls Centre", to: "/founder/portfolio-exit/controls", icon: ShieldCheck },
-      { label: "Hardening Centre", to: "/founder/portfolio-exit/hardening", icon: ShieldAlert },
-      { label: "System Oversight", to: "/founder/system", icon: Siren, badge: "system" },
-      { label: "Monitoring", to: "/founder/monitoring", icon: Monitor },
-      { label: "Activity", to: "/founder/activity", icon: Activity },
-    ],
-  },
-  {
-    label: "Settings / Admin", icon: Settings,
-    items: [
-      { label: "Portal Admin", to: "/founder/portal-admin", icon: Users },
-    ],
-  },
+  })),
 ];
 
 const FounderLayout = ({ children }: { children: React.ReactNode }) => {
