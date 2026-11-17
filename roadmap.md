@@ -93,3 +93,6 @@
 - [x] Add confirmed postal address to 4 Kindnesss footers
 - [x] Explain legacy dashboards
 - [x] Full Liftor capability map (all ~200 founder pages) before designing one dashboard
+- [x] Lock founder area + fix 22 open data rules (founder/admin only)
+- [ ] Review areas one by one starting with 1 Daily running
+- [ ] Lock ~30 open backend functions flagged by deep scan (e.g. founder-copilot, apollo-daily-runner, crm-send-check)

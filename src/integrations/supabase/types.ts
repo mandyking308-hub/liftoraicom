@@ -49536,6 +49536,7 @@ export type Database = {
       }
       portfolio_send_bookings: {
         Row: {
+          booking_group: string | null
           business_id: string
           campaign_draft_id: string | null
           campaign_label: string
@@ -49546,12 +49547,15 @@ export type Database = {
           id: string
           mailbox_id: string
           notes: string | null
+          recipients_planned: number
           sending_enabled: boolean
+          sequence_step: number
           starts_at: string
           status: string
           updated_at: string
         }
         Insert: {
+          booking_group?: string | null
           business_id: string
           campaign_draft_id?: string | null
           campaign_label: string
@@ -49562,12 +49566,15 @@ export type Database = {
           id?: string
           mailbox_id: string
           notes?: string | null
+          recipients_planned?: number
           sending_enabled?: boolean
+          sequence_step?: number
           starts_at: string
           status?: string
           updated_at?: string
         }
         Update: {
+          booking_group?: string | null
           business_id?: string
           campaign_draft_id?: string | null
           campaign_label?: string
@@ -49578,7 +49585,9 @@ export type Database = {
           id?: string
           mailbox_id?: string
           notes?: string | null
+          recipients_planned?: number
           sending_enabled?: boolean
+          sequence_step?: number
           starts_at?: string
           status?: string
           updated_at?: string
