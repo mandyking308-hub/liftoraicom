@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { CSLayout, CSSection } from "./_shared";
 import { Phone, BookOpen, ListChecks, MessageSquare, Target, Tag, Shield, Bell, Settings as Cog, ArrowRight, Activity } from "lucide-react";
 
@@ -53,6 +54,7 @@ export default function CustomerSalesHub() {
       title="Customer Voice + Sales Close Engine"
       subtitle="Hold conversations, qualify, handle objections, prepare closes and hand off to payment/contract/booking. Internal preparation runs live; outbound calls, payments and contract sends remain approval-gated until a provider is connected and founder rules permit."
     >
+      <RelatedToolTabs tabs={[{ to: "/founder/customer-sales", label: "Conversations" }, { to: "/founder/sales-coaching", label: "Sales coaching" }]} />
       <CSSection title="Today at a glance" description="Click any tile to act. Numbers are live.">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
           <Tile to="/founder/customer-sales/voice-console" icon={Phone} label="Calls today" value={data?.callsToday} hint={providerLive ? "provider live" : "no provider connected"} />

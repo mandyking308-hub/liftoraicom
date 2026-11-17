@@ -44,12 +44,12 @@ export const founderAreas: FounderArea[] = [
   { key: "sales", n: 3, title: "Sales", summary: "Pipeline, sales targets, coaching, proposals, demos and quote-to-cash.", sections: [
     s("/pipeline", "Pipeline", "Move leads through stages."),
     s("/sales-targets", "Sales targets", "Works back from revenue goals to daily activity targets."),
-    s("/customer-sales", "Sales conversations", "Qualification, objections and closing hand-offs."),
-    s("/sales-coaching", "Sales coaching", "Coaching and improvement guidance."),
-    s("/internal-proposals", "Proposals (to contacts)", "AI-drafted proposals for qualified contacts."),
-    s("/proposals", "Website proposal requests", "Submissions from the public proposal generator."),
+    s("/customer-sales", "Sales conversations", "Qualification, objections and closing hand-offs, with a Sales coaching tab."),
     s("/demos", "Demos", "Sandbox demo passes without real client data."),
-    s("/quote-to-cash", "Quote to cash", "Quote, proposal, invoice, payment and delivery trigger."),
+    s("/quote-to-cash", "Quote to cash", "Quote, invoice, payment and delivery, with tabs for both kinds of proposal."),
+    s("/sales-coaching", "Sales coaching", "Now a tab in Sales conversations.", true),
+    s("/internal-proposals", "Proposals (to contacts)", "Now a tab in Quote to cash.", true),
+    s("/proposals", "Website proposal requests", "Now a tab in Quote to cash.", true),
   ]},
   { key: "outreach", n: 4, title: "Email outreach", summary: "Send calendar, 180 GSM mailboxes, Smartlead campaigns and replies.", sections: [
     s("/portfolio-calendar", "Send calendar & launch control", "Book campaigns across the shared mailboxes; readiness checks."),

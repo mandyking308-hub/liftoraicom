@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { QTCLayout, QTCSection, QTCStat } from "./_shared";
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { Link } from "react-router-dom";
 
 export default function QTCOverview() {
@@ -36,6 +37,7 @@ export default function QTCOverview() {
 
   return (
     <QTCLayout title="Quote-to-Cash" subtitle="Lead → quote → proposal → invoice → payment → confirmed revenue → delivery trigger. Drafts run live; sending, charging, signing remain founder-approval-gated.">
+      <RelatedToolTabs tabs={[{ to: "/founder/quote-to-cash", label: "Overview" }, { to: "/founder/internal-proposals", label: "Proposals (to contacts)" }, { to: "/founder/proposals", label: "Website proposal requests" }]} />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <QTCStat label="Quotes awaiting approval" value={d.quotesApproval} tone={d.quotesApproval>0?"warn":"good"} />
         <QTCStat label="Proposals awaiting approval" value={d.proposalsApproval} tone={d.proposalsApproval>0?"warn":"good"} />
