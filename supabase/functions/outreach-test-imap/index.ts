@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.95.0";
 import { ImapFlow } from "npm:imapflow@1.0.164";
+import { founderGuard } from "../_shared/founderGuard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -47,6 +48,9 @@ type ImapCreds = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const denied = await founderGuard(req, corsHeaders);
+  if (denied) return denied;
 
   try {
     const authHeader = req.headers.get("Authorization");
