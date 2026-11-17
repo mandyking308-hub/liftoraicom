@@ -3,6 +3,7 @@ import nodemailer from "npm:nodemailer@6.9.14";
 import { ImapFlow } from "npm:imapflow@1.0.164";
 
 import { founderGuard } from "../_shared/founderGuard.ts";
+import { resolveSelfTestRecipient } from "../_shared/founderTestRecipient.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -31,13 +32,16 @@ Deno.serve(async (req) => {
     if (userErr || !userData?.user) return json({ error: "Unauthorized" }, 401);
     console.log("[send-test] auth ok user=", userData.user.id);
 
-    const { inbox_id, to } = await req.json().catch(() => ({}));
-    if (!inbox_id) return json({ code: "INBOX_NOT_FOUND", error: "inbox_id required" }, 400);
-    if (!to) return json({ code: "TEST_RECIPIENT_REQUIRED", error: "to required" }, 400);
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return json({ code: "TEST_RECIPIENT_REQUIRED", error: "invalid recipient email" }, 400);
+    const { inbox_id, to: requestedTo } = await req.json().catch(() => ({}));
+    if (typeof inbox_id !== "string" || !inbox_id) {
+      return json({ code: "INBOX_NOT_FOUND", error: "inbox_id required" }, 400);
+    }
+    const recipient = resolveSelfTestRecipient(requestedTo, userData.user.email);
+    if (!recipient.ok) return json({ code: recipient.code, error: recipient.error }, recipient.status);
+    const to = recipient.email;
     inboxIdForLog = inbox_id;
     toForLog = to;
-    console.log("[send-test] payload inbox_id=", inbox_id, " to=", to);
+    console.log("[send-test] payload inbox_id=", inbox_id, " self-test recipient verified");
 
     const encKey = Deno.env.get("INBOX_CREDENTIALS_KEY");
     if (!encKey) return json({ code: "MISSING_CREDENTIALS", error: "encryption key not configured" }, 500);

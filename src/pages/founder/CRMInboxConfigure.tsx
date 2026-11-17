@@ -137,6 +137,9 @@ const CRMInboxConfigure = () => {
   const [savingPrompt, setSavingPrompt] = useState(false);
 
   useEffect(() => { if (id) void load(id); }, [id]);
+  useEffect(() => {
+    void supabase.auth.getUser().then(({ data }) => setTestTo(data.user?.email ?? ""));
+  }, []);
 
   async function load(inboxId: string) {
     setLoading(true);
@@ -178,7 +181,6 @@ const CRMInboxConfigure = () => {
     }));
     setAiMode(inboxRow.ai_reply_mode ?? "approval_required");
     setAiPrompt(((inboxRow as unknown) as { ai_prompt_instructions?: string | null }).ai_prompt_instructions ?? "");
-    setTestTo(inboxRow.reply_to_email ?? inboxRow.email_address);
     setLoading(false);
   }
 
@@ -229,7 +231,7 @@ const CRMInboxConfigure = () => {
   }
 
   async function sendTest() {
-    if (!id || !testTo) { toast.error("Recipient required"); return; }
+    if (!id || !testTo) { toast.error("Your signed-in email is required"); return; }
     setTesting(true);
     const { data, error } = await supabase.functions.invoke("outreach-send-test", {
       body: { inbox_id: id, to: testTo },
@@ -723,10 +725,10 @@ const CRMInboxConfigure = () => {
             <div className="space-y-3">
               <p className="text-xs text-muted-foreground">
                 A real email will be sent through {form.smtp_host}:{form.smtp_port} using the saved IONOS credentials.
-                On success, this inbox becomes <strong>Live Ready</strong>.
+                It can only go to your own signed-in email address. On success, this inbox becomes <strong>Live Ready</strong>.
               </p>
-              <div className="space-y-1.5"><Label className="text-xs">Recipient</Label>
-                <Input value={testTo} onChange={(e) => setTestTo(e.target.value)} placeholder="you@example.com" /></div>
+              <div className="space-y-1.5"><Label className="text-xs">Your signed-in email</Label>
+                <Input value={testTo} readOnly aria-label="Your signed-in email" placeholder="Signed-in email unavailable" /></div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setTestOpen(false)}>Cancel</Button>
