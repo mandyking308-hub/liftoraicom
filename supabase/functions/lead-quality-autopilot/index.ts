@@ -1,6 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { EmailHistoryLookupError, loadEmailHistory, supabaseEmailHistoryDeps } from "../_shared/emailHistory.ts";
 
+import { founderGuard } from "../_shared/founderGuard.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -18,6 +20,8 @@ const NEON_BUSINESS_ID = "b47c4b11-9a96-4af9-9aec-2f5218de9182";
  * Triggers: "after_apollo_import", "daily_cron", "manual_founder", "post_lifecycle_change"
  */
 Deno.serve(async (req) => {
+  const __guard = await founderGuard(req, corsHeaders as Record<string, string>);
+  if (__guard) return __guard;
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 

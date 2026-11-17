@@ -34529,6 +34529,24 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_cron_token: {
+        Row: {
+          created_at: string
+          id: number
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          token?: string
+        }
+        Relationships: []
+      }
       internal_email_identities: {
         Row: {
           created_at: string

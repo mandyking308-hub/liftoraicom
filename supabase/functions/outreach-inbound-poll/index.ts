@@ -2,6 +2,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.95.0";
 import { ImapFlow } from "npm:imapflow@1.0.164";
 import { simpleParser } from "npm:mailparser@3.7.1";
 
+import { founderGuard } from "../_shared/founderGuard.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -131,11 +133,15 @@ class PollStageError extends Error {
 }
 
 Deno.serve(async (req) => {
+  const __guard = await founderGuard(req, corsHeaders as Record<string, string>);
+  if (__guard) return __guard;
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const cronSecret = Deno.env.get("CRON_SECRET");
   const providedSecret = req.headers.get("x-cron-secret");
-  if (!cronSecret || !providedSecret || providedSecret !== cronSecret) {
+  // founderGuard already verified a founder JWT or the locked Liftor cron token.
+  const guardedCron = !!req.headers.get("x-liftor-cron-token");
+  if (!guardedCron && (!cronSecret || !providedSecret || providedSecret !== cronSecret)) {
     return json({
       ok: false,
       code: ERROR_CODES.CONFIG_ERROR,

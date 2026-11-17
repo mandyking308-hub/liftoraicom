@@ -1,5 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+import { founderGuard } from "../_shared/founderGuard.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -14,6 +16,8 @@ interface SandboxResult {
 }
 
 Deno.serve(async (req) => {
+  const __guard = await founderGuard(req, corsHeaders as Record<string, string>);
+  if (__guard) return __guard;
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

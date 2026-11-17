@@ -12,6 +12,8 @@ import { callAIGateway } from "../_shared/aiGateway.ts";
 import { assertCustomerSalesBusiness, CustomerSalesScopeError, requireCustomerSalesBusinessId } from "../_shared/customerSalesScope.ts";
 import { classifyCustomerSalesContactLookup } from "../_shared/customerSalesIdentity.ts";
 
+import { founderGuard } from "../_shared/founderGuard.ts";
+
 const ANALYSIS_TOOL = {
   type: "function",
   function: {
@@ -46,6 +48,8 @@ const ANALYSIS_TOOL = {
 } as const;
 
 Deno.serve(async (req) => {
+  const __guard = await founderGuard(req, corsHeaders as Record<string, string>);
+  if (__guard) return __guard;
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const a = await authenticateVoiceCaller(req);
   if (a instanceof Response) return a;

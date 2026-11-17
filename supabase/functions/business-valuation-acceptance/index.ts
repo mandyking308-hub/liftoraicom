@@ -1,6 +1,9 @@
+import { founderGuard } from "../_shared/founderGuard.ts";
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
 
 Deno.serve(async (req) => {
+  const __guard = await founderGuard(req, corsHeaders as Record<string, string>);
+  if (__guard) return __guard;
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   try {
     const checks = {

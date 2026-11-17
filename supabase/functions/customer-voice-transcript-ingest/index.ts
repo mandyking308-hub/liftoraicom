@@ -3,7 +3,11 @@
 // NOT call any provider. Redaction hook is a placeholder for later policy.
 import { corsHeaders, json, authenticateVoiceCaller, recordRuntimeEvent, getProviderType, isInternalTestPayload } from "../_shared/voiceProviderShared.ts";
 
+import { founderGuard } from "../_shared/founderGuard.ts";
+
 Deno.serve(async (req) => {
+  const __guard = await founderGuard(req, corsHeaders as Record<string, string>);
+  if (__guard) return __guard;
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const a = await authenticateVoiceCaller(req);
   if (a instanceof Response) return a;

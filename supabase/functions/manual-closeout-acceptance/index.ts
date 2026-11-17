@@ -1,9 +1,12 @@
+import { founderGuard } from "../_shared/founderGuard.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 Deno.serve(async (req) => {
+  const __guard = await founderGuard(req, corsHeaders as Record<string, string>);
+  if (__guard) return __guard;
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
     // This is a static manifest acceptance — it does not call any provider.

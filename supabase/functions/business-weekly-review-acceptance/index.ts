@@ -1,6 +1,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
+import { founderGuard } from "../_shared/founderGuard.ts";
+
 function j(b: unknown, s = 200) {
   return new Response(JSON.stringify(b), {
     status: s,
@@ -9,6 +11,8 @@ function j(b: unknown, s = 200) {
 }
 
 Deno.serve(async (req) => {
+  const __guard = await founderGuard(req, corsHeaders as Record<string, string>);
+  if (__guard) return __guard;
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
     const url = Deno.env.get("SUPABASE_URL")!;

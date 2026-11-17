@@ -3,7 +3,11 @@
 // can see the test was attempted, and updates last_test_at on the provider row.
 import { corsHeaders, json, authenticateVoiceCaller, recordRuntimeEvent, getProviderType, isInternalTestPayload, SUPPORTED_PROVIDERS } from "../_shared/voiceProviderShared.ts";
 
+import { founderGuard } from "../_shared/founderGuard.ts";
+
 Deno.serve(async (req) => {
+  const __guard = await founderGuard(req, corsHeaders as Record<string, string>);
+  if (__guard) return __guard;
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const a = await authenticateVoiceCaller(req);
   if (a instanceof Response) return a;

@@ -176,6 +176,13 @@
       "when": 1794921460655,
       "tag": "0024_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1794921720172,
+      "tag": "0025_internal_cron_token",
+      "breakpoints": true
     }
   ]
 }
