@@ -6,7 +6,7 @@
 - [x] Refresh the 131 manual pages against current Liftor behaviour while preserving historical versions and the append-only build log.
 - [ ] PAUSED BY FOUNDER: Kindnesss webhook signing key and recipient shortlist; mailbox freshness and sender details verified, no sending or gate changes.
 - [x] Trace the add-company journey across all 14 sections; identify which pages share canonical data, which require separate setup, and any broken handoffs.
-- [ ] Founder decision: build one canonical internal add-company orchestration with native module records, idempotent synchronisation and external actions still off.
+- [x] Build one canonical internal add-company orchestration with native records across all 14 sections, idempotent synchronisation, per-section status and external actions still off; verified with 27 tests and signed-in UI without running it against a real company.
 - [x] Run focused tests and live read-only verification, update truthful evidence, and commit the completed changes.
 
 ## Unified inbound portfolio communications — Phase 1 (16 Nov 2026)

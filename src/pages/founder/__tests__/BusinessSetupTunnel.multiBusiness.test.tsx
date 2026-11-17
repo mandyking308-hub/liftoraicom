@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import BusinessSetupTunnel from "../BusinessSetupTunnel";
 
@@ -10,6 +10,10 @@ const mocks = vi.hoisted(() => ({
   listAll: vi.fn(() => []),
   listAllRemote: vi.fn(async () => []),
   overallCompleteness: vi.fn(() => 0),
+  newState: vi.fn(),
+  saveRemote: vi.fn(async () => "setup-run"),
+  promoteDraft: vi.fn(async () => "640de582-a112-4d16-a221-03c27f00c6ec"),
+  promoteInto: vi.fn(async (_state: any) => ({})),
 }));
 
 vi.mock("@/integrations/supabase/client", () => ({
@@ -21,20 +25,20 @@ vi.mock("@/components/founder/FounderLayout", () => ({
 }));
 
 vi.mock("@/lib/businessSetupTunnel", () => ({
-  TUNNEL_STEPS: [],
-  STEP_FIELDS: {},
+  TUNNEL_STEPS: [{ key: "identity", label: "Business identity" }],
+  STEP_FIELDS: { identity: [] },
   fieldCounts: mocks.fieldCounts,
   load: mocks.load,
   save: vi.fn(),
   listAll: mocks.listAll,
-  newState: vi.fn(),
+  newState: mocks.newState,
   stepCompleteness: vi.fn(),
   overallCompleteness: mocks.overallCompleteness,
   loadRemote: vi.fn(),
-  saveRemote: vi.fn(),
+  saveRemote: mocks.saveRemote,
   listAllRemote: mocks.listAllRemote,
-  promoteDraftToBusiness: vi.fn(),
-  promoteIntoLiftorModules: vi.fn(),
+  promoteDraftToBusiness: mocks.promoteDraft,
+  promoteIntoLiftorModules: mocks.promoteInto,
   MODULE_AREAS: [],
 }));
 
@@ -93,6 +97,17 @@ describe("Business Setup Tunnel multi-business harness", () => {
     mocks.from.mockReset();
     mocks.from.mockImplementation(() => makeBusinessesQuery());
     mocks.listAllRemote.mockResolvedValue([]);
+    mocks.newState.mockImplementation((businessId: string, businessName: string, isDraft: boolean) => ({
+      businessId,
+      businessName,
+      isDraft,
+      steps: { identity: { status: "not_started", fields: {} } },
+      createdAt: "2026-11-17T00:00:00.000Z",
+      updatedAt: "2026-11-17T00:00:00.000Z",
+    }));
+    mocks.promoteDraft.mockClear();
+    mocks.promoteInto.mockClear();
+    mocks.saveRemote.mockClear();
   });
 
   afterEach(() => {
@@ -132,4 +147,24 @@ describe("Business Setup Tunnel multi-business harness", () => {
     });
     expect(screen.queryByText(businesses[0].name)).not.toBeInTheDocument();
   }, 15_000);
+
+  it("creates a draft company and synchronises all sections from one action", async () => {
+    renderTunnel();
+    fireEvent.click(screen.getByRole("button", { name: "Create new" }));
+    fireEvent.change(screen.getByLabelText(/Draft business name/), { target: { value: "New Example Company" } });
+    fireEvent.click(screen.getByRole("button", { name: "Create draft & start tunnel" }));
+
+    const sync = await screen.findByRole("button", { name: "Create company & synchronise 14 sections" });
+    expect(sync).toBeEnabled();
+    fireEvent.click(sync);
+
+    await waitFor(() => expect(mocks.promoteInto).toHaveBeenCalledTimes(1));
+    expect(mocks.promoteDraft).toHaveBeenCalledTimes(1);
+    expect(mocks.promoteInto.mock.calls[0][0]).toMatchObject({
+      businessId: "640de582-a112-4d16-a221-03c27f00c6ec",
+      businessName: "New Example Company",
+      isDraft: false,
+    });
+    expect(mocks.saveRemote).toHaveBeenCalled();
+  });
 });

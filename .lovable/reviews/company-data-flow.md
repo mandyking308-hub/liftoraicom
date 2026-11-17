@@ -53,3 +53,13 @@ Kindnesss (`640de582-a112-4d16-a221-03c27f00c6ec`) has:
 ## Safety boundary
 
 Unification should create and link **internal draft/setup records only**. It must not send email, publish social posts, create provider campaigns, allocate live sending, spend Apollo credits, activate AI execution or open any external-action gate.
+
+## Implemented later on 17 November 2026
+
+The founder approved one internal setup flow. `Add a business` now creates the canonical company when needed and synchronises native records across all 14 HQ areas with stable keys, safe reruns and per-section outcomes. Shared manuals now become real Brain-readable knowledge assets; the customer template is generic rather than school-specific; sales targets, context, compliance, operating, social, exit and AI-off records are included.
+
+Existing live/approval/provider switches and metadata are preserved. New records remain drafts with sending, publishing, external providers, AI execution and go-live off. Optional social content creates no blank post. No contacts, suppliers, revenue, customers or approvals are invented.
+
+Verification: 27 focused tests passed, the automatic build was clean, and a signed-in founder preview showed all 14 cards and valid section links. The flow was not run against a real company. Detailed evidence: `docs/verification/company-setup-unification-2026-11-17.md`.
+
+A failed section is explicit and retryable; successful earlier sections are not rolled back because this is an idempotent client orchestration, not a cross-section database transaction.

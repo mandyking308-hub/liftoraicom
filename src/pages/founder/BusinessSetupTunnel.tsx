@@ -42,6 +42,7 @@ export default function BusinessSetupTunnel() {
   const [businessLoadError, setBusinessLoadError] = useState(false);
   const [loadingBiz, setLoadingBiz] = useState(true);
   const [state, setState] = useState<TunnelState | null>(null);
+  const [syncing, setSyncing] = useState(false);
   const [stepIdx, setStepIdx] = useState(0);
   const [newName, setNewName] = useState("");
   const businessRequestId = useRef(0);
@@ -197,30 +198,19 @@ export default function BusinessSetupTunnel() {
     toast.success(status === "saved" ? "Saved. Next step ready." : "Skipped (still incomplete).");
   }
 
-  async function confirmCreateRealBusiness() {
-    if (!state || !state.isDraft) return;
-    let newId: string;
-    try {
-      newId = await promoteDraftToBusiness(state);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not create business.");
-      return;
-    }
-    const next: TunnelState = { ...state, businessId: newId, isDraft: false };
-    setState(next); save(next);
-    await saveRemote(next, counts);
-    toast.success("Draft business created. No external activation — stays draft.");
-  }
-
   async function promoteIntoLiftorModules() {
-    if (!state) return;
-    if (!state.businessId || state.businessId.startsWith("draft:")) {
-      toast.error("Confirm the draft business first (creates a real businesses row).");
-      return;
-    }
+    if (!state || syncing) return;
+    setSyncing(true);
     try {
-      const moduleConnections = await runPromoteIntoLiftorModules(state);
-      const next: TunnelState = { ...state, moduleConnections };
+      let current = state;
+      if (current.isDraft) {
+        const newId = await promoteDraftToBusiness(current);
+        current = { ...current, businessId: newId, isDraft: false };
+        setState(current); save(current);
+        await saveRemote(current, counts);
+      }
+      const moduleConnections = await runPromoteIntoLiftorModules(current);
+      const next: TunnelState = { ...current, moduleConnections };
       setState(next); save(next);
       await saveRemote(next, counts);
       const vals = Object.values(moduleConnections);
@@ -228,12 +218,14 @@ export default function BusinessSetupTunnel() {
       const manual = vals.filter((c) => c?.status === "manual_action_needed").length;
       const failed = vals.filter((c) => c?.status === "failed");
       if (failed.length) {
-        toast.error(`${failed.length} area(s) failed: ${failed.map((c) => c?.note).join(" | ")}`);
+        toast.error(`${failed.length} section(s) need attention. Successful sections were saved; rerun safely after fixing the shown error.`);
       } else {
-        toast.success(`Promoted as drafts only. ${connected} connected, ${manual} manual. Nothing live.`);
+        toast.success(`Company synchronised: ${connected} sections connected${manual ? `, ${manual} optional/manual` : ""}. Nothing sent or activated.`);
       }
     } catch (e: any) {
-      toast.error(e?.message ?? "Promotion failed.");
+      toast.error(e?.message ?? "Company setup could not be synchronised.");
+    } finally {
+      setSyncing(false);
     }
   }
 
@@ -334,8 +326,8 @@ export default function BusinessSetupTunnel() {
           {mode === "new" && (
             <Card><CardHeader><CardTitle>Create new draft business</CardTitle></CardHeader>
               <CardContent className="space-y-2">
-                <Label>Draft business name (e.g. "Acme Marketing")</Label>
-                <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Business name" />
+                <Label htmlFor="new-business-name">Draft business name (e.g. "Acme Marketing")</Label>
+                <Input id="new-business-name" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Business name" />
                 <p className="text-xs text-muted-foreground">Draft is saved to your founder-only workspace. No external action. No live launch until you explicitly approve.</p>
                 <Button onClick={createNew}>Create draft & start tunnel</Button>
               </CardContent>
@@ -504,22 +496,20 @@ export default function BusinessSetupTunnel() {
         </Card>
 
         <Card className="border-primary/40">
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Promote setup into Liftor modules</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">One company setup across Liftor</CardTitle></CardHeader>
           <CardContent className="space-y-3 text-xs text-muted-foreground">
-            {state.isDraft && (
-              <div className="space-y-2">
-                <p>This is still a local draft business. Before promoting into Liftor modules, confirm and create a real (draft / not-live) business row.</p>
-                <Button size="sm" onClick={confirmCreateRealBusiness}>Confirm draft → create real business (draft, not live)</Button>
-              </div>
-            )}
-            <p>When the 11 steps are complete, you can promote setup into the existing Liftor modules. This writes draft records only. No emails, no providers, no publishing, no buyer outreach, no data-room tokens, no healthcare go-live.</p>
-            <Button size="sm" variant="outline" onClick={promoteIntoLiftorModules} disabled={state.isDraft}>
-              Promote into Liftor modules (drafts only)
+            <p>
+              Synchronise now with whatever you have saved. The first run creates the canonical company if needed, then creates or refreshes native records across all 14 sections. Blank information stays visibly missing; you can rerun this safely after adding it.
+            </p>
+            <p>
+              Drafts only: no emails, provider campaigns, mailbox bookings, social publishing, payments, buyer outreach, data-room access, AI execution or go-live changes.
+            </p>
+            <Button size="sm" onClick={promoteIntoLiftorModules} disabled={syncing}>
+              {syncing ? "Synchronising company…" : state.isDraft ? "Create company & synchronise 14 sections" : "Synchronise all 14 sections"}
             </Button>
-            {state.isDraft && <p className="text-amber-500">Disabled until the draft business is confirmed.</p>}
 
-            <div className="pt-3 border-t border-border/40 space-y-2">
-              <div className="text-foreground font-medium">Module connections</div>
+            <div className="pt-3 border-t border-border/40 space-y-2" aria-live="polite">
+              <div className="text-foreground font-medium">Section connections</div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {MODULE_AREAS.map((a) => {
                   const c = state.moduleConnections?.[a.key];
@@ -527,14 +517,20 @@ export default function BusinessSetupTunnel() {
                   const color = status === "connected" ? "text-emerald-500"
                     : status === "failed" ? "text-destructive"
                     : status === "manual_action_needed" ? "text-amber-500" : "text-muted-foreground";
+                  const actionCounts = c?.records?.reduce<Record<string, number>>((acc, record) => {
+                    acc[record.action] = (acc[record.action] ?? 0) + 1;
+                    return acc;
+                  }, {}) ?? {};
                   return (
-                    <div key={a.key} className="border border-border/40 rounded p-2">
-                      <div className="flex items-center justify-between">
+                    <div key={a.key} className="border border-border/40 rounded p-2 space-y-1">
+                      <div className="flex items-center justify-between gap-2">
                         <div className="font-medium text-foreground">{a.label}</div>
                         <span className={`text-[10px] uppercase ${color}`}>{status.replace(/_/g, " ")}</span>
                       </div>
-                      <div className="text-[11px]">{c?.note ?? "Not attempted yet — run promote."}</div>
-                      {c?.target_table && <div className="text-[10px] text-muted-foreground">target: {c.target_table}{c.draft_record_id ? ` · #${c.draft_record_id.slice(0, 8)}` : ""}</div>}
+                      <div className="text-[11px]">{c?.note ?? "Not synchronised yet — run company setup."}</div>
+                      {c?.records && <div className="text-[10px]">{Object.entries(actionCounts).map(([action, count]) => `${count} ${action}`).join(" · ")}</div>}
+                      {c?.target_table && <div className="text-[10px] text-muted-foreground">Native: {c.target_table}</div>}
+                      <Link to={a.route} className="inline-block text-[11px] text-primary hover:underline">Open section →</Link>
                     </div>
                   );
                 })}
