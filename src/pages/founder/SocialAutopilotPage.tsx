@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
@@ -261,6 +262,7 @@ export default function SocialAutopilotPage() {
   return (
     <FounderLayout>
       <div className="space-y-4">
+        <RelatedToolTabs tabs={[{ to: "/founder/social", label: "Readiness & drafts" }, { to: "/founder/social-autopilot", label: "Posting engine" }]} />
         <div>
           <h1 className="text-2xl font-semibold">Social Autopilot</h1>
           <p className="text-sm text-muted-foreground">

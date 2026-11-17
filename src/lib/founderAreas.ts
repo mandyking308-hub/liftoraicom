@@ -65,9 +65,9 @@ export const founderAreas: FounderArea[] = [
     s("/smartlead", "Smartlead (second link)", "Same page as Smartlead campaigns.", true),
   ]},
   { key: "social", n: 5, title: "Social media", summary: "Post drafts, approval-based autopilot and social messaging.", sections: [
-    s("/social-autopilot", "Social autopilot", "Approval-based posting across businesses."),
+    s("/social-autopilot", "Social posting", "Approval-based posting, with a Readiness & drafts tab."),
     s("/social-relationships", "Social messaging", "Networking and conversations, separate from posting."),
-    s("/social", "Social readiness", "Per-business social readiness and content drafts."),
+    s("/social", "Social readiness", "Now a tab in Social posting.", true),
   ]},
   { key: "marketing", n: 6, title: "Marketing", summary: "Campaign briefs, content, assets, channels, partners and attribution.", sections: [
     s("/marketing", "Marketing hub", "Blogs, newsletters, landing pages, launch kits and briefs."),
