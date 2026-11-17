@@ -6,7 +6,13 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import kindnesssManual from "@/data/spoke-manuals/kindnesss.md?raw";
 import { STEP_FIELDS, type StepKey } from "@/lib/businessSetupTunnel";
+
+// Manuals copied from linked business projects, keyed by Liftor business id.
+const SPOKE_MANUALS: Record<string, { project: string; text: string }> = {
+  "640de582-a112-4d16-a221-03c27f00c6ec": { project: "Kindness Habits", text: kindnesssManual },
+};
 
 type Props = {
   businessId: string;
@@ -25,11 +31,13 @@ export default function SetupAutofillCard({ businessId, defaultWebsite, onApply 
   const [url, setUrl] = useState(defaultWebsite ?? "");
   const [file, setFile] = useState<File | null>(null);
   const [overwrite, setOverwrite] = useState(false);
+  const spoke = SPOKE_MANUALS[businessId];
+  const [useSpoke, setUseSpoke] = useState(Boolean(spoke));
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<string | null>(null);
 
   async function run() {
-    if (!url.trim() && !file) { toast.error("Add the website, the manual, or both."); return; }
+    if (!url.trim() && !file && !(spoke && useSpoke)) { toast.error("Add the website, the manual, or both."); return; }
     if (file && file.size > 10 * 1024 * 1024) { toast.error("Manual is over 10 MB."); return; }
     setBusy(true); setResult(null);
     try {
@@ -42,6 +50,7 @@ export default function SetupAutofillCard({ businessId, defaultWebsite, onApply 
           body.manual_text = await file.text();
         }
       }
+      if (spoke && useSpoke) body.manual_text = [body.manual_text, spoke.text].filter(Boolean).join("\n\n");
       const { data, error } = await supabase.functions.invoke("business-setup-autofill", { body });
       if (error) {
         let msg = error.message;
@@ -66,6 +75,7 @@ export default function SetupAutofillCard({ businessId, defaultWebsite, onApply 
           <div><Label htmlFor="af-url">Website</Label><Input id="af-url" placeholder="https://kindnesss.com" value={url} onChange={(e) => setUrl(e.target.value)} /></div>
           <div><Label htmlFor="af-file">Manual (PDF, TXT or MD)</Label><Input id="af-file" type="file" accept=".pdf,.txt,.md,application/pdf,text/plain,text/markdown" onChange={(e) => setFile(e.target.files?.[0] ?? null)} /></div>
         </div>
+        {spoke && <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={useSpoke} onChange={(e) => setUseSpoke(e.target.checked)} /> Use the manuals already copied from your {spoke.project} project (no upload needed)</label>}
         <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={overwrite} onChange={(e) => setOverwrite(e.target.checked)} /> Replace boxes I've already filled in (otherwise only empty boxes are filled)</label>
         <Button onClick={run} disabled={busy}>{busy ? "Reading… (up to a minute)" : "Read and fill all steps"}</Button>
         {result && <p className="text-xs text-primary">{result}</p>}
