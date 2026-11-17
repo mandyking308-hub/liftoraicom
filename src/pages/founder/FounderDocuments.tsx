@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
@@ -34,6 +35,7 @@ const FounderDocuments = () => {
   return (
     <FounderLayout>
       <div className="max-w-4xl">
+        <RelatedToolTabs tabs={[{ to: "/founder/documents", label: "Documents" }, { to: "/founder/sops", label: "SOPs" }, { to: "/founder/automation-book", label: "Automation book" }, { to: "/founder/video-sop-factory", label: "Video SOP factory" }, { to: "/founder/video-library", label: "Video library" }]} />
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold">Documents</h1>
           <p className="text-muted-foreground mt-1">All project documents across the platform</p>

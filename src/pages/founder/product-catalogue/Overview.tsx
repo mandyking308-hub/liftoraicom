@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PCLayout, PCSection, PCStat } from "./_shared";
@@ -22,6 +23,7 @@ export default function PCOverview() {
   return (
     <PCLayout title="Global Product / Offer Catalogue"
       subtitle="Every product, service, subscription, package, add-on, listing, licence and upgrade across all businesses. Internal catalogue runs live; publishing offers, sending prices, discounting, payment links or contracts is approval-gated unless pre-approved.">
+      <RelatedToolTabs tabs={[{ to: "/founder/product-catalogue", label: "Catalogue" }, { to: "/founder/product", label: "Product" }, { to: "/founder/ecommerce", label: "Online shop" }, { to: "/founder/marketplace", label: "Marketplace" }, { to: "/founder/education-commercial", label: "Education commercial" }]} />
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <PCStat label="Products active" value={sum.products_active} hint={`${sum.products_total} total`} />
         <PCStat label="Offers" value={sum.offers_total} hint={`${sum.offers_approved} approved`} />

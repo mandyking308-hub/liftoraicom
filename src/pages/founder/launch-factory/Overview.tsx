@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { LFLayout, LFSection, LFStat, StatusBadge } from "./_shared";
@@ -28,6 +29,7 @@ export default function LFOverview() {
       title="Launch Factory"
       subtitle="Each business needs a complete launch pack: brand, domain, email, support inbox, legal footer, socials, tracking, CRM, products and first campaigns. Internal setup runs live; domain purchases, DNS, publishing, account creation and outbound sends require founder approval."
     >
+      <RelatedToolTabs tabs={[{ to: "/founder/launch-factory", label: "Launch factory" }, { to: "/founder/business-internal-activation", label: "Internal activation" }, { to: "/founder/external-activation-readiness", label: "Go-live readiness" }]} />
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <LFStat label="Launch profiles" value={profiles.length} />
         <LFStat label="Live" value={live} />

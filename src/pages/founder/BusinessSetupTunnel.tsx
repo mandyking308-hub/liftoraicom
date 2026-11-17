@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
@@ -380,6 +381,7 @@ export default function BusinessSetupTunnel() {
   return (
     <FounderLayout>
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+        <RelatedToolTabs tabs={[{ to: "/founder/business-setup-tunnel", label: "Add a business" }, { to: "/founder/business-onboarding-factory", label: "Onboarding factory" }, { to: "/founder/business-archetypes", label: "Business types" }, { to: "/founder/business-templates", label: "Templates" }, { to: "/founder/starter-pack-materialiser", label: "Starter packs" }, { to: "/founder/first-use-configuration", label: "First-use setup" }, { to: "/founder/expansion", label: "Expansion" }]} />
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold">{state.businessName}</h1>

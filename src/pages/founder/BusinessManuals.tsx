@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import FounderLayout from "@/components/founder/FounderLayout";
@@ -27,6 +28,7 @@ export default function BusinessManualsPage() {
   return (
     <FounderLayout>
       <div className="max-w-6xl mx-auto p-4 space-y-4">
+        <RelatedToolTabs tabs={[{ to: "/founder/business-manuals", label: "Business manuals" }, { to: "/founder/manuals-hub", label: "Manuals hub" }, { to: "/founder/manual", label: "Liftor manual" }, { to: "/founder/user-guide", label: "User guide" }, { to: "/founder/knowledge", label: "Knowledge" }, { to: "/founder/knowledge-governance", label: "Knowledge quality" }]} />
         <Card className="tech-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
