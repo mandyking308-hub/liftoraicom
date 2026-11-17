@@ -1,29 +1,37 @@
-# One founder dashboard ("Business Journey") and a slimmer menu
+# One founder home: "Liftor HQ"
 
-## What Liftor can actually do today (by step of your process)
-| Step | Capability | State |
-|---|---|---|
-| 1. Add business | Business registry, setup tunnel, legacy filtering | Works |
-| 2. Upload manual | Business manual upload per business | Works (Q&A from manual not built) |
-| 3. Emails | Campaign drafts, footer/branding QA, version history | Works (Kindnesss 4-email draft ready) |
-| 4. Social (optional) | Social post drafts and calendar | Drafts only; no connected accounts |
-| 5. Calendar | Portfolio Send Calendar, no-overlap booking across 180 GSM mailboxes | Works (planning only) |
-| 6. Mailboxes | Winnr sync, health/readiness (90+ rule) | Works |
-| 7. Recipients | Apollo archive, candidate pool, suppression, eligibility | Works; 0 Kindnesss contacts cleared |
-| 8. Send | Smartlead sync, safety gates | Built; all gates off |
-| 9. Replies / inbox | Unified communications inbox, quarantine, privacy queue | Built; incoming collection not switched on |
-| 10. Close | CRM, conversations, proposals, payments | Partly built; payments not connected |
+## What you get
+One page you log into every day to run all businesses. Nothing built so far is lost: every existing page stays and still works.
 
-## What we build
-1. **One page: "Business Journey"** (becomes the first page you see). Pick a business at the top; it shows the 10 steps above as a vertical checklist. Each step shows: done / blocked / not started, the live numbers that matter, the one blocker in plain words, and a single "Open" button to the working page for that step.
-2. **Slim menu**: only Business Journey, plus the ~8 working pages it links to (Business setup & manual, Marketing/emails, Send calendar & mailboxes, Recipients, Inbox, CRM, Schools, Settings).
-3. **Everything else moves under one collapsed "Archive – older tools" entry.** Nothing is deleted; old pages still open if you need them.
-4. Old duplicate overviews (Start Here, Command Centre x2, Overview, Daily Operator, Outreach Command Centre, Monday launch/readiness, Micro-batch) go into the archive since Business Journey replaces them.
+### The HQ page
+- **Top bar:** business switcher ("All businesses" or one business, e.g. Kindnesss). Every box below follows that choice.
+- **"Today" strip:** things waiting on you right now: approvals, replies, blockers, alerts, upcoming send dates.
+- **15 boxes, one per area** (same numbering as the capability list):
+  1 Daily running · 2 Radars & prospecting · 3 Sales · 4 Email outreach · 5 Social media · 6 Marketing · 7 Customers · 8 Money · 9 Legal & tax · 10 Portfolio & exit · 11 Business setup & knowledge · 12 People & suppliers · 13 AI · 14 Platform & security · 15 Schools & private
+- Each box shows 2–3 live numbers and a status colour (working / needs attention / not switched on), then opens that area.
+
+### Area pages (the deeper menus)
+- Clicking a box opens that area's own page: a short summary at the top, then tiles for every tool in that area with a one-line plain description.
+- Duplicates are folded together: where two pages do the same thing, only the better one gets a tile and the other is listed under "Older version" at the bottom of that area. Nothing is removed.
+
+### Side menu
+- Shrinks from about 90 links to 16: HQ plus the 15 areas.
+- Old links and bookmarks still work.
+
+## Duplicates folded (examples)
+- Two Smartlead links become one.
+- Portals and Portal admin become one.
+- The command centres, Overview, Start Here and Daily Operator are replaced by HQ (kept under "Older version").
+- Monday launch, Monday readiness and Micro-batch are listed as older launch screens under Daily running.
+- Money, Finance and Revenue become one "Money" area with the others as tiles.
 
 ## Not changing
-No data is deleted, nothing is sent, no gates change, no provider changes.
+No data deleted, nothing sent or posted, no safety switches changed.
 
 ## Technical details
-- New `src/pages/founder/BusinessJourney.tsx` reading existing tables read-only (businesses, business_knowledge_uploads, outreach_campaign_drafts, social_post_drafts, portfolio_send_bookings, gsm_mailboxes, business_contact_relationships, external_action_gates, communications/inbox tables).
-- Step status logic in a pure helper with unit tests.
-- `FounderLayout.tsx` nav reduced to core group + "Archive" group; routes in `App.tsx` untouched.
+- `src/lib/founderAreas.ts`: single registry of 15 areas → sections (route, label, description, primary/legacy flag). Nav, HQ and area pages all read it, so new pages are added in one place.
+- `src/pages/founder/LiftorHQ.tsx` at `/founder` (current Overview moves to the legacy list); `src/pages/founder/AreaPage.tsx` at `/founder/area/:areaKey`.
+- Live box metrics: small read-only queries per area on existing tables, filtered by the selected business (founder RLS unchanged); boxes fall back to "no data yet" rather than guessing.
+- `FounderLayout.tsx` nav generated from the registry; `App.tsx` routes untouched apart from the two new ones.
+- Unit test: every `/founder` route in App.tsx is in exactly one area (so nothing gets lost); registry has no duplicate primaries.
+- Record the registry rule in AGENTS.md.
