@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "@/hooks/use-toast";
 import { Network, Plus, Download, ShieldAlert, Lock, Pause, CheckCircle2, FileSignature, Upload } from "lucide-react";
 import { Sprout } from "lucide-react";
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { RELATIONSHIP_SEED } from "./relationshipIntelligenceSeed";
 import CapitalInfluenceTab, {
   CAPITAL_LANE, CAPITAL_ROLE, BEST_VEHICLE, CONVERSATION_POSTURE,
@@ -317,6 +318,7 @@ export default function RelationshipIntelligence() {
 
   return (
     <div className="p-6 space-y-6">
+      <RelatedToolTabs tabs={[{ to: "/founder/relationship-intelligence", label: "People" }, { to: "/founder/strategic-organisations", label: "Strategic organisations" }, { to: "/founder/relationship-health", label: "Relationship health" }]} />
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2"><Network className="text-primary" /> Relationship Intelligence</h1>

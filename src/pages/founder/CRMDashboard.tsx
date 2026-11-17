@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Users, Activity, Ban, Send, Mail, Inbox as InboxIcon, MessageCircle, Coins } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import BillionaireAccessResearchPanel from "@/components/founder/crm/BillionaireAccessResearchPanel";
 import StrategicProspectingAgentPanel from "@/components/founder/prospecting/StrategicProspectingAgentPanel";
 import CRMInteractionLedgerPanel from "@/components/founder/crm/CRMInteractionLedgerPanel";
@@ -102,6 +103,7 @@ const CRMDashboard = () => {
   return (
     <FounderLayout>
       <div className="max-w-7xl mx-auto space-y-8">
+        <RelatedToolTabs tabs={[{ to: "/founder/crm", label: "CRM" }, { to: "/founder/identity-resolution", label: "Duplicate people" }]} />
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Portfolio CRM & Sanity Control</h1>
