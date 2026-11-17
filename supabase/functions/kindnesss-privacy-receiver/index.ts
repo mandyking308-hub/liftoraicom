@@ -2,6 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { handleKindnesssPrivacyNotification } from "../_shared/kindnesssPrivacyReceiver.ts";
 import { createKindnesssPrivacyStore } from "../_shared/kindnesssPrivacyStore.ts";
+import { readKindnesssPrivacyBody } from "../_shared/kindnesssPrivacyBody.ts";
 
 const json = (body: unknown, status: number) => new Response(JSON.stringify(body), {
   status,
@@ -20,7 +21,9 @@ Deno.serve(async (req) => {
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!supabaseUrl || !serviceKey) return json({ ok: false, reason: "receiver_unavailable" }, 503);
 
-  const rawBody = new Uint8Array(await req.arrayBuffer());
+  const bounded = await readKindnesssPrivacyBody(req.body, req.headers.get("content-length"));
+  if (!bounded.ok) return json({ ok: false, reason: bounded.reason }, bounded.status);
+  const rawBody = bounded.bytes;
   const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
   const result = await handleKindnesssPrivacyNotification(rawBody, {
     source: req.headers.get("x-liftor-source"),
