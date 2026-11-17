@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useEffect, useState } from "react";
 import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
 import ContractsProcurementControlPanel from "@/components/founder/legal/ContractsProcurementControlPanel";
@@ -104,6 +105,7 @@ const SuppliersDashboard = () => {
   return (
     <FounderLayout>
       <div className="space-y-6 max-w-7xl mx-auto">
+        <RelatedToolTabs tabs={[{ to: "/founder/suppliers", label: "Suppliers" }, { to: "/founder/assignments", label: "Supplier assignments" }]} />
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Suppliers & Operators</h1>

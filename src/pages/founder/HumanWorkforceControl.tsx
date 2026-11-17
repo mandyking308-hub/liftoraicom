@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -192,6 +193,7 @@ export default function HumanWorkforceControl() {
   return (
     <div className="min-h-screen bg-background p-6 md:p-10">
       <header className="mb-6">
+        <div className="mb-3"><RelatedToolTabs tabs={[{ to: "/founder/human-workforce-control", label: "Workforce" }, { to: "/founder/people", label: "Helpers" }, { to: "/founder/worker-manuals", label: "Worker manuals" }, { to: "/founder/worker-help-audit", label: "Worker help audit" }, { to: "/founder/capacity", label: "Capacity" }]} /></div>
         <h1 className="text-2xl font-bold">Human Workforce Control</h1>
         <p className="text-sm text-muted-foreground">Manage workers, time-windowed access, oversight reviews, monthly content and approvals.</p>
       </header>
