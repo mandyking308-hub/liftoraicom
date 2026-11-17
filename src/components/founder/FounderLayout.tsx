@@ -21,6 +21,7 @@ export const navGroups: NavGroup[] = [
     items: [
       { label: "Start Here", to: "/founder/start-here", icon: Sparkles },
       { label: "Business Setup Tunnel", to: "/founder/business-setup-tunnel", icon: Workflow },
+      { label: "Portfolio Send Calendar", to: "/founder/portfolio-calendar", icon: ClipboardList },
       { label: "Outreach Command Centre", to: "/founder/outreach-command-centre", icon: Workflow },
       { label: "Daily Operator", to: "/founder/daily-operator", icon: ClipboardCheck },
       { label: "Founder User Guide", to: "/founder/user-guide", icon: BookOpenCheck },

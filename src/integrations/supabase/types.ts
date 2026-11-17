@@ -49534,6 +49534,86 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolio_send_bookings: {
+        Row: {
+          business_id: string
+          campaign_draft_id: string | null
+          campaign_label: string
+          created_at: string
+          created_by: string | null
+          emails_planned: number
+          ends_at: string
+          id: string
+          mailbox_id: string
+          notes: string | null
+          sending_enabled: boolean
+          starts_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          campaign_draft_id?: string | null
+          campaign_label: string
+          created_at?: string
+          created_by?: string | null
+          emails_planned?: number
+          ends_at: string
+          id?: string
+          mailbox_id: string
+          notes?: string | null
+          sending_enabled?: boolean
+          starts_at: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          campaign_draft_id?: string | null
+          campaign_label?: string
+          created_at?: string
+          created_by?: string | null
+          emails_planned?: number
+          ends_at?: string
+          id?: string
+          mailbox_id?: string
+          notes?: string | null
+          sending_enabled?: boolean
+          starts_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_send_bookings_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portfolio_send_bookings_campaign_draft_id_fkey"
+            columns: ["campaign_draft_id"]
+            isOneToOne: false
+            referencedRelation: "outreach_campaign_drafts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portfolio_send_bookings_mailbox_id_fkey"
+            columns: ["mailbox_id"]
+            isOneToOne: false
+            referencedRelation: "gsm_mailbox_readiness"
+            referencedColumns: ["mailbox_id"]
+          },
+          {
+            foreignKeyName: "portfolio_send_bookings_mailbox_id_fkey"
+            columns: ["mailbox_id"]
+            isOneToOne: false
+            referencedRelation: "gsm_mailboxes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       portfolio_strategy_recommendations: {
         Row: {
           business_id: string | null

@@ -772,6 +772,7 @@ import KnowledgeSources from "./pages/founder/knowledge-governance/Sources";
 import GiasSearch from "./pages/founder/GiasSearch";
 import SchoolVisits from "./pages/founder/SchoolVisits";
 import SchoolAdmissions from "./pages/founder/SchoolAdmissions";
+import PortfolioCalendar from "./pages/founder/PortfolioCalendar";
 import KnowledgeConflicts from "./pages/founder/knowledge-governance/Conflicts";
 import KnowledgeStale from "./pages/founder/knowledge-governance/Stale";
 import KnowledgeApprovedClaims from "./pages/founder/knowledge-governance/ApprovedClaims";
@@ -1204,6 +1205,7 @@ const App = () => (
             <Route path="/founder/knowledge-governance/sources" element={<FounderRoute><KnowledgeSources /></FounderRoute>} />
             <Route path="/founder/gias-search" element={<FounderRoute><GiasSearch /></FounderRoute>} />
             <Route path="/founder/school-visits" element={<FounderRoute><SchoolVisits /></FounderRoute>} />
+            <Route path="/founder/portfolio-calendar" element={<FounderRoute><PortfolioCalendar /></FounderRoute>} />
             <Route path="/founder/school-admissions" element={<FounderRoute><SchoolAdmissions /></FounderRoute>} />
             <Route path="/founder/knowledge-governance/conflicts" element={<FounderRoute><KnowledgeConflicts /></FounderRoute>} />
             <Route path="/founder/knowledge-governance/stale" element={<FounderRoute><KnowledgeStale /></FounderRoute>} />

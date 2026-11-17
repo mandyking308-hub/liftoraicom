@@ -148,6 +148,20 @@
       "when": 1793032524908,
       "tag": "0020_kindnesss_pool_segment_word_boundaries",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794917189574,
+      "tag": "0021_migration",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794917205118,
+      "tag": "0022_migration",
+      "breakpoints": true
     }
   ]
 }
