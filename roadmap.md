@@ -1,11 +1,13 @@
 # Roadmap
 
 ## Founder-approved next steps (17 Nov 2026)
-- [ ] Tighten the seven remaining loose database access rules without breaking public proposal/partner forms or founder operations.
-- [ ] Clear only the approved stale/test records: nine pending May emails, eight reconciliation mismatches, and sample collections, shop and marketplace rows.
-- [ ] Refresh the 131 manual pages against current Liftor behaviour while preserving historical versions and the append-only build log.
-- [ ] Work the Kindnesss send-readiness blockers (recipient clearance, live mailbox freshness, webhook signing key and sender details) without sending, activating providers or opening gates.
-- [ ] Run focused tests and live read-only verification, update truthful evidence, and commit the completed changes.
+- [x] Tighten the seven remaining loose database access rules without breaking public proposal/partner forms or founder operations.
+- [x] Clear only the approved stale/test records: nine pending May emails, eight reconciliation mismatches, and sample collections, shop and marketplace rows.
+- [x] Refresh the 131 manual pages against current Liftor behaviour while preserving historical versions and the append-only build log.
+- [ ] PAUSED BY FOUNDER: Kindnesss webhook signing key and recipient shortlist; mailbox freshness and sender details verified, no sending or gate changes.
+- [x] Trace the add-company journey across all 14 sections; identify which pages share canonical data, which require separate setup, and any broken handoffs.
+- [ ] Founder decision: build one canonical internal add-company orchestration with native module records, idempotent synchronisation and external actions still off.
+- [x] Run focused tests and live read-only verification, update truthful evidence, and commit the completed changes.
 
 ## Unified inbound portfolio communications — Phase 1 (16 Nov 2026)
 - [x] Add a founder-only unified inbox over existing communications data, with truthful source health, quarantine and diagnostics.

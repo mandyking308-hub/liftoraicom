@@ -358,28 +358,30 @@ const AIProposal = () => {
       const allProcesses = [...form.processesToAutomate];
       if (form.customProcess.trim()) allProcesses.push(form.customProcess.trim());
 
-      const { error } = await supabase.from("proposals").insert({
-        company_name: form.companyName,
-        industry: form.industry,
-        company_size: form.companySize,
-        website_url: form.websiteUrl || null,
-        contact_name: form.contactName || null,
-        contact_email: form.contactEmail || null,
-        project_types: form.projectTypes,
-        business_problem: form.businessProblem,
-        processes_to_automate: allProcesses,
-        project_scale: form.projectScale,
-        timeline: form.timeline,
-        ai_suggested_solution: proposal.suggested_solution,
-        ai_estimated_scope: proposal.estimated_scope,
-        ai_estimated_timeline: proposal.estimated_timeline,
-        ai_estimated_cost_range: proposal.estimated_cost_range || null,
-        ai_estimated_cost_breakdown: (proposal.estimated_cost_breakdown || null) as any,
-        ai_estimated_roi_summary: proposal.estimated_roi_summary || null,
-        ai_estimated_annual_savings: proposal.estimated_annual_savings || null,
-        ai_estimated_roi_period: proposal.estimated_roi_period || null,
-        ai_estimated_productivity_gain: proposal.estimated_productivity_gain || null,
-      } as any);
+      const { error } = await supabase.rpc("submit_public_proposal", {
+        p_payload: {
+          company_name: form.companyName,
+          industry: form.industry,
+          company_size: form.companySize,
+          website_url: form.websiteUrl || null,
+          contact_name: form.contactName || null,
+          contact_email: form.contactEmail || null,
+          project_types: form.projectTypes,
+          business_problem: form.businessProblem,
+          processes_to_automate: allProcesses,
+          project_scale: form.projectScale,
+          timeline: form.timeline,
+          ai_suggested_solution: proposal.suggested_solution,
+          ai_estimated_scope: proposal.estimated_scope,
+          ai_estimated_timeline: proposal.estimated_timeline,
+          ai_estimated_cost_range: proposal.estimated_cost_range || null,
+          ai_estimated_cost_breakdown: (proposal.estimated_cost_breakdown || null) as any,
+          ai_estimated_roi_summary: proposal.estimated_roi_summary || null,
+          ai_estimated_annual_savings: proposal.estimated_annual_savings || null,
+          ai_estimated_roi_period: proposal.estimated_roi_period || null,
+          ai_estimated_productivity_gain: proposal.estimated_productivity_gain || null,
+        },
+      });
 
       if (error) throw error;
 
