@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import FounderLayout from "@/components/founder/FounderLayout";
 import LiftorBrainPanel from "@/components/founder/brain/LiftorBrainPanel";
 import LiftorBrainInboundReplyPanel from "@/components/founder/brain/LiftorBrainInboundReplyPanel";
@@ -9,6 +10,7 @@ export default function LiftorBrain() {
   return (
     <FounderLayout>
       <div className="max-w-7xl mx-auto px-4 pt-4">
+        <div className="mb-3"><RelatedToolTabs tabs={[{ to: "/founder/brain", label: "AI brain" }, { to: "/founder/brain-core", label: "Brain core" }, { to: "/founder/strategy", label: "Strategy" }]} /></div>
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <Link to="/founder/brain/sessions"><Button size="sm" variant="outline">Sessions</Button></Link>
           <Link to="/founder/brain/drafts"><Button size="sm" variant="outline">Drafts</Button></Link>

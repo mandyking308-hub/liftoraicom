@@ -181,12 +181,12 @@ export const founderAreas: FounderArea[] = [
     s("/capacity", "Capacity", "Demand versus delivery and support capacity.", true),
   ]},
   { key: "ai", n: 13, title: "AI", summary: "AI Brain, co-pilot, agents and AI costs.", sections: [
-    s("/strategy", "Strategy", "Growth intelligence and opportunity detection."),
+    s("/strategy", "Strategy", "Growth intelligence and opportunity detection.", true),
     s("/copilot", "AI co-pilot", "Ask Liftor questions in plain language."),
-    s("/brain", "AI brain", "Reply intelligence and insights."),
+    s("/brain", "AI brain", "Reply insights, with Brain core and Strategy tabs."),
     s("/agents", "Agents", "Manage AI agents."),
     s("/ai-cost", "AI costs & approvals", "Spend, ROI, runtime and approval queue."),
-    s("/brain-core", "Brain core", "Underlying analysis layer."),
+    s("/brain-core", "Brain core", "Underlying analysis layer.", true),
   ]},
   { key: "platform", n: 14, title: "Platform & security", summary: "Monitoring, security, integrations, backups, testing and audit.", sections: [
     s("/system", "System oversight", "Events, health and modes."),
