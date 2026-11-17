@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { InsLayout, InsSection, InsStat, fmtMoney } from "./_shared";
@@ -22,6 +23,7 @@ export default function InsuranceOverview() {
   return (
     <InsLayout title="Insurance / Liability Matrix"
       subtitle="Maps insurance needs across all businesses. Tracks policies, cover, renewals, gaps and liability events. Internal mapping is live. Buying or changing cover, sending declarations, adviser/insurer communications and legal decisions all require approval.">
+      <RelatedToolTabs tabs={[{ to: "/founder/insurance-liability", label: "Insurance" }, { to: "/founder/insurance-claims", label: "Claims" }]} />
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <InsStat label="Active policies" value={sum.policies_active} hint={`${sum.policies_total} total`} />
         <InsStat label="Missing / expired" value={sum.policies_missing + sum.policies_expired} hint={`${sum.policies_review} need review`} />

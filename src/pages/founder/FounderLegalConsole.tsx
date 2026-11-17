@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
@@ -40,6 +41,7 @@ const FounderLegalConsole = () => {
   return (
     <FounderLayout>
       <div className="space-y-6">
+        <RelatedToolTabs tabs={[{ to: "/founder/legal", label: "Legal console" }, { to: "/founder/policies", label: "Policy coverage" }, { to: "/founder/contracts", label: "Contracts" }]} />
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Legal Compliance</h1>
           <p className="text-muted-foreground mt-1">Policy versions and user acceptance records</p>

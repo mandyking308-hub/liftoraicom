@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useEffect, useState } from "react";
 import { EMLayout, EMSection, EMStat } from "./_shared";
 import { fetchAdviserQuestions, fetchAssignments, fetchEntities, fetchPolicies, fetchRoutingRules, type AdviserQuestion, type EntityAssignment, type LegalEntity, type PolicyAssignment, type RevenueRoutingRule } from "@/lib/entityMapEngine";
@@ -21,6 +22,7 @@ export default function EMOverview() {
   const missingPolicies = policies.filter(p => p.policy_status === "missing").length;
   return (
     <EMLayout title="Entity / Legal / Tax Map" subtitle="Which legal entity owns/runs each business, where revenue belongs, what policies apply, and what needs adviser review across UK, Delaware, Dubai and future jurisdictions.">
+      <RelatedToolTabs tabs={[{ to: "/founder/entity-map", label: "Legal entities" }, { to: "/founder/corporate-secretarial", label: "Company secretarial" }, { to: "/founder/statutory-filings", label: "Statutory filings" }, { to: "/founder/jurisdiction-tax", label: "Tax flags" }, { to: "/founder/international-expansion", label: "International expansion" }, { to: "/founder/adviser-pack", label: "Adviser packs" }]} />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <EMStat label="Legal entities" value={entities.length} />
         <EMStat label="Mapped businesses" value={mappedBusinesses} />

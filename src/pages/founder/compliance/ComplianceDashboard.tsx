@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -98,6 +99,7 @@ const ComplianceDashboard = () => {
   return (
     <FounderLayout>
       <div className="space-y-6">
+        <RelatedToolTabs tabs={[{ to: "/founder/compliance", label: "Overview" }, { to: "/founder/business-compliance", label: "Business compliance" }, { to: "/founder/ai-compliance", label: "AI compliance" }, { to: "/founder/healthcare-overlay", label: "Healthcare overlay" }]} />
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Compliance Engine</h1>
