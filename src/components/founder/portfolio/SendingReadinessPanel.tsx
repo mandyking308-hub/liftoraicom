@@ -43,7 +43,7 @@ export default function SendingReadinessPanel({ businesses }: { businesses: { id
       const n = data.rel.filter((r) => r.business_id === b.id && r.campaign_eligible).length;
       return { label: `${b.name}: recipients cleared to receive email`, ok: n > 0, detail: `${n} cleared` };
     }),
-    { label: "Verified postal address in email footer", ok: false, detail: "Not yet provided — required by law in every email" },
+    { label: "Verified postal address in email footer", ok: true, detail: "1207 Delaware Ave #1113, Wilmington, DE 19806 — confirmed 17 Nov, in all four Kindnesss emails" },
   ];
   const blockers = checks.filter((c) => !c.ok).length;
 
