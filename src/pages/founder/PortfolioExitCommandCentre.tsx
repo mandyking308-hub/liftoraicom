@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -203,6 +204,7 @@ export default function PortfolioExitCommandCentre() {
   return (
     <FounderLayout>
       <div className="space-y-6">
+        <RelatedToolTabs tabs={[{ to: "/founder/portfolio-exit", label: "Overview" }, { to: "/founder/exit-metrics", label: "Exit metrics" }, { to: "/founder/portfolio-exit-targets", label: "Exit targets" }, { to: "/founder/founder-led-exit", label: "Founder-led exit" }, { to: "/founder/founder-led-buyer-market", label: "Buyer market" }, { to: "/founder/acquisition-funding", label: "Acquisition funding" }]} />
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">

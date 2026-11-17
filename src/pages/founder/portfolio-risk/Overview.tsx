@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PRLayout, PRSection, PRStat, StatusBadge } from "./_shared";
@@ -19,6 +20,7 @@ export default function PROverview() {
   return (
     <PRLayout title="Portfolio Risk Matrix"
       subtitle="Risk across legal, tax, data, AI cost, delivery, customer, reputation, compliance, cashflow, integrations, dependency and founder overload. Internal scoring runs live; legal/tax/compliance actions, customer notices, insurance and external communications require approval.">
+      <RelatedToolTabs tabs={[{ to: "/founder/portfolio-risk", label: "Risk" }, { to: "/founder/portfolio-diversity", label: "Diversity" }]} />
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <PRStat label="Businesses scored" value={sum.businesses_scored} />
         <PRStat label="Avg risk" value={sum.avg_risk} hint="0–10" />

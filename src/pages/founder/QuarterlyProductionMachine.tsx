@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
@@ -146,6 +147,7 @@ export default function QuarterlyProductionMachine() {
   return (
     <FounderLayout>
       <div className="space-y-6">
+        <RelatedToolTabs tabs={[{ to: "/founder/quarterly-production-machine", label: "Build selector" }, { to: "/founder/portfolio-prioritisation", label: "Prioritisation" }, { to: "/founder/resource-allocation", label: "Resource allocation" }, { to: "/founder/business-lifecycle", label: "Lifecycle" }, { to: "/founder/portfolio-memory", label: "Portfolio memory" }]} />
         <div>
           <Link to="/founder/portfolio-exit/build-selector" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
             <ArrowLeft className="h-3 w-3" /> Quarterly Build Selector
