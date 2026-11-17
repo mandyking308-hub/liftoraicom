@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CRMInteractionMatchPreviewPanel from "@/components/founder/crm/CRMInteractionMatchPreviewPanel";
 import MultiChannelInboxPanel from "@/components/founder/channels/MultiChannelInboxPanel";
@@ -117,6 +118,7 @@ const IntegrationDirectory = () => {
   return (
     <FounderLayout>
       <div className="space-y-8">
+      <div className="mb-3"><RelatedToolTabs tabs={[{ to: "/founder/integrations", label: "Integrations" }, { to: "/founder/connectors", label: "Connector health" }, { to: "/founder/integration-map", label: "Integration needs" }, { to: "/founder/webhooks", label: "Webhooks" }]} /></div>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Integrations</h1>

@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +11,7 @@ export default function ImportOverview() {
   const { data: batches = [] } = useQuery({ queryKey: ["import-batches"], queryFn: () => listImportBatches(20), refetchInterval: 30000 });
   return (
     <ImportLayout title="Import / Migration Centre" subtitle="Controlled import, mapping, preview, dedupe and rollback across all businesses. Defaults to test mode. Apply to real records requires founder approval.">
+      <div className="mb-3"><RelatedToolTabs tabs={[{ to: "/founder/imports", label: "Imports" }, { to: "/founder/data-quality", label: "Data quality" }, { to: "/founder/search", label: "Search" }, { to: "/founder/organisations", label: "Organisations" }]} /></div>
       <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
         <Stat label="Total batches" value={summary?.totalBatches ?? 0} />
         <Stat label="Awaiting approval" value={summary?.awaitingApproval ?? 0} tone={summary?.awaitingApproval ? "warn" : undefined} />

@@ -1,8 +1,10 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import BusinessActivationControlPanel from "@/components/founder/activation/BusinessActivationControlPanel";
 
 export default function BusinessActivationOverview() {
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="mb-3"><RelatedToolTabs tabs={[{ to: "/founder/business-activation", label: "Activation gate" }, { to: "/founder/runtime-mode", label: "Runtime mode" }, { to: "/founder/system-config", label: "System configuration" }]} /></div>
       <header>
         <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
           Business Activation Control

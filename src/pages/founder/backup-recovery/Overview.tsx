@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useEffect, useState } from "react";
 import { BRLayout, BRStat } from "./_shared";
 import { Card } from "@/components/ui/card";
@@ -11,6 +12,7 @@ export default function BROverview() {
   }, []);
   return (
     <BRLayout title="Backup / Export / Recovery" subtitle="Backup visibility, export preparation, recovery checklists and emergency operating pack. Actual exports, restores and public sharing are founder-gated. Restore operations are never automatic.">
+      <div className="mb-3"><RelatedToolTabs tabs={[{ to: "/founder/backup-recovery", label: "Backups" }, { to: "/founder/recovery", label: "Recovery" }]} /></div>
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <BRStat label="Systems tracked" value={sum?.systems ?? "—"} />
         <BRStat label="Healthy" value={sum?.healthy ?? "—"} tone="ok" />

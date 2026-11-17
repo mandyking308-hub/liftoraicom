@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import FounderLayout from "@/components/founder/FounderLayout";
@@ -137,6 +138,7 @@ const SystemDashboard = () => {
   return (
     <FounderLayout>
       <div className="max-w-7xl mx-auto space-y-6">
+      <div className="mb-3"><RelatedToolTabs tabs={[{ to: "/founder/system", label: "System oversight" }, { to: "/founder/monitoring", label: "Monitoring" }, { to: "/founder/operations", label: "Operations" }, { to: "/founder/system-health", label: "System health" }, { to: "/founder/platform-monitor", label: "Performance" }, { to: "/founder/analytics", label: "Analytics" }, { to: "/founder/optimisation", label: "Optimisation" }, { to: "/founder/scheduled-jobs", label: "Scheduled jobs" }]} /></div>
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">System Oversight</h1>

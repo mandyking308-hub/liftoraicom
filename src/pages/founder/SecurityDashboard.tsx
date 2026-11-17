@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import KnowledgeSourceTruthPanel from "@/components/founder/knowledge/KnowledgeSourceTruthPanel";
 import FounderLayout from "@/components/founder/FounderLayout";
 import GroupHQOperatingPanel from "@/components/founder/group/GroupHQOperatingPanel";
@@ -178,6 +179,7 @@ const SecurityDashboard = () => {
   return (
     <FounderLayout>
       <div className="space-y-6">
+      <div className="mb-3"><RelatedToolTabs tabs={[{ to: "/founder/security", label: "Security" }, { to: "/founder/access-control", label: "Access control" }, { to: "/founder/roles", label: "Roles" }, { to: "/founder/access-governance", label: "Access governance" }, { to: "/founder/security-vault", label: "Security vault" }, { to: "/founder/incidents", label: "Incidents" }]} /></div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2"><ShieldAlert size={24} className="text-primary" /> Security & Compliance</h1>

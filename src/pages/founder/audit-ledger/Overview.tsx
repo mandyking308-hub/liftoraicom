@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ export default function AuditOverview() {
   const [busy, setBusy] = useState(false);
   return (
     <AuditLayout title="Global Audit Ledger" subtitle="One append-only audit trail across every business, agent and module. Secrets are redacted before write; deletion is not available from this UI; external export requires founder approval.">
+      <div className="mb-3"><RelatedToolTabs tabs={[{ to: "/founder/audit-ledger", label: "Audit ledger" }, { to: "/founder/activity", label: "Activity feed" }, { to: "/founder/build-log", label: "Build log" }]} /></div>
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <AuditStat label="Events 24h" value={sum?.events_today ?? "—"} />
         <AuditStat label="High sensitivity" value={sum?.high_sensitivity_today ?? 0} tone={(sum?.high_sensitivity_today ?? 0) > 0 ? "warn" : "ok"} />

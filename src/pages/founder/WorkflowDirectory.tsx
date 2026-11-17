@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import FounderLayout from "@/components/founder/FounderLayout";
 import InternalOperatingSchedulesPanel from "@/components/founder/operations/InternalOperatingSchedulesPanel";
 import { supabase } from "@/integrations/supabase/client";
@@ -107,6 +108,7 @@ const WorkflowDirectory = () => {
   return (
     <FounderLayout>
       <div className="space-y-8">
+      <div className="mb-3"><RelatedToolTabs tabs={[{ to: "/founder/workflows", label: "Workflows" }, { to: "/founder/processes", label: "Processes" }, { to: "/founder/architectures", label: "Architectures" }, { to: "/founder/templates", label: "System templates" }, { to: "/founder/executions", label: "Executions" }]} /></div>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Workflow Builder</h1>

@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useState } from "react";
 import LiftorMasterDryRunPanel from "@/components/founder/testing/LiftorMasterDryRunPanel";
 import LiftorMasterReconciliationPanel from "@/components/founder/testing/LiftorMasterReconciliationPanel";
@@ -293,6 +294,7 @@ const PlatformTesting = () => {
   return (
     <FounderLayout>
       <div className="space-y-6">
+      <div className="mb-3"><RelatedToolTabs tabs={[{ to: "/founder/testing", label: "Testing" }, { to: "/founder/ai-evals", label: "AI safety tests" }, { to: "/founder/agent-capabilities", label: "Agent permissions" }, { to: "/founder/deployments", label: "Deployments" }, { to: "/founder/deployment", label: "Environment" }, { to: "/founder/release-workflow", label: "Releases" }]} /></div>
         <CommandCentreUsabilityReportPanel />
         <BusinessActivationWizardPanel />
         <BusinessRehearsalSimulationPanel />

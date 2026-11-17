@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { CGLayout, CGSection, CGStat, SevBadge, ActionBadge } from "./_shared";
@@ -15,6 +16,7 @@ export default function CGOverview() {
   return (
     <CGLayout title="Multi-Business Context Fabric"
       subtitle="Before any AI action, workflow, draft or external send, Liftor verifies which business it belongs to and refuses to mix brand voice, pricing, customers, legal entity, products, policies or compliance rules across businesses.">
+      <div className="mb-3"><RelatedToolTabs tabs={[{ to: "/founder/context-fabric", label: "Business separation" }, { to: "/founder/cross-contamination", label: "Cross-business checks" }]} /></div>
       <FabricActivationCard />
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <CGStat label="Context profiles" value={sum.profiles} hint="One per business" />
