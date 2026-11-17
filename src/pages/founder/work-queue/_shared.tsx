@@ -14,6 +14,9 @@ export const WQ_NAV = [
   { to: "/founder/work-queue/blocked",    label: "Blocked" },
   { to: "/founder/work-queue/high-value", label: "High-value" },
   { to: "/founder/work-queue/overdue",    label: "Overdue" },
+  { to: "/founder/priority",             label: "Priority" },
+  { to: "/founder/attention-guard",      label: "Attention guard" },
+  { to: "/founder/internal-sla",         label: "Hand-offs & deadlines" },
   { to: "/founder/work-queue/settings",   label: "Settings" },
 ];
 

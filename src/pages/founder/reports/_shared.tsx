@@ -10,6 +10,9 @@ export const RP_NAV: { to: string; label: string }[] = [
   { to: "/founder/reports/monthly", label: "Monthly" },
   { to: "/founder/reports/portfolio", label: "Portfolio" },
   { to: "/founder/reports/decisions", label: "Decisions" },
+  { to: "/founder/business-daily-operating-loop", label: "Daily summaries" },
+  { to: "/founder/business-weekly-review", label: "Weekly review" },
+  { to: "/founder/reporting-truth", label: "Reporting truth" },
   { to: "/founder/reports/archive", label: "Archive" },
 ];
 
