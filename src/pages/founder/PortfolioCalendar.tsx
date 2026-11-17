@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import SendingReadinessPanel from "@/components/founder/portfolio/SendingReadinessPanel";
+import BusinessKnowledgeUploadTrainingPanel from "@/components/founder/knowledge/BusinessKnowledgeUploadTrainingPanel";
 import { SEQUENCE_STEPS, checkWindow, onboardingSteps, splitRecipients, stepsBooked, type Booking } from "@/lib/portfolio/sendCalendar";
 
 // Mounted inside FounderRoute; founder/admin RLS and the DB trigger are authoritative. Planning only — no sending.
@@ -76,9 +78,11 @@ export default function PortfolioCalendar() {
     <FounderLayout>
       <div className="space-y-8 p-6">
         <header>
-          <h1 className="text-2xl font-semibold text-foreground">Portfolio send calendar & onboarding</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Portfolio launch control</h1>
           <p className="text-sm text-muted-foreground">One shared GSM mailbox pool for every business. Each business campaign is five emails, sent to all its recipients across the whole pool, then it stops and the next business takes its dates. Bookings are plans only — sending stays off.</p>
         </header>
+
+        {data && <SendingReadinessPanel businesses={data.biz} />}
 
         <section className="tech-card p-4 space-y-3">
           <h2 className="font-medium text-foreground">Onboarding journey</h2>
@@ -102,7 +106,7 @@ export default function PortfolioCalendar() {
 
         <section className="tech-card p-4 space-y-3">
           <h2 className="font-medium text-foreground">Book a send window</h2>
-          <p className="text-xs text-muted-foreground">Liftor still lists all GSM mailboxes as warming (last provider check is out of date). Booking is allowed for planning; nothing sends.</p>
+          <p className="text-xs text-muted-foreground">Booking is for planning only; nothing sends until every check above is done.</p>
           <div className="grid gap-3 md:grid-cols-3">
             <div><Label>Business</Label>
               <Select value={form.business_id} onValueChange={(v) => setForm({ ...form, business_id: v })}>
@@ -146,6 +150,11 @@ export default function PortfolioCalendar() {
                   <td><Button size="sm" variant="ghost" onClick={() => cancelWindow(w.ids)}>Cancel</Button></td>
                 </tr>))}</tbody>
             </table>)}
+        </section>
+        <section id="business-manual" className="space-y-2">
+          <h2 className="font-medium text-foreground">Upload the business manual</h2>
+          <p className="text-sm text-muted-foreground">Add each business's manual, offers, FAQs and policies so Liftor can answer questions about it. Customer replies stay human-approved.</p>
+          <BusinessKnowledgeUploadTrainingPanel />
         </section>
       </div>
     </FounderLayout>

@@ -30,7 +30,7 @@ export const BusinessKnowledgeUploadTrainingPanel = () => {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("businesses").select("id,name").order("name");
+      const { data } = await supabase.from("businesses").select("id,name").is("archived_at", null).neq("portfolio_status", "legacy_prelaunch").order("name");
       const list = (data ?? []) as any[];
       setBusinesses(list);
       const neon = list.find((b) => /neon\s*candy/i.test(b.name));
