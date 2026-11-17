@@ -105,3 +105,4 @@
 - [x] Lock founder area + fix 22 open data rules (founder/admin only)
 - [ ] Review areas one by one starting with 1 Daily running
 - [ ] Lock ~30 open backend functions flagged by deep scan (e.g. founder-copilot, apollo-daily-runner, crm-send-check)
+- [ ] Single founder-only login; remove public login links; publish
