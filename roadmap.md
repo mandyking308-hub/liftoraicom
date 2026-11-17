@@ -92,3 +92,4 @@
 - [ ] Send all eligible prospects over time (blocked: founder to supply real Kindnesss sender mailboxes; legal basis per contact; webhook signing key)
 - [x] Add confirmed postal address to 4 Kindnesss footers
 - [x] Explain legacy dashboards
+- [ ] Full Liftor capability map (all ~200 founder pages) before designing one dashboard
