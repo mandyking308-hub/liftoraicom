@@ -14,10 +14,23 @@ const mocks = vi.hoisted(() => ({
   saveRemote: vi.fn(async () => "setup-run"),
   promoteDraft: vi.fn(async () => "640de582-a112-4d16-a221-03c27f00c6ec"),
   promoteInto: vi.fn(async (_state: any) => ({})),
+  invokeFeed: vi.fn(async () => ({
+    data: {
+      ok: true,
+      summary: {
+        generated_at: "2026-11-17T22:00:00.000Z",
+        signups_total: 0,
+        signups_last_24h: 0,
+        signups_last_7d: 0,
+        active_users_last_7d: 0,
+      },
+    },
+    error: null,
+  })),
 }));
 
 vi.mock("@/integrations/supabase/client", () => ({
-  supabase: { from: mocks.from },
+  supabase: { from: mocks.from, functions: { invoke: mocks.invokeFeed } },
 }));
 
 vi.mock("@/components/founder/FounderLayout", () => ({

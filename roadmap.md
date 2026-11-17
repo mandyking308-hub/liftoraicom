@@ -1,5 +1,10 @@
 # Roadmap
 
+## Kindness Habits private feed — 17 Nov 2026
+- [x] Connect Liftor to the read-only Kindness Habits summary feed with founder/admin authentication and the saved private key.
+- [x] Show validated sign-up totals and freshness on Liftor HQ and the Kindnesss business page; never import child personal data.
+- [x] Test refusal, schema/privacy validation, live read-only retrieval and dashboard display; commit the verified changes.
+
 ## Founder-approved next steps (17 Nov 2026)
 - [x] Tighten the seven remaining loose database access rules without breaking public proposal/partner forms or founder operations.
 - [x] Clear only the approved stale/test records: nine pending May emails, eight reconciliation mismatches, and sample collections, shop and marketplace rows.

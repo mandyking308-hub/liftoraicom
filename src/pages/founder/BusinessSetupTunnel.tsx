@@ -1,5 +1,7 @@
 import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import SetupAutofillCard from "@/components/founder/SetupAutofillCard";
+import KindnessHabitsSummaryCard from "@/components/founder/KindnessHabitsSummaryCard";
+import { KINDNESS_HABITS_BUSINESS_ID } from "@/lib/spokeFeeds";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
@@ -405,6 +407,8 @@ export default function BusinessSetupTunnel() {
         <Progress value={overall} />
 
         <SetupAutofillCard businessId={state.businessId} defaultWebsite={state.steps.web?.fields?.website_url} onApply={applyAutofill} />
+
+        {state.businessId === KINDNESS_HABITS_BUSINESS_ID && <KindnessHabitsSummaryCard />}
 
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Step completeness</CardTitle></CardHeader>

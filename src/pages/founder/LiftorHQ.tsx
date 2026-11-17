@@ -2,7 +2,9 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
 import BusinessSwitcher from "@/components/founder/hq/BusinessSwitcher";
+import KindnessHabitsSummaryCard from "@/components/founder/KindnessHabitsSummaryCard";
 import { useHqBusiness } from "@/hooks/useHqBusiness";
+import { KINDNESS_HABITS_BUSINESS_ID } from "@/lib/spokeFeeds";
 import { founderAreas, areaRoute } from "@/lib/founderAreas";
 import { areaMetrics, areaStatus, hqCount, type CountSpec } from "@/lib/hqMetrics";
 import { ArrowRight } from "lucide-react";
@@ -77,6 +79,8 @@ export default function LiftorHQ() {
             </Link>
           ))}
         </section>
+
+        {(!biz || biz === KINDNESS_HABITS_BUSINESS_ID) && <KindnessHabitsSummaryCard />}
 
         <section aria-label="Areas" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {founderAreas.map((a) => <AreaBox key={a.key} areaKey={a.key} biz={biz} />)}
