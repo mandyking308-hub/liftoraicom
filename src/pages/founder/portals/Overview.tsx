@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ export default function PortalsOverview() {
   }, []);
   return (
     <PortalsLayout title="External Portals Overview" subtitle="Architecture for future customer, seller, partner, adviser and document upload portals. Everything stays internal_only by default — no public exposure, no invites sent.">
+      <RelatedToolTabs tabs={[{ to: "/founder/portal-admin", label: "Portals" }, { to: "/founder/clients", label: "Portal content" }]} />
       <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
         <PortalStat label="Profiles" value={sum?.total_profiles ?? "—"} />
         <PortalStat label="Live" value={sum?.live ?? "—"} />

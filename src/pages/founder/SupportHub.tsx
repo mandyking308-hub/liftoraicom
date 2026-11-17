@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import FounderLayout from "@/components/founder/FounderLayout";
 import SupportKnowledgeAgentPanel from "@/components/founder/support/SupportKnowledgeAgentPanel";
 import { SupportKnowledgeDashboard } from "@/components/founder/support/SupportKnowledgePanels";
@@ -11,6 +12,7 @@ export default function SupportHub() {
   return (
     <FounderLayout>
       <div className="space-y-4">
+        <RelatedToolTabs tabs={[{ to: "/founder/support", label: "Help & drafts" }, { to: "/founder/support-tickets", label: "Tickets" }, { to: "/founder/complaints", label: "Complaints & refunds" }]} />
         <div>
           <h1 className="text-2xl font-bold">Support Hub</h1>
           <p className="text-sm text-muted-foreground">FAQs, help articles, support drafts, triage and escalation — internal only, no external send.</p>
