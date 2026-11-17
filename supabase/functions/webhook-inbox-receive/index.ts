@@ -2,6 +2,8 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
+import { founderGuard } from "../_shared/founderGuard.ts";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-provider, x-signature, x-webhook-signature, stripe-signature, x-test-mode",
@@ -31,6 +33,8 @@ async function sha256Hex(s: string) {
 }
 
 serve(async (req) => {
+  const __guard = await founderGuard(req, corsHeaders as Record<string, string>);
+  if (__guard) return __guard;
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: corsHeaders });
 
