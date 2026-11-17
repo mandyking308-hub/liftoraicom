@@ -58,7 +58,6 @@ export const areaMetrics: Record<string, Metric[]> = {
   platform: [
     { label: "Safety switches ON", spec: { table: "external_action_gates", eq: { enabled: true } }, attentionIfAbove: 0 },
   ],
-  schools: [],
 };
 
 export type AreaStatus = "attention" | "working" | "idle";

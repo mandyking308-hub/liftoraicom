@@ -11,7 +11,7 @@ const IGNORE = new Set(["/", "/login", "/area"]) // "/" is Liftor HQ itself;
 const all = founderAreas.flatMap((a) => a.sections);
 
 describe("founder area registry", () => {
-  it("has 15 areas", () => expect(founderAreas).toHaveLength(15));
+  it("has 14 areas", () => expect(founderAreas).toHaveLength(14));
   it("puts every founder section in exactly one area, so nothing is lost", () => {
     const missing = [...topLevel].filter((t) => !IGNORE.has(t) && !all.some((s) => s.route === (t === "/" ? "/founder" : `/founder${t}`)));
     expect(missing).toEqual([]);

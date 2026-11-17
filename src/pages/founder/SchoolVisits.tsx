@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import FounderLayout from "@/components/founder/FounderLayout";
@@ -69,6 +70,7 @@ export default function SchoolVisits() {
   return (
     <FounderLayout>
       <div className="space-y-4 p-4 md:p-6">
+        <RelatedToolTabs tabs={[{ to: "/founder/school-visits", label: "School visits" }, { to: "/founder/school-admissions", label: "Admissions" }, { to: "/founder/gias-search", label: "School Register" }]} />
         <div>
           <h1 className="text-2xl font-semibold">School Visit Assessments</h1>
           <p className="text-sm text-muted-foreground">Private founder workspace. Unchecked criteria are unknown, not failures. Ratings only where evidence is recorded.</p>

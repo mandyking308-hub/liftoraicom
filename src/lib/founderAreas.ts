@@ -30,7 +30,7 @@ export const founderAreas: FounderArea[] = [
     s("/monday-launch", "Monday launch", "Earlier launch console.", true),
     s("/monday-readiness", "Monday readiness", "Earlier pre-launch checklist.", true),
   ]},
-  { key: "radars", n: 2, title: "Radars & prospecting", summary: "Funding, PR, distressed and billionaire radars plus your relationship network and CRM.", sections: [
+  { key: "radars", n: 2, title: "Radars & prospecting", summary: "Funding, PR, distressed and billionaire radars, your relationship network, CRM and private school records.", sections: [
     s("/crm", "CRM", "Shared contacts with business-specific safeguards, plus a Duplicate people tab."),
     s("/funding-radar", "Funding radar", "Funded companies and build opportunities."),
     s("/global-pr-radar", "PR radar", "Media opportunities, journalists and coverage."),
@@ -40,6 +40,9 @@ export const founderAreas: FounderArea[] = [
     s("/strategic-organisations", "Strategic organisations", "Now a tab in Relationship intelligence.", true),
     s("/relationship-health", "Relationship health", "Now a tab in Relationship intelligence.", true),
     s("/identity-resolution", "Duplicate people", "Now a tab in CRM.", true),
+    s("/school-visits", "Schools (private)", "Your private school records, with Admissions and School Register tabs. Not linked to any campaign."),
+    s("/school-admissions", "Admissions tracker", "Now a tab in Schools (private).", true),
+    s("/gias-search", "School Register (GIAS)", "Now a tab in Schools (private).", true),
   ]},
   { key: "sales", n: 3, title: "Sales", summary: "Pipeline, sales targets, coaching, proposals, demos and quote-to-cash.", sections: [
     s("/pipeline", "Pipeline", "Move leads through stages."),
@@ -233,11 +236,6 @@ export const founderAreas: FounderArea[] = [
     s("/recovery", "Recovery", "Recovery controls.", true),
     s("/backup-recovery", "Backups", "Backup and emergency packs."),
     s("/context-guard", "Context guard (old link)", "Forwards to Business separation.", true),
-  ]},
-  { key: "schools", n: 15, title: "Schools & private", summary: "Private admissions, visits and the school register.", sections: [
-    s("/school-admissions", "Admissions tracker", "Private admissions tracking."),
-    s("/school-visits", "School visits", "Private visit assessments."),
-    s("/gias-search", "School Register (GIAS)", "Search the official school register."),
   ]},
 ];
 
