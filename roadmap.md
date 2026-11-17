@@ -1,5 +1,12 @@
 # Roadmap
 
+## Founder-approved next steps (17 Nov 2026)
+- [ ] Tighten the seven remaining loose database access rules without breaking public proposal/partner forms or founder operations.
+- [ ] Clear only the approved stale/test records: nine pending May emails, eight reconciliation mismatches, and sample collections, shop and marketplace rows.
+- [ ] Refresh the 131 manual pages against current Liftor behaviour while preserving historical versions and the append-only build log.
+- [ ] Work the Kindnesss send-readiness blockers (recipient clearance, live mailbox freshness, webhook signing key and sender details) without sending, activating providers or opening gates.
+- [ ] Run focused tests and live read-only verification, update truthful evidence, and commit the completed changes.
+
 ## Unified inbound portfolio communications — Phase 1 (16 Nov 2026)
 - [x] Add a founder-only unified inbox over existing communications data, with truthful source health, quarantine and diagnostics.
 - [x] Add source-only, disabled-by-default deterministic Smartlead and Kindnesss fan-in candidates with pending schema.

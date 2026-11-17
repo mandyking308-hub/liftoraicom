@@ -183,6 +183,13 @@
       "when": 1794921720172,
       "tag": "0025_internal_cron_token",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1794929271779,
+      "tag": "0026_tighten_remaining_public_and_authenticated_policies",
+      "breakpoints": true
     }
   ]
 }
