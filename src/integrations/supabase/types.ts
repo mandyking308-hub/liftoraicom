@@ -75640,6 +75640,7 @@ export type Database = {
         Args: { p_action_id: string }
         Returns: string
       }
+      submit_public_proposal: { Args: { p_payload: Json }; Returns: string }
       suggest_replacement_supplier: {
         Args: { _assignment_id: string }
         Returns: {
