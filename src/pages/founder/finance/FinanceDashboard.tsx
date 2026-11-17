@@ -1,3 +1,4 @@
+import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useEffect, useState } from "react";
 import RevenueOperationsPanel from "@/components/founder/finance/RevenueOperationsPanel";
 import TreasuryCashflowControlPanel from "@/components/founder/finance/TreasuryCashflowControlPanel";
@@ -108,6 +109,7 @@ const FinanceDashboard = () => {
   return (
     <FounderLayout>
       <div className="max-w-7xl mx-auto space-y-8">
+        <RelatedToolTabs tabs={[{ to: "/founder/finance", label: "Overview" }, { to: "/founder/money", label: "Morning view" }, { to: "/founder/revenue", label: "Revenue" }, { to: "/founder/pricing-margin", label: "Pricing & margin" }, { to: "/founder/revenue-autopilot", label: "Revenue autopilot" }, { to: "/founder/portfolio-fx", label: "Currency" }]} />
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Financial System</h1>
