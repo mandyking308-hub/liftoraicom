@@ -84,7 +84,11 @@ describe("GSM readiness", () => {
     expect(r.campaign_ready).toBe(false);
   });
 
-  it("warming is never campaign ready", () => {
+  it("warming with live health 90 or above counts as ready (owner decision)", () => {
+    expect(evaluateMailboxReadiness(mailbox({ warmup_status: "warming", health_score: 90 }), readyDomain).campaign_ready).toBe(true);
+    expect(evaluateMailboxReadiness(mailbox({ warmup_status: "warming", health_score: 89 }), readyDomain).campaign_ready).toBe(false);
+  });
+  it("warming without a health score is never campaign ready", () => {
     const r = evaluateMailboxReadiness(mailbox({ warmup_status: "in_progress" }), readyDomain);
     expect(r.readiness_state).toBe("warming");
     expect(r.campaign_ready).toBe(false);

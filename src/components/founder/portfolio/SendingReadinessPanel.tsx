@@ -37,7 +37,7 @@ export default function SendingReadinessPanel({ businesses }: { businesses: { id
     { label: "Mailboxes connected (sending + receiving)", ok: connected === total && total > 0, detail: `${connected} of ${total} GSM mailboxes` },
     { label: "Mailbox status checked in the last 24 hours", ok: fresh, detail: last ? `Last check ${new Date(last).toLocaleString("en-GB")}` : "Never checked" },
     { label: "Mailbox health", ok: minHealth >= 90, detail: `Lowest health score ${minHealth}` },
-    { label: "Mailboxes marked ready to send", ok: ready > 0, detail: `${ready} of ${total} — Winnr still reports all as "warming"` },
+    { label: "Mailboxes marked ready to send", ok: ready > 0, detail: `${ready} of ${total} — warming mailboxes count as ready at health 90+` },
     { label: "Opens, replies, bounces and opt-outs arriving in Liftor", ok: data.evCount > 0, detail: data.evCount ? `${data.evCount} events, last ${new Date(data.lastEv!).toLocaleString("en-GB")}` : "None received yet — Smartlead signing key needed" },
     ...businesses.map((b) => {
       const n = data.rel.filter((r) => r.business_id === b.id && r.campaign_eligible).length;

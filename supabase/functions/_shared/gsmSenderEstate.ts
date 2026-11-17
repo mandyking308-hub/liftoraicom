@@ -52,6 +52,8 @@ export const GSM_EVERGREEN_DEFAULT_PER_BUSINESS = 5;
 
 /** A mailbox below this provider health score is never campaign-ready. */
 export const GSM_MIN_HEALTH_SCORE = 70;
+/** Owner decision 17 Nov 2026: a mailbox still in continuous warm-up counts as ready once its live health score is at least this. */
+export const GSM_WARMING_READY_HEALTH = 90;
 
 /** Legacy estate that must never be pulled into the GSM portfolio estate. */
 export const NON_GSM_EXCLUDED_EMAILS = ["hello@neoncandy.online"];
@@ -266,7 +268,9 @@ export function evaluateMailboxReadiness(
   if (!m.smartlead_email_account_id || !OK_SMARTLEAD.has(norm(m.smartlead_status))) {
     setState("smartlead_disconnected", "smartlead_account_not_connected");
   }
-  if (!WARM_DONE.has(norm(m.warmup_status))) {
+  const warmingButHealthy = WARMING.has(norm(m.warmup_status)) && m.health_score !== undefined && m.health_score !== null
+    && Number(m.health_score) >= GSM_WARMING_READY_HEALTH;
+  if (!WARM_DONE.has(norm(m.warmup_status)) && !warmingButHealthy) {
     setState("warming", WARMING.has(norm(m.warmup_status)) ? "warmup_in_progress" : "warmup_not_started");
   }
   const limit = Number(m.configured_daily_limit ?? 0);
