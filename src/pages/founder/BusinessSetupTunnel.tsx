@@ -1,5 +1,6 @@
 import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import SetupAutofillCard from "@/components/founder/SetupAutofillCard";
+import CanonicalCampaignNotice, { useCanonicalCampaign } from "@/components/founder/CanonicalCampaignNotice";
 import KindnessHabitsSummaryCard from "@/components/founder/KindnessHabitsSummaryCard";
 import { KINDNESS_HABITS_BUSINESS_ID } from "@/lib/spokeFeeds";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -45,6 +46,7 @@ export default function BusinessSetupTunnel() {
   const [businessLoadError, setBusinessLoadError] = useState(false);
   const [loadingBiz, setLoadingBiz] = useState(true);
   const [state, setState] = useState<TunnelState | null>(null);
+  const canonicalCampaign = useCanonicalCampaign(state?.businessId && !state.businessId.startsWith("draft:") ? state.businessId : null);
   const [syncing, setSyncing] = useState(false);
   const [stepIdx, setStepIdx] = useState(0);
   const [newName, setNewName] = useState("");
@@ -445,7 +447,9 @@ export default function BusinessSetupTunnel() {
               {fields.map((f) => (
                 <div key={f.key}>
                   <Label>{f.label}</Label>
-                  {f.long
+                  {stepDef.key === "sales" && f.key === "email_drafts" && canonicalCampaign
+                    ? <CanonicalCampaignNotice campaign={canonicalCampaign} oldText={stepState.fields[f.key] || ""} />
+                    : f.long
                     ? <Textarea rows={2} value={stepState.fields[f.key] || ""} onChange={(e) => updateField(stepDef.key, f.key, e.target.value)} />
                     : <Input value={stepState.fields[f.key] || ""} onChange={(e) => updateField(stepDef.key, f.key, e.target.value)} />}
                 </div>

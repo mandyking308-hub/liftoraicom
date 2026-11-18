@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { renderStepPreview, footerQa } from "@/lib/kindnesss/emailPreview";
+import { splitKindnesssCampaigns } from "@/lib/kindnesss/currentCampaign";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 // Founder-only, read-only review of the Kindnesss launch kit saved in existing
@@ -15,7 +16,6 @@ type Step = { step: number; day: number; subject: string; body: string; cta_url?
 type Draft = { id: string; campaign_name: string; campaign_key: string | null; status: string; external_send_blocked: boolean; email_sequence: any };
 type Post = { id: string; platform_key: string; post_date: string; suggested_time: string; content_pillar: string; post_type: string; caption: string; cta: string; hashtags: string[]; visual_direction: string; asset_requirements: string[]; approval_status: string; metadata: any };
 
-const plain = (b: string) => b.replace(/<table[\s\S]*<\/table>/, "[unsubscribe box]");
 
 export default function KindnesssLaunchKitPanel() {
   const [brief, setBrief] = useState<any>(null);
@@ -28,7 +28,7 @@ export default function KindnesssLaunchKitPanel() {
       const db = supabase as any;
       const [b, d, p] = await Promise.all([
         db.from("marketing_campaign_briefs").select("id,campaign_name,approval_status,launch_allowed,metadata").eq("id", KIT_BRIEF_ID).maybeSingle(),
-        db.from("outreach_campaign_drafts").select("id,campaign_name,campaign_key,status,external_send_blocked,email_sequence").eq("business_id", KINDNESSS_ID).not("campaign_key", "is", null).order("campaign_name"),
+        db.from("outreach_campaign_drafts").select("id,campaign_name,campaign_key,status,external_send_blocked,email_sequence").eq("business_id", KINDNESSS_ID).order("campaign_name"),
         db.from("social_post_drafts").select("*").eq("business_id", KINDNESSS_ID).filter("metadata->>kit", "eq", "KINDNESSS_LAUNCH_KIT_2026_11").order("post_date"),
       ]);
       if (b.error || d.error || p.error) setError((b.error || d.error || p.error).message);
@@ -41,9 +41,8 @@ export default function KindnesssLaunchKitPanel() {
   const m = brief.metadata ?? {};
   const defs: Record<string, string> = m.reason_code_definitions ?? {};
 
-  const stepsOf = (d: Draft): { label: string; steps: Step[] }[] => {
-    return [{ label: d.status === "archived" ? "Archived steps (history only)" : "Current steps", steps: (d.email_sequence?.steps ?? []) as Step[] }];
-  };
+  const { current, superseded } = splitKindnesssCampaigns(drafts);
+  const stepsOf = (d: Draft): { label: string; steps: Step[] }[] => [{ label: "Approved emails", steps: (d.email_sequence?.steps ?? []) as Step[] }];
 
   return (
     <Card>
@@ -56,6 +55,65 @@ export default function KindnesssLaunchKitPanel() {
         <p className="text-sm text-muted-foreground">{m.central_message}</p>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
+        <div data-testid="kindnesss-current-campaign">
+          <h3 className="mb-2 flex flex-wrap items-center gap-2 font-medium">Current four-email campaign <Badge variant="destructive">DRAFT, NOT SENT</Badge></h3>
+          {!current && <p className="text-destructive">The approved four-email campaign could not be found.</p>}
+          {current && (
+            <ol className="mb-2 list-decimal pl-5">
+              {((current.email_sequence?.steps ?? []) as Step[]).map((s) => <li key={s.step}>{s.subject}</li>)}
+            </ol>
+          )}
+          <Accordion type="multiple" defaultValue={current ? [current.id] : []}>
+          {current && [current].map((d) => (
+            <AccordionItem key={d.id} value={d.id}>
+              <AccordionTrigger>The one current campaign: {d.campaign_name} · DRAFT, NOT SENT</AccordionTrigger>
+              <AccordionContent>
+                {d.status !== "archived" && d.email_sequence?.metadata?.branding_footer_qa && (
+                  <div className="mb-3 rounded-md border border-border p-2 space-y-1">
+                    <div className="flex flex-wrap items-center gap-2 font-medium">Branding and footer QA <Badge variant="outline">{d.email_sequence.metadata.branding_footer_qa.status}</Badge></div>
+                    <div className="text-xs text-muted-foreground">{d.email_sequence.metadata.branding_footer_qa.signature_strategy_reason}</div>
+                    <div className="text-xs"><span className="text-destructive font-medium">Postal address: {d.email_sequence.metadata.branding_footer_qa.postal_address_status}</span> — {d.email_sequence.metadata.branding_footer_qa.postal_address_note}</div>
+                    <div className="flex flex-wrap gap-1">{(d.email_sequence.metadata.branding_footer_qa.send_blockers ?? []).map((b: string) => <Badge key={b} variant="destructive">{b}</Badge>)}</div>
+                  </div>
+                )}
+                {stepsOf(d).map((g) => (
+                  <div key={g.label} className="mb-3">
+                    <div className="mb-1 text-muted-foreground">{g.label} · {g.steps.length} emails</div>
+                    {g.steps.map((s) => (
+                      <div key={s.step} className="mb-2 rounded-md border border-border p-2">
+                        <div className="font-medium">Day {s.day ?? "?"} · {s.subject || "(same thread)"}</div>
+                        {(() => {
+                          const qa = footerQa(s.body);
+                          const ok = qa.signoffs === 1 && qa.unsubscribeTags === 1 && qa.signaturePlaceholders === 0 && qa.hasCompanyAttribution && qa.hasLogo && qa.disclaimers === 4 && !qa.forbiddenSchoolText;
+                          return (
+                            <div className="mt-2 space-y-2">
+                              <div className="flex flex-wrap gap-1">
+                                <Badge variant={ok ? "secondary" : "destructive"}>{ok ? "Footer QA pass" : "Footer QA fail"}</Badge>
+                                <Badge variant="outline">sign-offs {qa.signoffs}</Badge>
+                                <Badge variant="outline">unsubscribe tags {qa.unsubscribeTags}</Badge>
+                                <Badge variant="outline">%signature% {qa.signaturePlaceholders}</Badge>
+                                <Badge variant="outline">links {qa.links.length}</Badge>
+                                <Badge variant="outline">logo {qa.hasLogo ? "PNG" : "missing"}</Badge>
+                                <Badge variant="outline">disclaimers {qa.disclaimers}/4</Badge>
+                              </div>
+                              <div className="text-xs text-muted-foreground">Preview only (first name fallback "there"). Nothing is sent.</div>
+                              <div className="flex flex-wrap gap-3">
+                                <iframe title={`Email ${s.step} desktop preview`} sandbox="" srcDoc={renderStepPreview(s.body)} className="h-[520px] w-full max-w-[620px] rounded-md border border-border bg-background" />
+                                <iframe title={`Email ${s.step} mobile preview`} sandbox="" srcDoc={renderStepPreview(s.body)} className="h-[520px] w-[375px] rounded-md border border-border bg-background" />
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+          </Accordion>
+        </div>
+
         <div>
           <h3 className="mb-2 font-medium">Streams and blockers</h3>
           <ul className="space-y-2">
@@ -88,55 +146,17 @@ export default function KindnesssLaunchKitPanel() {
             </AccordionContent>
           </AccordionItem>
 
-          {[...drafts.filter((d) => d.status !== "archived"), ...drafts.filter((d) => d.status === "archived")].map((d) => (
-            <AccordionItem key={d.id} value={d.id}>
-              <AccordionTrigger className={d.status === "archived" ? "text-muted-foreground" : ""}>{d.status === "archived" ? "History: " : "Current email campaign: "}{d.campaign_name} · {d.status}{d.external_send_blocked ? " · blocked" : ""}</AccordionTrigger>
+          {superseded.length > 0 && (
+            <AccordionItem value="superseded">
+              <AccordionTrigger className="text-muted-foreground">Superseded / not used — history only ({superseded.length})</AccordionTrigger>
               <AccordionContent>
-                {d.status !== "archived" && d.email_sequence?.metadata?.branding_footer_qa && (
-                  <div className="mb-3 rounded-md border border-border p-2 space-y-1">
-                    <div className="flex flex-wrap items-center gap-2 font-medium">Branding and footer QA <Badge variant="outline">{d.email_sequence.metadata.branding_footer_qa.status}</Badge></div>
-                    <div className="text-xs text-muted-foreground">{d.email_sequence.metadata.branding_footer_qa.signature_strategy_reason}</div>
-                    <div className="text-xs"><span className="text-destructive font-medium">Postal address: {d.email_sequence.metadata.branding_footer_qa.postal_address_status}</span> — {d.email_sequence.metadata.branding_footer_qa.postal_address_note}</div>
-                    <div className="flex flex-wrap gap-1">{(d.email_sequence.metadata.branding_footer_qa.send_blockers ?? []).map((b: string) => <Badge key={b} variant="destructive">{b}</Badge>)}</div>
-                  </div>
-                )}
-                {stepsOf(d).map((g) => (
-                  <div key={g.label} className="mb-3">
-                    <div className="mb-1 text-muted-foreground">{g.label} · {g.steps.length} emails</div>
-                    {g.steps.map((s) => (
-                      <div key={s.step} className="mb-2 rounded-md border border-border p-2">
-                        <div className="font-medium">Day {s.day ?? "?"} · {s.subject || "(same thread)"}</div>
-                        {d.status === "archived" ? (
-                          <pre className="mt-1 whitespace-pre-wrap font-sans text-muted-foreground">{plain(s.body)}</pre>
-                        ) : (() => {
-                          const qa = footerQa(s.body);
-                          const ok = qa.signoffs === 1 && qa.unsubscribeTags === 1 && qa.signaturePlaceholders === 0 && qa.hasCompanyAttribution && qa.hasLogo && qa.disclaimers === 4 && !qa.forbiddenSchoolText;
-                          return (
-                            <div className="mt-2 space-y-2">
-                              <div className="flex flex-wrap gap-1">
-                                <Badge variant={ok ? "secondary" : "destructive"}>{ok ? "Footer QA pass" : "Footer QA fail"}</Badge>
-                                <Badge variant="outline">sign-offs {qa.signoffs}</Badge>
-                                <Badge variant="outline">unsubscribe tags {qa.unsubscribeTags}</Badge>
-                                <Badge variant="outline">%signature% {qa.signaturePlaceholders}</Badge>
-                                <Badge variant="outline">links {qa.links.length}</Badge>
-                                <Badge variant="outline">logo {qa.hasLogo ? "PNG" : "missing"}</Badge>
-                                <Badge variant="outline">disclaimers {qa.disclaimers}/4</Badge>
-                              </div>
-                              <div className="text-xs text-muted-foreground">Preview only (first name fallback "there"). Nothing is sent.</div>
-                              <div className="flex flex-wrap gap-3">
-                                <iframe title={`Email ${s.step} desktop preview`} sandbox="" srcDoc={renderStepPreview(s.body)} className="h-[520px] w-full max-w-[620px] rounded-md border border-border bg-background" />
-                                <iframe title={`Email ${s.step} mobile preview`} sandbox="" srcDoc={renderStepPreview(s.body)} className="h-[520px] w-[375px] rounded-md border border-border bg-background" />
-                              </div>
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    ))}
-                  </div>
-                ))}
+                <p className="mb-2 text-muted-foreground">These older drafts are kept for the record. They are superseded, not used and cannot be sent.</p>
+                <ul className="space-y-1 text-muted-foreground">
+                  {superseded.map((d) => <li key={d.id}>{d.campaign_name} · {d.status} · superseded/not used</li>)}
+                </ul>
               </AccordionContent>
             </AccordionItem>
-          ))}
+          )}
 
           <AccordionItem value="social">
             <AccordionTrigger>Social calendar ({posts.length} posts, UK time, not scheduled)</AccordionTrigger>

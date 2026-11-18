@@ -14,8 +14,10 @@ vi.mock("@/integrations/supabase/client", () => ({
       const q: any = {
         select: () => q,
         eq: (k: string, v: any) => { filters.push([k, v]); return q; },
+        not: (k: string, _op: string, v: string) => { const bad = v.replace(/[()]/g, "").split(","); filters.push([k, { notIn: bad }]); return q; },
+        order: () => q,
         limit: async () => ({
-          data: (db.rows[table] ?? []).filter((r) => filters.every(([k, v]) => r[k] === v)),
+          data: (db.rows[table] ?? []).filter((r) => filters.every(([k, v]) => (v && v.notIn ? !v.notIn.includes(r[k]) : r[k] === v))),
           error: db.failTable === table ? { message: `column "x" of relation "${table}" does not exist` } : null,
         }),
         insert: (row: any) => ({
@@ -184,5 +186,15 @@ describe("one company setup synchronisation", () => {
     const runtime = attempts.find((x) => x.table === "business_runtime_activation")!.payload;
     expect(runtime).not.toHaveProperty("runtime_mode");
     expect(runtime).not.toHaveProperty("is_live");
+  });
+  it("reuses an existing approved campaign instead of creating a setup duplicate", async () => {
+    db.rows.outreach_campaign_drafts = [
+      { id: "canonical", business_id: BIZ, campaign_key: "approved-campaign", status: "draft", email_sequence: { steps: [1, 2, 3, 4] } },
+      { id: "old-setup", business_id: BIZ, campaign_key: `setup_tunnel_${BIZ}`, status: "archived", email_sequence: [{ body: "old" }] },
+    ];
+    const out = await promoteIntoLiftorModules(state());
+    expect(db.rows.outreach_campaign_drafts).toHaveLength(2);
+    expect(db.rows.outreach_campaign_drafts[1].email_sequence).toEqual([{ body: "old" }]);
+    expect(out.email_outreach.records.find((r: any) => r.table === "outreach_campaign_drafts")?.record_id).toBe("canonical");
   });
 });

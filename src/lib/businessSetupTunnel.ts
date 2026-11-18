@@ -473,13 +473,34 @@ const yesField = (state: TunnelState, step: StepKey, key: string): boolean | nul
 
 const textLines = (value: string): string[] => value.split(/\r?\n/).map((v) => v.trim()).filter(Boolean);
 
-const emailDrafts = (state: TunnelState): Record<string, unknown>[] =>
-  fld(state, "sales", "email_drafts")
-    .split(/\n\s*\n/)
-    .map((body) => body.trim())
+/**
+ * Parse pasted email copy into whole emails. When the text contains explicit
+ * "EMAIL 1" / "Email 2:" markers, each marked block is ONE email (subject read
+ * from a "Subject:" line). Only unmarked text falls back to blank-line splits.
+ * Splitting marked emails by paragraph is what produced fragment "emails".
+ */
+export function parseEmailDrafts(raw: string): Record<string, unknown>[] {
+  const text = (raw || "").replace(/\r\n/g, "\n");
+  const marker = /^\s*(?:#+\s*)?(?:\*\*)?\s*(?:EMAIL|Email|email|TOUCH|Touch|STEP|Step)\s*(\d+)\b/gm;
+  const hits = [...text.matchAll(marker)];
+  let blocks: string[];
+  if (hits.length > 0) {
+    blocks = hits.map((m, i) => text.slice((m.index ?? 0) + m[0].length, i + 1 < hits.length ? hits[i + 1].index : text.length).trim());
+  } else {
+    blocks = text.split(/\n\s*\n/).map((b) => b.trim());
+  }
+  return blocks
     .filter(Boolean)
     .slice(0, 5)
-    .map((body, index) => ({ step: index + 1, subject: `Email ${index + 1}`, body, status: "draft" }));
+    .map((block, index) => {
+      const sub = block.match(/Subject(?:\*\*)?\s*:\s*(.+)$/im);
+      const lines = block.split("\n");
+      const body = sub ? lines.filter((l) => !l.includes(sub[0])).join("\n").trim() : block;
+      return { step: index + 1, subject: sub ? sub[1].trim() : `Email ${index + 1}`, body, status: "draft" };
+    });
+}
+
+const emailDrafts = (state: TunnelState): Record<string, unknown>[] => parseEmailDrafts(fld(state, "sales", "email_drafts"));
 
 export function buildPromoteAttempts(state: TunnelState): PromoteAttempt[] {
   const bizId = state.businessId;
@@ -1008,6 +1029,22 @@ export function buildPromoteAttempts(state: TunnelState): PromoteAttempt[] {
   return attempts;
 }
 
+/**
+ * A business that already has its own (non-setup) current campaign draft keeps
+ * it as the single campaign: setup never creates or rewrites a parallel one.
+ */
+export async function findCanonicalCampaign(businessId: string): Promise<string | null> {
+  const { data, error } = await (supabase.from("outreach_campaign_drafts" as any) as any)
+    .select("id,campaign_key,status")
+    .eq("business_id", businessId)
+    .not("status", "in", "(archived,inactive,superseded)")
+    .order("updated_at", { ascending: false })
+    .limit(20);
+  if (error) throw new Error(error.message);
+  const row = ((data as any[]) ?? []).find((r) => r.campaign_key && !String(r.campaign_key).startsWith("setup_tunnel_"));
+  return row?.id ?? null;
+}
+
 /** Insert once, then refresh only safe internal fields on subsequent runs. */
 async function ensureRecord(a: PromoteAttempt): Promise<EnsureResult> {
   let q = (supabase.from(a.table as any) as any).select("*");
@@ -1060,6 +1097,13 @@ export async function promoteIntoLiftorModules(state: TunnelState): Promise<Modu
       continue;
     }
     try {
+      if (a.table === "outreach_campaign_drafts") {
+        const canonical = await findCanonicalCampaign(state.businessId);
+        if (canonical) {
+          areaRecords.push({ table: a.table, record_id: canonical, action: "reused", note: "Linked to this business's existing approved campaign draft. No setup copy was imported and no duplicate campaign was created." });
+          continue;
+        }
+      }
       const result = await ensureRecord(a);
       areaRecords.push({ table: a.table, record_id: result.id, action: result.action, note: a.note });
     } catch (e) {
