@@ -1,4 +1,6 @@
 import { corsHeaders, json, requireFounder } from "../_shared/socialAuth.ts";
+import { pickAllowedRecord } from "../_shared/writeFieldAllowlist.ts";
+const STEP_FIELDS = ['step_order','step_type','step_name','message_text','button_label','button_url','expected_response_type','routing_condition','escalation_required','founder_review_required','metadata'] as const;
 import { buildStepsFromBlueprint, SAFETY_FLAGS } from "../_shared/socialEngagementLogic.ts";
 const PHRASE = "CREATE SOCIAL DM FLOW BLUEPRINT";
 Deno.serve(async (req) => {
@@ -37,8 +39,13 @@ Deno.serve(async (req) => {
   }
   const { data: flow, error } = await a.admin.from("social_dm_flow_blueprints").insert(bp).select().maybeSingle();
   if (error || !flow) return json({ ok: false, error: error?.message ?? "flow_failed" }, 500);
-  const stepRows = (steps && Array.isArray(steps) && steps.length ? steps : buildStepsFromBlueprint(flow))
-    .map((s: any) => ({ ...s, business_id, flow_id: flow.id, is_test_data }));
+  const sourceSteps = (Array.isArray(steps) && steps.length ? steps.slice(0, 50) : buildStepsFromBlueprint(flow));
+  const stepRows: Record<string, any>[] = [];
+  for (const s of sourceSteps) {
+    const picked = pickAllowedRecord(s, STEP_FIELDS);
+    if (!picked.ok) return json({ ok: false, error: picked.error, rejected_fields: picked.rejected_fields, flow_id: flow.id }, 400);
+    stepRows.push({ ...picked.record, business_id, flow_id: flow.id, status: "draft", is_test_data });
+  }
   if (stepRows.length) await a.admin.from("social_dm_flow_steps").insert(stepRows);
   if (bp.keyword_rule_id) {
     await a.admin.from("social_keyword_trigger_rules").update({ flow_id: flow.id }).eq("id", bp.keyword_rule_id);

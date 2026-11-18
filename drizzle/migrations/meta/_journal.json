@@ -204,6 +204,13 @@
       "when": 1794930006787,
       "tag": "0028_public_proposal_submission_rpc",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1795012058472,
+      "tag": "0029_proposal_token_status_filter",
+      "breakpoints": true
     }
   ]
 }

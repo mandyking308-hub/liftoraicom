@@ -1,4 +1,6 @@
 import { corsHeaders, json, requireFounder } from "../_shared/socialAuth.ts";
+import { pickAllowedRecord } from "../_shared/writeFieldAllowlist.ts";
+const MAP_FIELDS = ['content_pack_id','content_item_id','content_variant_id','asset_id','map_role','funnel_stage','customer_journey_stage','platform','priority_score','notes','metadata'] as const;
 
 const CONFIRM = "CREATE SOCIAL CAMPAIGN CONTENT MAP";
 
@@ -14,9 +16,13 @@ Deno.serve(async (req) => {
   if (!dry_run && body.confirmation_phrase !== CONFIRM)
     return json({ ok: false, error: `confirmation_phrase_required:${CONFIRM}` }, 400);
 
-  const rows = mappings.map((m: any) => ({
-    ...m, business_id, campaign_plan_id, is_test_data: !!body.is_test_data,
-  }));
+  if (!Array.isArray(mappings) || mappings.length > 500) return json({ ok: false, error: "mappings_must_be_array_max_500" }, 400);
+  const rows: Record<string, any>[] = [];
+  for (const m of mappings) {
+    const picked = pickAllowedRecord(m, MAP_FIELDS);
+    if (!picked.ok) return json({ ok: false, error: picked.error, rejected_fields: picked.rejected_fields }, 400);
+    rows.push({ ...picked.record, business_id, campaign_plan_id, status: "planned", is_test_data: !!body.is_test_data });
+  }
   if (dry_run) return json({ ok: true, dry_run: true, would_insert: rows.length, sample: rows.slice(0, 3) });
 
   const { data, error } = await admin.from("social_campaign_content_map").insert(rows).select("id");

@@ -6,6 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
 
+const escapeHtml = (v: string) => v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 const html = (title: string, body: string, ok = true) => `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><meta name="robots" content="noindex"><style>body{font-family:system-ui,sans-serif;background:#0b1020;color:#e5ecff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}main{max-width:480px;padding:32px;border:1px solid #1e2a4a;border-radius:12px;background:#111733}h1{font-size:20px;margin:0 0 8px;color:${ok ? "#7ee0a8" : "#ff8b8b"}}p{margin:8px 0;color:#9fb0d8;font-size:14px}</style></head><body><main><h1>${title}</h1>${body}</main></body></html>`;
 
 Deno.serve(async (req) => {
@@ -72,7 +73,7 @@ Deno.serve(async (req) => {
   return new Response(
     html(
       "You've been unsubscribed",
-      `<p>The address <strong>${contact.email}</strong> has been removed from all Liftor outreach.</p><p>You won't receive further emails from us. If this was a mistake, just reply to any prior email and we'll restore it.</p>`
+      `<p>The address <strong>${escapeHtml(String(contact.email ?? ""))}</strong> has been removed from all Liftor outreach.</p><p>You won't receive further emails from us. If this was a mistake, just reply to any prior email and we'll restore it.</p>`
     ),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" } }
   );

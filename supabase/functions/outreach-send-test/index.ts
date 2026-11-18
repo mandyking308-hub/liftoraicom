@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
     const fromEmail = (c.from_email as string) || (c.smtp_username as string);
     const fromName = (c.from_name as string) || "";
     const replyTo = (c.reply_to_email as string) || fromEmail;
-    console.log("[send-test] smtp config host=", c.smtp_host, " port=", port, " ssl=", isSSL, " user=", c.smtp_username);
+    console.log("[send-test] smtp config host=", c.smtp_host, " port=", port, " ssl=", isSSL, " user_present=", Boolean(c.smtp_username));
 
     let result: { ok: boolean; error?: string; code?: string; messageId?: string } = { ok: false };
 

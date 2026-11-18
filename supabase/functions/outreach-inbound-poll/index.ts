@@ -1036,12 +1036,24 @@ async function recordInboundPoll(
   }
 }
 
+const LOG_REDACT_KEYS = /(from|sender|to|recipient|email|address|subject|username|user|mailbox)/i;
+function redactLogData(data?: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data ?? {})) {
+    if (k === "inbox_id") { out[k] = v; continue; }
+    if (LOG_REDACT_KEYS.test(k) && v != null && typeof v !== "boolean" && typeof v !== "number") {
+      out[`${k}_present`] = true;
+    } else out[k] = v;
+  }
+  return out;
+}
+
 function logPoll(inboxId: string | undefined, stage: string, event: string, data?: Record<string, unknown>) {
   console.log(`[outreach-inbound-poll] ${JSON.stringify({
     inbox_id: inboxId ?? null,
     stage,
     event,
-    ...data,
+    ...redactLogData(data),
   })}`);
 }
 

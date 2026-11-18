@@ -16,7 +16,6 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   const target = url.searchParams.get("u");
   const t = url.searchParams.get("t");
-  const q = url.searchParams.get("q");
 
   if (!target) {
     return new Response(JSON.stringify({ error: "missing u" }), {
@@ -35,6 +34,16 @@ Deno.serve(async (req) => {
     });
   }
 
+  const allowedHosts = (Deno.env.get("TRACK_CLICK_ALLOWED_HOSTS") ??
+    "liftorai.com,joinkindnesss.com,kindnesss.com,global-solutions-management.com")
+    .split(",").map((h) => h.trim().toLowerCase()).filter(Boolean);
+  const host = safe.hostname.toLowerCase();
+  if (!allowedHosts.some((h) => host === h || host.endsWith(`.${h}`))) {
+    return new Response(JSON.stringify({ error: "destination not allowed" }), {
+      status: 400, headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const supa = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -46,12 +55,9 @@ Deno.serve(async (req) => {
         .select("id, contact_id, campaign_id, business_name")
         .eq("tracking_token", t).maybeSingle();
       row = data;
-    } else if (q) {
-      const { data } = await supa.from("email_queue")
-        .select("id, contact_id, campaign_id, business_name")
-        .eq("id", q).maybeSingle();
-      row = data;
     }
+    // Only record clicks tied to a valid, unguessable tracking token.
+    if (!row) throw new Error("no_valid_token");
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "";
     const ua = req.headers.get("user-agent") || "";
     await supa.from("email_tracking_events").insert({

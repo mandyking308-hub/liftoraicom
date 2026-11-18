@@ -93,7 +93,13 @@ const FounderManual = () => {
   const handleExportPDF = () => {
     const md = generateManualMarkdown(d);
     // Convert markdown to simple HTML for print
-    const html = md
+    const escaped = md
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+    const html = escaped
       .replace(/^### (.*$)/gm, '<h3>$1</h3>')
       .replace(/^## (.*$)/gm, '<h2>$1</h2>')
       .replace(/^# (.*$)/gm, '<h1>$1</h1>')

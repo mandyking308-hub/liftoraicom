@@ -132,7 +132,7 @@ Deno.serve(async (req) => {
       inbox_id,
       found: Boolean(inbox),
       inbound_provider: inbox?.inbound_provider ?? null,
-      monitored_mailbox: inbox?.monitored_mailbox ?? null,
+      monitored_mailbox_present: Boolean(inbox?.monitored_mailbox),
     }));
 
     if (inboxError) {
@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
       host,
       port,
       secure,
-      username,
+      username_present: Boolean(username),
       reuseSmtpPassword: Boolean(c.imap_password),
     }));
 

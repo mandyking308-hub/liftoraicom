@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
         const email = (ix as any)?.email_address?.toLowerCase() ?? "";
         const active = (ix as any)?.active === true;
         if (email !== "hello@neoncandy.online" || !active) {
-          console.error("NEONCANDY_INVALID_INBOX", { contact: cid, resolved: email, active });
+          console.error("NEONCANDY_INVALID_INBOX", { contact: cid, resolved_present: Boolean(email), active });
           continue; // skip this contact entirely
         }
       }

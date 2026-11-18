@@ -45,7 +45,18 @@ Deno.serve(async (req) => {
     return json({ error: "Invalid request", details: (e as Error).message }, 400);
   }
 
-  let customerId = body.stripe_customer_id ?? null;
+  let customerId: string | null = null;
+  if (body.stripe_customer_id) {
+    // Only allow Stripe customers that Liftor itself recorded on a payment.
+    const { data: known } = await admin
+      .from("qtc_payments")
+      .select("stripe_customer_id")
+      .eq("stripe_customer_id", body.stripe_customer_id)
+      .limit(1)
+      .maybeSingle();
+    if (!known) return json({ error: "Unknown Stripe customer" }, 403);
+    customerId = known.stripe_customer_id;
+  }
   if (!customerId && body.qtc_payment_id) {
     const { data: pay } = await admin
       .from("qtc_payments")

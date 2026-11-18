@@ -34,7 +34,22 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages } = await req.json();
+    const rawBody = await req.json().catch(() => ({}));
+    const rawMessages = Array.isArray(rawBody?.messages) ? rawBody.messages : null;
+    if (!rawMessages || rawMessages.length === 0 || rawMessages.length > 50) {
+      return new Response(JSON.stringify({ error: "messages must be a non-empty array (max 50)" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const messages: { role: "user" | "assistant"; content: string }[] = [];
+    for (const m of rawMessages) {
+      if (!m || (m.role !== "user" && m.role !== "assistant") || typeof m.content !== "string" || m.content.length > 20000) {
+        return new Response(JSON.stringify({ error: "Only user/assistant text messages are allowed" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      messages.push({ role: m.role, content: m.content });
+    }
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
