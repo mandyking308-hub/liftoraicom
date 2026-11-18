@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
   let body: any;
   try { body = await req.json(); } catch { return json({ error: "invalid_json" }, 400); }
   const websiteUrl = typeof body?.website_url === "string" ? body.website_url.slice(0, 500) : "";
-  const manualText = typeof body?.manual_text === "string" ? body.manual_text.slice(0, 120000) : "";
+  const manualText = typeof body?.manual_text === "string" ? body.manual_text.slice(0, 200000) : "";
   const pdf = typeof body?.manual_pdf_base64 === "string" ? body.manual_pdf_base64 : "";
   const filename = typeof body?.manual_filename === "string" ? body.manual_filename.slice(0, 200) : "manual.pdf";
   const fields = body?.fields;
