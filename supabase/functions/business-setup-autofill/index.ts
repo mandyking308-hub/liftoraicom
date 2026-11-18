@@ -29,6 +29,24 @@ function htmlToText(html: string): string {
 }
 
 async function fetchPage(u: URL): Promise<{ text: string; html: string } | null> {
+  const lov = Deno.env.get("LOVABLE_API_KEY"), fc = Deno.env.get("FIRECRAWL_API_KEY");
+  if (lov && fc) {
+    // Rendered read: many sites build their text in the browser, so a plain fetch only sees the title.
+    try {
+      const r = await fetch("https://connector-gateway.lovable.dev/firecrawl/v2/scrape", {
+        method: "POST", signal: AbortSignal.timeout(45000),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${lov}`, "X-Connection-Api-Key": fc },
+        body: JSON.stringify({ url: u.toString(), formats: ["markdown", "links"], onlyMainContent: false }),
+      });
+      if (r.ok) {
+        const d = (await r.json())?.data;
+        if (d?.markdown) {
+          const html = (d.links ?? []).map((l: string) => `href="${l}"`).join(" ");
+          return { text: String(d.markdown).replace(/\s+/g, " ").trim(), html };
+        }
+      } else console.error("firecrawl", r.status, (await r.text()).slice(0, 300));
+    } catch (e) { console.error("firecrawl error", e); }
+  }
   try {
     const r = await fetch(u.toString(), { redirect: "follow", signal: AbortSignal.timeout(12000), headers: { "User-Agent": "LiftorSetupReader/1.0" } });
     if (!r.ok || !(r.headers.get("content-type") ?? "").includes("html")) return null;
@@ -51,11 +69,10 @@ async function readWebsite(raw: string): Promise<{ text: string; pages: string[]
       if (l.hostname === start.hostname && /about|pricing|price|product|service|feature|faq|contact|team|school|how|plan|terms|privacy|refund/i.test(l.pathname)) links.add(l.origin + l.pathname);
     } catch { /* skip */ }
   }
-  for (const l of [...links].slice(0, 8)) {
-    const p = await fetchPage(new URL(l));
-    if (p?.text) { pages.push(l); text += `\n\nPAGE ${l}\n${p.text.slice(0, 6000)}`; }
-  }
-  return { text: text.slice(0, 60000), pages };
+  const sub = [...links].filter((l) => l !== start.origin + start.pathname).slice(0, 10);
+  const got = await Promise.all(sub.map((l) => fetchPage(new URL(l))));
+  got.forEach((p, i) => { if (p?.text) { pages.push(sub[i]); text += `\n\nPAGE ${sub[i]}\n${p.text.slice(0, 8000)}`; } });
+  return { text: text.slice(0, 90000), pages };
 }
 
 Deno.serve(async (req) => {
