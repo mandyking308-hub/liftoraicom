@@ -63,16 +63,35 @@ async function readWebsite(raw: string): Promise<{ text: string; pages: string[]
   const pages = [start.toString()];
   let text = `PAGE ${start}\n${home.text.slice(0, 15000)}`;
   const links = new Set<string>();
-  for (const m of home.html.matchAll(/href=["']([^"'#]+)["']/gi)) {
+  const add = (href: string) => {
     try {
-      const l = new URL(m[1], start);
-      if (l.hostname === start.hostname && /about|pricing|price|product|service|feature|faq|contact|team|school|how|plan|terms|privacy|refund/i.test(l.pathname)) links.add(l.origin + l.pathname);
+      const l = new URL(href, start);
+      if (l.hostname.replace(/^www\./, "") !== start.hostname.replace(/^www\./, "")) return;
+      if (/\.(png|jpe?g|gif|svg|webp|ico|css|js|zip|mp4|xml)$/i.test(l.pathname)) return;
+      if (/login|signin|sign-in|signup|auth|account|cart|checkout|dashboard/i.test(l.pathname)) return;
+      links.add(l.origin + l.pathname.replace(/\/$/, ""));
     } catch { /* skip */ }
+  };
+  // Discover the whole site (sitemap + links), not just pages linked from the home page.
+  const lov = Deno.env.get("LOVABLE_API_KEY"), fc = Deno.env.get("FIRECRAWL_API_KEY");
+  if (lov && fc) {
+    try {
+      const r = await fetch("https://connector-gateway.lovable.dev/firecrawl/v2/map", {
+        method: "POST", signal: AbortSignal.timeout(30000),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${lov}`, "X-Connection-Api-Key": fc },
+        body: JSON.stringify({ url: start.toString(), limit: 200, includeSubdomains: false }),
+      });
+      if (r.ok) for (const l of (await r.json())?.links ?? []) add(typeof l === "string" ? l : l?.url);
+      else console.error("firecrawl map", r.status, (await r.text()).slice(0, 300));
+    } catch (e) { console.error("firecrawl map error", e); }
   }
-  const sub = [...links].filter((l) => l !== start.origin + start.pathname).slice(0, 10);
-  const got = await Promise.all(sub.map((l) => fetchPage(new URL(l))));
-  got.forEach((p, i) => { if (p?.text) { pages.push(sub[i]); text += `\n\nPAGE ${sub[i]}\n${p.text.slice(0, 8000)}`; } });
-  return { text: text.slice(0, 90000), pages };
+  for (const m of home.html.matchAll(/href=["']([^"'#]+)["']/gi)) add(m[1]);
+  const homeKey = start.origin + start.pathname.replace(/\/$/, "");
+  const sub = [...links].filter((l) => l !== homeKey).slice(0, 30);
+  const got: ({ text: string } | null)[] = [];
+  for (let i = 0; i < sub.length; i += 10) got.push(...await Promise.all(sub.slice(i, i + 10).map((l) => fetchPage(new URL(l)))));
+  got.forEach((p, i) => { if (p?.text) { pages.push(sub[i]); text += `\n\nPAGE ${sub[i]}\n${p.text.slice(0, 6000)}`; } });
+  return { text: text.slice(0, 180000), pages };
 }
 
 Deno.serve(async (req) => {
