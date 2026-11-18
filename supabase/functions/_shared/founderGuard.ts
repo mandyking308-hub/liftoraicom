@@ -25,6 +25,10 @@ export async function founderGuard(req: Request, headers: Record<string, string>
     if (data?.token && safeEqual(cronToken, data.token)) return null;
     return authJson({ ok: false, error: "forbidden" }, 403, headers as typeof callerCorsHeaders);
   }
+  // Liftor's own functions call each other with the server-only service key.
+  const bearer = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "").trim();
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  if (bearer && serviceKey && safeEqual(bearer, serviceKey)) return null;
   const auth = await authorizeFounderOrAdmin(req, headers as typeof callerCorsHeaders);
   return "error" in auth ? auth.error : null;
 }
