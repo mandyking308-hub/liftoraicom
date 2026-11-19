@@ -5,8 +5,22 @@ const footer = '<table><tr><td>A product of Global Solutions Management LLC. To 
 const body = `Dear {{first_name}},\n\nSee https://joinkindnesss.com\n\nKind regards,\n\n${footer}`;
 
 describe("Kindnesss email preview", () => {
-  it("uses 'there' when first name is missing", () => {
-    expect(renderStepPreview(body)).toContain("Dear there,");
+  it("uses the sample name 'Alex' (never 'there') when no sample name is given", () => {
+    const html = renderStepPreview(body);
+    expect(html).toContain("Dear Alex,");
+    expect(html).not.toContain("Dear there");
+    expect(renderStepPreview(body, { firstName: "  " })).toContain("Dear Alex,");
+  });
+  it("uses an edited sample name and escapes it", () => {
+    expect(renderStepPreview(body, { firstName: "Priya" })).toContain("Dear Priya,");
+    expect(renderStepPreview(body, { firstName: "<b>" })).toContain("Dear &lt;b&gt;,");
+  });
+  it("does not modify the stored body", () => {
+    const copy = body;
+    renderStepPreview(body, { firstName: "Sam" });
+    expect(body).toBe(copy);
+    expect(body).toContain("{{first_name}}");
+    expect(body).toContain("%unsubscribe-text%");
   });
   it("renders exactly one unsubscribe link and no raw tags", () => {
     const html = renderStepPreview(body, { firstName: "Sam" });

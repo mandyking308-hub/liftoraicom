@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { renderStepPreview, footerQa } from "@/lib/kindnesss/emailPreview";
+import { renderStepPreview, footerQa, SAMPLE_FIRST_NAME } from "@/lib/kindnesss/emailPreview";
 import { splitKindnesssCampaigns } from "@/lib/kindnesss/currentCampaign";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
@@ -22,6 +22,7 @@ export default function KindnesssLaunchKitPanel() {
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [sampleName, setSampleName] = useState(SAMPLE_FIRST_NAME);
 
   useEffect(() => {
     (async () => {
@@ -96,10 +97,16 @@ export default function KindnesssLaunchKitPanel() {
                                 <Badge variant="outline">logo {qa.hasLogo ? "PNG" : "missing"}</Badge>
                                 <Badge variant="outline">disclaimers {qa.disclaimers}/4</Badge>
                               </div>
-                              <div className="text-xs text-muted-foreground">Preview only (first name fallback "there"). Nothing is sent.</div>
+                              <div className="space-y-1 text-xs text-muted-foreground">
+                                <label className="flex flex-wrap items-center gap-2">
+                                  <span className="font-medium text-foreground">Sample first name — preview only</span>
+                                  <input aria-label="Sample first name — preview only" value={sampleName} onChange={(e) => setSampleName(e.target.value)} maxLength={40} className="h-7 w-32 rounded border border-border bg-background px-2 text-foreground" />
+                                </label>
+                                <div>The saved campaign keeps <code>{"{{first_name}}"}</code>. A real send must use each recipient's own mapped first name; a recipient with no first name needs review instead of being sent "Dear there" or a blank. This sample is not saved and nothing is sent.</div>
+                              </div>
                               <div className="flex flex-wrap gap-3">
-                                <iframe title={`Email ${s.step} desktop preview`} sandbox="" srcDoc={renderStepPreview(s.body)} className="h-[520px] w-full max-w-[620px] rounded-md border border-border bg-background" />
-                                <iframe title={`Email ${s.step} mobile preview`} sandbox="" srcDoc={renderStepPreview(s.body)} className="h-[520px] w-[375px] rounded-md border border-border bg-background" />
+                                <iframe title={`Email ${s.step} desktop preview`} sandbox="" srcDoc={renderStepPreview(s.body, { firstName: sampleName })} className="h-[520px] w-full max-w-[620px] rounded-md border border-border bg-background" />
+                                <iframe title={`Email ${s.step} mobile preview`} sandbox="" srcDoc={renderStepPreview(s.body, { firstName: sampleName })} className="h-[520px] w-[375px] rounded-md border border-border bg-background" />
                               </div>
                             </div>
                           );

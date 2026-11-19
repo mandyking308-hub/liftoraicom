@@ -17,8 +17,11 @@ export function footerQa(body: string) {
   };
 }
 
+// Sample name used only in the founder preview; never stored or sent.
+export const SAMPLE_FIRST_NAME = "Alex";
+
 export function renderStepPreview(body: string, opts: { firstName?: string } = {}) {
-  const name = opts.firstName?.trim() || "there";
+  const name = opts.firstName?.trim() || SAMPLE_FIRST_NAME;
   const filled = body
     .replace(/\{\{\s*first_name\s*\}\}/g, name)
     .replace(/%unsubscribe-text%/g, '<a href="#unsubscribe-preview" style="color:#7A6F76;">Unsubscribe from Kindnesss emails</a>');
