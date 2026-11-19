@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, Search, Download } from "lucide-react";
 import { LIFTOR_SIMPLE_GUIDE, LIFTOR_FULL_GUIDE, LIFTOR_USER_MANUAL_VERSION, NEW_BUSINESS_OPERATING_FLOW, type ManualSection } from "@/lib/liftorUserManualContent";
 import { Link } from "react-router-dom";
+import { LiftorPageGuide } from "./LiftorPageGuide";
 
 const filterSections = (sections: ManualSection[], q: string) => {
   if (!q) return sections;
@@ -55,12 +56,15 @@ export const LiftorUserManualPanel = () => {
           <Badge variant="outline">Full {full.length}</Badge>
         </div>
 
-        <Tabs defaultValue="simple">
+        <Tabs defaultValue="pages">
           <TabsList>
+            <TabsTrigger value="pages">Every page (Nov 2026)</TabsTrigger>
             <TabsTrigger value="simple">Simple Liftor Guide</TabsTrigger>
             <TabsTrigger value="full">Full Operating Manual</TabsTrigger>
             <TabsTrigger value="flow">New business flow</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="pages"><LiftorPageGuide q={q} /></TabsContent>
 
           <TabsContent value="simple">
             <div className="flex justify-end mb-2">

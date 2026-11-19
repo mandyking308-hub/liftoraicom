@@ -1,6 +1,6 @@
 // Liftor User Manual — plain-English operating guide (separate from Founder/Technical Manual)
 
-export const LIFTOR_USER_MANUAL_VERSION = "1.20 — 13 October 2026 operating-state delta (active Kindnesss, ≤5 pilot) · current-state section DB-verified 13 Oct · route operator coverage regenerated at freeze 662f42827f40a253c7b99b954de2aba4fff69f43 (801/801) · older sections historical where they differ";
+export const LIFTOR_USER_MANUAL_VERSION = "2.0 — 19 November 2026: new 'Every page' user guide covers all 14 sections; tabs below are earlier versions kept for history · previously 1.20 — 13 October 2026 operating-state delta (active Kindnesss, ≤5 pilot) · current-state section DB-verified 13 Oct · route operator coverage regenerated at freeze 662f42827f40a253c7b99b954de2aba4fff69f43 (801/801) · older sections historical where they differ";
 
 export interface ManualSection {
   number: number;
