@@ -136,6 +136,29 @@ const OK_IMAP = OK_SMTP;
 const OK_SMARTLEAD = new Set(["connected", "active", "ok", "linked"]);
 const WARM_DONE = new Set(["completed", "complete", "warm", "ready", "finished", "not_required"]);
 const WARMING = new Set(["warming", "in_progress", "running", "started", "active"]);
+
+export const MATURE_WARMUP_MIN_DAYS = 21;
+export const MATURE_WARMUP_MIN_HEALTH = 90;
+
+/**
+ * Winnr keeps warming switched on permanently (maintenance warming), so its live
+ * status never reads "completed". A mailbox whose live Winnr read says warming,
+ * has warmed for at least 21 days and scores at least 90 is stored as "warm".
+ * Anything else keeps the provider status unchanged.
+ */
+export function matureWarmupStatus(
+  status: string | null | undefined,
+  startedAt: string | null | undefined,
+  health: number | null | undefined,
+  now: Date = new Date(),
+): string | null | undefined {
+  if (!WARMING.has(String(status ?? "").trim().toLowerCase())) return status;
+  if (!startedAt || health === null || health === undefined) return status;
+  const started = Date.parse(startedAt);
+  if (!Number.isFinite(started)) return status;
+  const days = (now.getTime() - started) / 86_400_000;
+  return days >= MATURE_WARMUP_MIN_DAYS && health >= MATURE_WARMUP_MIN_HEALTH ? "warm" : status;
+}
 const BAD_HEALTH = new Set(["unhealthy", "critical", "error", "failing", "suspended", "blocked"]);
 
 export function emailDomain(email: string): string {

@@ -16,6 +16,7 @@ import {
 import {
   GSM_OWNER_LEGAL_ENTITY,
   evaluateMailboxReadiness,
+  matureWarmupStatus,
   isExcludedFromGsmEstate,
   stripSecretFields,
 } from "../_shared/gsmSenderEstate.ts";
@@ -422,6 +423,18 @@ Deno.serve(async (req) => {
   for (const m of gsmMailboxes) {
     const { domain, ...rest } = m;
     const warm = warmingByEmail.get(m.email);
+    const { data: prior } = await admin
+      .from("gsm_mailboxes")
+      .select("warmup_started_at")
+      .ilike("email", m.email)
+      .maybeSingle();
+    const warmStatus = warm
+      ? matureWarmupStatus(
+        warm.warmup_status,
+        warm.warmup_started_at ?? (prior as any)?.warmup_started_at ?? null,
+        warm.health_score ?? null,
+      )
+      : undefined;
     const row = stripSecretFields({
       ...rest,
       sending_domain_id: domain ? (domainIdByName.get(domain) ?? null) : null,
@@ -431,7 +444,7 @@ Deno.serve(async (req) => {
       // mailbox payload alone must never downgrade a live warm-up to not_started.
       ...(warm
         ? {
-          warmup_status: warm.warmup_status,
+          warmup_status: warmStatus,
           ...(warm.warmup_started_at ? { warmup_started_at: warm.warmup_started_at } : {}),
           ...(warm.health_score != null ? { health_score: warm.health_score } : {}),
         }

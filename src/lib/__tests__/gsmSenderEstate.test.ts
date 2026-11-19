@@ -347,3 +347,20 @@ describe("Health score gate and Smartlead sender selection", () => {
     expect(GSM_MIN_HEALTH_SCORE).toBe(70);
   });
 });
+
+import { matureWarmupStatus } from "../../../supabase/functions/_shared/gsmSenderEstate";
+describe("matureWarmupStatus (Winnr maintenance warming)", () => {
+  const now = new Date("2026-11-19T00:00:00Z");
+  it("marks 21+ days warming with health 90+ as warm", () => {
+    expect(matureWarmupStatus("warming", "2026-10-29T00:00:00Z", 90, now)).toBe("warm");
+  });
+  it("keeps warming under 21 days", () => {
+    expect(matureWarmupStatus("warming", "2026-11-01T00:00:00Z", 100, now)).toBe("warming");
+  });
+  it("keeps warming when health is below 90", () => {
+    expect(matureWarmupStatus("warming", "2026-09-01T00:00:00Z", 89, now)).toBe("warming");
+  });
+  it("never upgrades not_started", () => {
+    expect(matureWarmupStatus("not_started", "2026-09-01T00:00:00Z", 100, now)).toBe("not_started");
+  });
+});
