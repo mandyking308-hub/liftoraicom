@@ -50,6 +50,46 @@ Deno.serve(async (req) => {
   if (!rs.has("founder") && !rs.has("admin")) return json({ ok: false, error: "forbidden" }, 403);
 
   let input: any = {}; try { input = await req.json(); } catch { /* */ }
+  if (input?.mode === "check" || input?.mode === "start") {
+    if (KEY.length < 8) return json({ ok: false, error: "smartlead_key_missing" }, 412);
+    const [camp, seq, acc, lds] = await Promise.all([sl(`/campaigns/${CAMPAIGN_ID}`, KEY), sl(`/campaigns/${CAMPAIGN_ID}/sequences`, KEY),
+      sl(`/campaigns/${CAMPAIGN_ID}/email-accounts`, KEY), sl(`/campaigns/${CAMPAIGN_ID}/leads?limit=100`, KEY)]);
+    const issues: string[] = [];
+    const status = String(camp.data?.status ?? "").toUpperCase();
+    const steps = (Array.isArray(seq.data) ? seq.data : []).sort((a: any, b: any) => a.seq_number - b.seq_number).map((r: any) => {
+      const v = Array.isArray(r.sequence_variants) && r.sequence_variants[0] ? r.sequence_variants[0] : r;
+      const body = String(v.email_body ?? ""); const subj = String(v.subject ?? "");
+      const c = { n: r.seq_number, subject: subj, delay: r.seq_delay_details?.delay_in_days ?? r.seq_delay_details?.delayInDays,
+        first_name_tag: body.includes("{{first_name}}"), unsubscribe: body.includes("%unsubscribe-text%"),
+        postal_address: /1207 Delaware/i.test(body), leftover_placeholders: (body.match(/\[[A-Z _]+\]|\{\{(?!first_name\}\})[^}]+\}\}/g) ?? []), chars: body.length,
+        text_preview: body.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim().slice(0, 220) };
+      if (!c.first_name_tag) issues.push(`step_${c.n}_no_first_name`); if (!c.unsubscribe) issues.push(`step_${c.n}_no_unsubscribe`);
+      if (!c.postal_address) issues.push(`step_${c.n}_no_postal_address`); if (c.leftover_placeholders.length) issues.push(`step_${c.n}_placeholders`);
+      if (!subj.trim()) issues.push(`step_${c.n}_no_subject`);
+      return c; });
+    if (steps.length !== 4) issues.push(`sequence_count_${steps.length}`);
+    const senders = (Array.isArray(acc.data) ? acc.data : []).map((a: any) => ({ email: a.from_email, smtp_ok: a.is_smtp_success, imap_ok: a.is_imap_success,
+      warmup: a.warmup_details?.status ?? null, reputation: a.warmup_details?.warmup_reputation ?? null, daily_limit: a.message_per_day }));
+    senders.forEach((x: any) => { if (!x.smtp_ok || !x.imap_ok) issues.push(`sender_${mask(x.email)}_connection`); if (/ghat|charit/i.test(x.email)) issues.push("ghat_sender"); });
+    if (!senders.length) issues.push("no_senders");
+    const leads = (lds.data?.data ?? []).map((l: any) => ({ email: mask(String(l?.lead?.email ?? "")), first_name: l?.lead?.first_name ?? null, company: l?.lead?.company_name ?? null, status: l?.status ?? null }));
+    leads.forEach((l: any) => { if (!String(l.first_name ?? "").trim()) issues.push(`lead_${l.email}_no_first_name`); });
+    if (leads.length < 1 || leads.length > 6) issues.push(`lead_count_${leads.length}`);
+    const report = { campaign_status: status, steps, senders, leads, issues, track_settings: camp.data?.track_settings ?? null, stop_lead_settings: camp.data?.stop_lead_settings ?? null, scheduler: camp.data?.scheduler_cron_value ?? null };
+    if (input.mode === "check" || issues.length) return json({ ok: !issues.length, mode: input.mode, started: false, ...report });
+    if (input?.confirm !== `START_PILOT_${CAMPAIGN_ID}`) return json({ ok: false, error: "confirmation_phrase_required" }, 400);
+    if (!WRITABLE.has(status)) return json({ ok: false, error: `status_${status}_not_startable` }, 409);
+    const sched = await sl(`/campaigns/${CAMPAIGN_ID}/schedule`, KEY, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+      timezone: "Europe/London", days_of_the_week: [1, 2, 3, 4, 5], start_hour: "13:00", end_hour: "17:00", min_time_btw_emails: 10, max_new_leads_per_day: 6,
+      schedule_start_time: String(input.start_at) }) });
+    if (!sched.ok) return json({ ok: false, error: "schedule_failed", http: sched.status, provider: sched.data, ...report }, 502);
+    const set = await sl(`/campaigns/${CAMPAIGN_ID}/settings`, KEY, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ stop_lead_settings: "REPLY_TO_AN_EMAIL" }) });
+    const st = await sl(`/campaigns/${CAMPAIGN_ID}/status`, KEY, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "START" }) });
+    const after = await sl(`/campaigns/${CAMPAIGN_ID}`, KEY);
+    const db2 = createClient(URL_, SERVICE, { auth: { persistSession: false } });
+    await db2.from("audit_log").insert({ action: "smartlead_kindnesss_pilot_started", actor_id: u.user.id, details: { campaign_id: CAMPAIGN_ID, leads: leads.length, start_at: input.start_at, founder_instruction: "go (chat 20 Nov 2026 11:32 UTC)" } }).then(() => {}, () => {});
+    return json({ ok: st.ok, mode: "start", schedule_http: sched.status, settings_http: set.status, settings_body: set.data, start_http: st.status, start_body: st.data, status_after: String(after.data?.status ?? "").toUpperCase(), scheduler_after: after.data?.scheduler_cron_value ?? null, ...report });
+  }
   const mode = input?.mode === "apply" ? "apply" : "preview";
   if (mode === "apply" && input?.confirm !== CONFIRM) return json({ ok: false, error: "confirmation_phrase_required" }, 400);
   const useExisting = input?.use_existing_leads === true;
