@@ -1,0 +1,2 @@
+UPDATE public.businesses SET archived_at = COALESCE(archived_at, now()) WHERE id <> '640de582-a112-4d16-a221-03c27f00c6ec' AND portfolio_status = 'legacy_prelaunch';
+CREATE POLICY "Hide archived businesses from app views" ON public.businesses AS RESTRICTIVE FOR SELECT TO authenticated, anon USING (archived_at IS NULL);

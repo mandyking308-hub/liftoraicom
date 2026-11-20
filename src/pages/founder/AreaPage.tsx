@@ -8,7 +8,6 @@ export default function AreaPage() {
   const area = areaByKey(areaKey);
   if (!area) return <Navigate to="/founder" replace />;
   const main = area.sections.filter((s) => !s.legacy);
-  const older = area.sections.filter((s) => s.legacy);
   return (
     <FounderLayout>
       <div className="space-y-6">
@@ -26,14 +25,6 @@ export default function AreaPage() {
             </Link>
           ))}
         </div>
-        {older.length > 0 && (
-          <section>
-            <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Older versions (kept, still work)</h2>
-            <ul className="space-y-1">
-              {older.map((s) => <li key={s.route}><Link to={s.route} className="text-sm text-muted-foreground hover:text-primary">{s.label}</Link> <span className="text-xs text-muted-foreground/70">— {s.desc}</span></li>)}
-            </ul>
-          </section>
-        )}
       </div>
     </FounderLayout>
   );
