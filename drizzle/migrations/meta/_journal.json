@@ -232,6 +232,13 @@
       "when": 1795182091086,
       "tag": "0032_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1795182693521,
+      "tag": "0033_inbox_agent_hourly_sweep",
+      "breakpoints": true
     }
   ]
 }

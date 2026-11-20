@@ -90,6 +90,21 @@ describe("inbox agent sorts and drafts", () => {
     expect(src).not.toMatch(/reply-email-thread|server\.smartlead\.ai/);
   });
   it("opt-outs get no draft and are marked do-not-contact", () => {
-    expect(src).toMatch(/category === "wants_out"\) \{[\s\S]*do_not_contact: true/);
+    expect(src).toMatch(/category === "wants_out"\) \{[\s\S]*apply_reply_stop_suppression[\s\S]*do_not_contact: true/);
+  });
+});
+
+describe("inbox agent worker reliability", () => {
+  const fs = require("node:fs");
+  const src: string = fs.readFileSync("supabase/functions/inbox-agent-reply-handover/index.ts", "utf8");
+  it("retries 3 times then dead-letters and tells the founder", () => {
+    expect(src).toContain("const MAX_ATTEMPTS = 3;");
+    expect(src).toContain('finish("dead_letter"');
+  });
+  it("founder notices can never send", () => {
+    expect(src).toMatch(/send_allowed: false/);
+  });
+  it("holds replies whose business/campaign can't be matched", () => {
+    expect(src).toContain("attribution_unmatched");
   });
 });
