@@ -2,7 +2,7 @@ const SIGNATURE_PREFIX = "sha256=";
 const SHA256_HEX_LENGTH = 64;
 export const SMARTLEAD_STANDARD_MAX_SKEW_SECONDS = 300;
 
-export type SmartleadWebhookProtocol = "legacy_hex" | "standard_webhooks";
+export type SmartleadWebhookProtocol = "legacy_hex" | "standard_webhooks" | "body_secret_key";
 
 export interface SmartleadWebhookHeaders {
   legacySignature: string | null;
@@ -25,7 +25,7 @@ export function smartleadWebhookReceiverEnabled(value: string | null | undefined
 export function smartleadWebhookProtocol(settings: unknown): SmartleadWebhookProtocol | null {
   if (!settings || typeof settings !== "object" || Array.isArray(settings)) return null;
   const value = (settings as Record<string, unknown>).webhook_protocol;
-  return value === "legacy_hex" || value === "standard_webhooks" ? value : null;
+  return value === "legacy_hex" || value === "standard_webhooks" || value === "body_secret_key" ? value : null;
 }
 
 function parseDigest(signatureHeader: string | null): Uint8Array<ArrayBuffer> | null {
@@ -155,6 +155,19 @@ export async function verifySmartleadWebhookRequest(input: {
   secret: string | null | undefined;
   nowSeconds: number;
 }): Promise<SmartleadWebhookVerification> {
+  if (input.protocol === "body_secret_key") {
+    // Smartlead's current webhooks carry the configured secret as JSON `secret_key` (no signature header).
+    // Constant-time comparison; the field is stripped before anything is stored.
+    if (!input.secret) return { ok: false, reason: "invalid_signature" };
+    let received: unknown;
+    try { received = (JSON.parse(new TextDecoder().decode(rawBytes(input.rawBody))) as Record<string, unknown>)?.secret_key; } catch { return { ok: false, reason: "invalid_signature" }; }
+    if (typeof received !== "string" || !received) return { ok: false, reason: "invalid_signature" };
+    const enc = new TextEncoder();
+    const [a, b] = await Promise.all([crypto.subtle.digest("SHA-256", enc.encode(received)), crypto.subtle.digest("SHA-256", enc.encode(input.secret))]);
+    if (!constantTimeEqual(new Uint8Array(a), new Uint8Array(b))) return { ok: false, reason: "invalid_signature" };
+    const id = input.headers.webhookId;
+    return { ok: true, protocol: input.protocol, requestId: validHeaderId(id) ? id.trim() : null };
+  }
   if (input.protocol === "legacy_hex") {
     const valid = await verifySmartleadWebhookSignature(input.rawBody, input.headers.legacySignature, input.secret);
     return valid

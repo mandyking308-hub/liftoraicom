@@ -120,6 +120,12 @@ Deno.serve(async (req) => {
 
   // Identical secrets across connections are ambiguous and must not select a tenant.
   if (matchedConnections.length !== 1) {
+    // Diagnostic only: header NAMES and top-level body KEYS, never values or secrets.
+    let bodyKeys: string[] = [];
+    try { const p = JSON.parse(new TextDecoder().decode(rawBody)); if (p && typeof p === "object") bodyKeys = Object.keys(p); } catch { /* ignore */ }
+    console.log(JSON.stringify({ rejected: "signature", connections: (connectionRows ?? []).length, matched: matchedConnections.length,
+      protocols: (connectionRows ?? []).map((c) => smartleadWebhookProtocol((c as SmartleadConnection).settings)),
+      header_names: [...req.headers.keys()], body_keys: bodyKeys }));
     return json({ ok: false, error: matchedConnections.length ? "ambiguous_provider_connection" : "invalid_signature" }, 401);
   }
   const connection = matchedConnections[0];
@@ -128,6 +134,7 @@ Deno.serve(async (req) => {
   try {
     const parsed: unknown = JSON.parse(new TextDecoder().decode(rawBody));
     if (!isRecord(parsed)) return json({ ok: false, error: "invalid_payload" }, 400);
+    delete parsed.secret_key; // never persist the shared key
     payload = parsed;
   } catch {
     return json({ ok: false, error: "invalid_json" }, 400);
