@@ -1,0 +1,1 @@
+alter table public.smartlead_reply_drafts add column if not exists agent_category text, add column if not exists agent_summary text, add column if not exists source_task_id uuid;

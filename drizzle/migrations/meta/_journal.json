@@ -225,6 +225,13 @@
       "when": 1795181541602,
       "tag": "0031_inbox_agent_reply_hook",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1795182091086,
+      "tag": "0032_migration",
+      "breakpoints": true
     }
   ]
 }

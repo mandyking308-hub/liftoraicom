@@ -28,8 +28,9 @@ describe("Inbox agent reply handover", () => {
   });
 
   it("never sends or mutates a provider from the reply path", () => {
-    // The reply path talks to the database only: no provider HTTP call at all.
-    expect(handover).not.toContain("fetch(");
+    // The only outside call is the AI gateway that writes the draft.
+    const calls = handover.match(/fetch\("([^"]+)"/g) ?? [];
+    expect(calls).toEqual(['fetch("https://ai.gateway.lovable.dev/v1/chat/completions"']);
     expect(handover).not.toContain("api.smartlead.ai");
     expect(handover).not.toMatch(/\/campaigns\/\d+\/(start|pause|resume)/);
     expect(handover).toContain("no_external_action: true");
@@ -78,5 +79,17 @@ describe("Inbox agent reply handover", () => {
     expect(handover).toContain('eq("provider_event_type", "reply_received")');
     expect(handover).toContain("smartlead_activity_events");
     expect(handover).toContain("outbound_provider_events");
+  });
+});
+
+describe("inbox agent sorts and drafts", () => {
+  const fs = require("node:fs");
+  const src: string = fs.readFileSync("supabase/functions/inbox-agent-reply-handover/index.ts", "utf8");
+  it("writes drafts only, never calls Smartlead", () => {
+    expect(src).toContain('from("smartlead_reply_drafts").insert');
+    expect(src).not.toMatch(/reply-email-thread|server\.smartlead\.ai/);
+  });
+  it("opt-outs get no draft and are marked do-not-contact", () => {
+    expect(src).toMatch(/category === "wants_out"\) \{[\s\S]*do_not_contact: true/);
   });
 });

@@ -47,6 +47,8 @@ type ReplySignal = {
   contact_id: string | null;
   occurred_at: string | null;
   detail: string;
+  provider_campaign_id: string | null;
+  provider_lead_id: string | null;
 };
 
 function jsonToText(value: unknown): string {
@@ -70,7 +72,7 @@ function jsonToText(value: unknown): string {
 async function pollerReplies(admin: any, sinceIso: string, limit: number): Promise<ReplySignal[]> {
   const rows = await safeSelect(admin, "smartlead_activity_events", (q: any) =>
     q
-      .select("id,business_id,liftor_contact_id,event_type,occurred_at,details,provider_message_id")
+      .select("id,business_id,liftor_contact_id,event_type,occurred_at,details,provider_message_id,provider_campaign_id,provider_lead_id")
       .eq("event_type", "reply_received")
       .gte("occurred_at", sinceIso)
       .order("occurred_at", { ascending: false })
@@ -98,6 +100,8 @@ async function pollerReplies(admin: any, sinceIso: string, limit: number): Promi
       contact_id: String(r.liftor_contact_id),
       occurred_at: r.occurred_at ?? null,
       detail: detail || "Inbound reply recorded by the Smartlead poll.",
+      provider_campaign_id: r.provider_campaign_id ? String(r.provider_campaign_id) : null,
+      provider_lead_id: r.provider_lead_id ? String(r.provider_lead_id) : null,
     });
   }
   return out;
@@ -109,7 +113,7 @@ async function pollerReplies(admin: any, sinceIso: string, limit: number): Promi
 async function receiverReplies(admin: any, sinceIso: string, limit: number): Promise<ReplySignal[]> {
   const rows = await safeSelect(admin, "outbound_provider_events", (q: any) =>
     q
-      .select("id,business_id,contact_id,provider_event_type,event_occurred_at,received_at,raw_payload,normalized_payload")
+      .select("id,business_id,contact_id,provider_event_type,event_occurred_at,received_at,raw_payload,normalized_payload,provider_campaign_id,provider_lead_id")
       .eq("provider_event_type", "reply_received")
       .gte("received_at", sinceIso)
       .order("received_at", { ascending: false })
@@ -128,7 +132,87 @@ async function receiverReplies(admin: any, sinceIso: string, limit: number): Pro
         jsonToText(r.normalized_payload).slice(0, 1200) ||
         jsonToText(r.raw_payload).slice(0, 1200) ||
         "Inbound reply recorded by the Smartlead receiver.",
+      provider_campaign_id: r.provider_campaign_id ? String(r.provider_campaign_id) : null,
+      provider_lead_id: r.provider_lead_id ? String(r.provider_lead_id) : null,
     }));
+}
+
+const CATEGORIES = ["interested", "question", "not_now", "wants_out", "out_of_office", "other"] as const;
+
+/**
+ * Inbox agent work: sort the reply and write a suggested answer as a Smartlead
+ * reply DRAFT. Drafts only go out when the founder sends them from the
+ * Smartlead Command Centre. Opt-outs get no draft and are marked do-not-contact.
+ */
+async function sortAndDraft(admin: any, taskId: string, p: any): Promise<boolean> {
+  const ctx = p.context_payload ?? {};
+  const key = Deno.env.get("LOVABLE_API_KEY");
+  const fail = async (msg: string) => {
+    await admin.from("ai_agent_task_queue").update({ status: "needs_founder", error_message: msg }).eq("id", taskId);
+    return false;
+  };
+  if (!key) return fail("ai_key_missing");
+  const first = String(ctx.contact_name ?? "").trim().split(/\s+/)[0] || "";
+  try {
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "openai/gpt-6.1-terra",
+        messages: [
+          { role: "system", content:
+            "You are the inbox agent for Kindnesss (https://joinkindnesss.com), a kindness and wellbeing platform for schools and organisations with governance-ready reporting. " +
+            "A prospect replied to a cold introduction email. Classify the reply and draft a short, warm, plain-English answer signed 'Kind regards, The Kindnesss Team'. " +
+            "Never invent prices, dates, customers, statistics or promises. If they ask something you can't answer from this, offer a short call or to send details. " +
+            "For wants_out, return an empty draft. For out_of_office, return an empty draft." },
+          { role: "user", content: `First name: ${first || "(unknown)"}\nReply:\n${String(ctx.reply_excerpt ?? "").slice(0, 2000)}` },
+        ],
+        tools: [{ type: "function", function: {
+          name: "sort_reply",
+          parameters: { type: "object", additionalProperties: false, required: ["category", "summary", "draft"],
+            properties: {
+              category: { type: "string", enum: CATEGORIES },
+              summary: { type: "string", description: "One sentence on what they said" },
+              draft: { type: "string" },
+            } },
+        } }],
+        tool_choice: { type: "function", function: { name: "sort_reply" } },
+      }),
+    });
+    if (!res.ok) return fail(`ai_${res.status}`);
+    const data = await res.json();
+    const out = JSON.parse(data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments ?? "{}");
+    const category = CATEGORIES.includes(out.category) ? out.category : "other";
+    const summary = String(out.summary ?? "").slice(0, 500);
+    const draft = String(out.draft ?? "").trim();
+
+    let draftId: string | null = null;
+    if (category === "wants_out") {
+      if (p.business_id) {
+        await admin.from("business_contact_relationships").update({ do_not_contact: true })
+          .eq("business_id", p.business_id).eq("contact_id", p.contact_id);
+      }
+    } else if (draft && p.business_id && ctx.provider_campaign_id && ctx.provider_lead_id) {
+      const { data: d } = await admin.from("smartlead_reply_drafts").insert({
+        business_id: p.business_id,
+        provider_campaign_id: ctx.provider_campaign_id,
+        provider_lead_id: ctx.provider_lead_id,
+        body: draft,
+        status: "draft",
+        agent_category: category,
+        agent_summary: summary,
+        source_task_id: taskId,
+      }).select("id").single();
+      draftId = d?.id ?? null;
+    }
+    await admin.from("ai_agent_task_queue").update({
+      status: "awaiting_founder_approval",
+      agent_output: { category, summary, draft_id: draftId, draft_written: !!draftId, marked_do_not_contact: category === "wants_out", sent: false },
+    }).eq("id", taskId);
+    return !!draftId;
+  } catch (e) {
+    return fail(`agent_error:${(e as Error).message?.slice(0, 120)}`);
+  }
 }
 
 Deno.serve(async (req) => {
@@ -220,6 +304,8 @@ Deno.serve(async (req) => {
           reply_excerpt: s.detail,
           contact_email: contact.email,
           contact_name: contact.name,
+          provider_campaign_id: s.provider_campaign_id,
+          provider_lead_id: s.provider_lead_id,
         },
         priority_level: "high",
         status: "created",
@@ -233,6 +319,7 @@ Deno.serve(async (req) => {
       proposed: proposed.length,
       created: 0,
       tasks_created: 0,
+      drafts_created: 0,
       skipped: skipped.length,
     };
 
@@ -281,6 +368,7 @@ Deno.serve(async (req) => {
                 .from("agent_handover_log")
                 .update({ task_id: task.id, status: "open" })
                 .eq("id", handover.id);
+              if (await sortAndDraft(admin, task.id, p)) summary.drafts_created++;
             }
           } catch {
             /* task creation is best-effort; the handover row still records the reply */

@@ -138,7 +138,7 @@ export default function SmartleadCommandCentre() {
   const sendDraft = async (draftId: string) => {
     if (!thread) return;
     try {
-      await invoke({ action: "send_reply", business_id: thread.business_id, campaign_id: thread.provider_campaign_id, draft_id: draftId, confirmation: confirm });
+      await invoke({ action: "send_reply", business_id: thread.business_id, campaign_id: thread.provider_campaign_id, draft_id: draftId, confirmation: "SEND THIS REPLY" });
       toast({ title: "Reply sent via Smartlead" });
       openThread(thread);
     } catch (e) { toast({ title: "Reply not sent", description: (e as Error).message, variant: "destructive" }); }
@@ -335,13 +335,18 @@ export default function SmartleadCommandCentre() {
                 <div className="text-sm font-medium text-foreground">Reply drafts (never sent automatically)</div>
                 {drafts.map((d) => (
                   <div key={d.id} className="rounded-md border border-border p-2 text-sm">
+                    {d.agent_category && (
+                      <div className="mb-2 text-xs text-muted-foreground">
+                        Inbox agent: <span className="font-medium text-foreground">{String(d.agent_category).replace(/_/g, " ")}</span>
+                        {d.agent_summary ? ` — ${d.agent_summary}` : ""}
+                      </div>
+                    )}
                     <div className="whitespace-pre-wrap text-foreground">{d.body}</div>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <Badge variant="outline">{d.status}</Badge>
                       {d.status === "draft" && hasReplies && (
                         <>
-                          <Input className="h-8 w-56" placeholder="Type SEND THIS REPLY" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
-                          <Button size="sm" disabled={confirm !== "SEND THIS REPLY"} onClick={() => sendDraft(d.id)}>Send via Smartlead</Button>
+                          <Button size="sm" onClick={() => { if (window.confirm("Send this reply now via Smartlead?")) sendDraft(d.id); }}>Approve & send</Button>
                         </>
                       )}
                     </div>
