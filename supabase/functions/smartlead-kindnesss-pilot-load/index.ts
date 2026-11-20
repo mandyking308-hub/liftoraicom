@@ -52,10 +52,26 @@ Deno.serve(async (req) => {
   let input: any = {}; try { input = await req.json(); } catch { /* */ }
   const mode = input?.mode === "apply" ? "apply" : "preview";
   if (mode === "apply" && input?.confirm !== CONFIRM) return json({ ok: false, error: "confirmation_phrase_required" }, 400);
-  const ids: string[] = Array.isArray(input?.contact_ids) ? [...new Set(input.contact_ids.map(String))] : [];
-  if (ids.length < 1 || ids.length > MAX_LEADS) return json({ ok: false, error: `contact_ids_must_be_1_to_${MAX_LEADS}` }, 400);
+  const useExisting = input?.use_existing_leads === true;
   if (KEY.length < 8) return json({ ok: false, error: "smartlead_key_missing" }, 412);
   const db = createClient(URL_, SERVICE, { auth: { persistSession: false } });
+  let ids: string[] = Array.isArray(input?.contact_ids) ? [...new Set(input.contact_ids.map(String))] : [];
+  if (useExisting) {
+    // Resolve the leads already in the remote campaign to Kindnesss contacts (case-insensitive, fail closed).
+    const pre = await sl(`/campaigns/${CAMPAIGN_ID}/leads?limit=100`, KEY);
+    if (!pre.ok) return json({ ok: false, error: `remote_leads_read_http_${pre.status}` }, 502);
+    const emails = (pre.data?.data ?? []).map((l: any) => String(l?.lead?.email ?? "").trim().toLowerCase()).filter(Boolean);
+    if (emails.length < 1 || emails.length > 6) return json({ ok: false, error: `existing_lead_count_${emails.length}_out_of_range` }, 409);
+    ids = [];
+    for (const e of emails) {
+      const { data: m, error: me } = await db.from("contacts").select("id").ilike("email", e.replace(/[%_\\]/g, (c) => "\\" + c));
+      if (me) return json({ ok: false, error: "contact_lookup_failed" }, 503);
+      if (!m || m.length !== 1) return json({ ok: false, error: "existing_lead_identity_ambiguous_or_missing", lead: mask(e), matches: m?.length ?? 0 }, 409);
+      ids.push(m[0].id);
+    }
+  }
+  const maxLeads = useExisting ? 6 : MAX_LEADS;
+  if (ids.length < 1 || ids.length > maxLeads) return json({ ok: false, error: `contact_ids_must_be_1_to_${maxLeads}` }, 400);
   const blockers: string[] = [];
 
   // Sequence source
@@ -114,7 +130,7 @@ Deno.serve(async (req) => {
   if (!w1.ok) return json({ ok: false, error: "sequence_write_failed", http: w1.status, provider: w1.data, ...base }, 502);
   const w2 = await sl(`/campaigns/${CAMPAIGN_ID}/email-accounts`, KEY, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email_account_ids: senders.map((s: any) => Number(s.smartlead_email_account_id)) }) });
   if (!w2.ok) return json({ ok: false, error: "sender_attach_failed", http: w2.status, provider: w2.data, sequence_written: true, ...base }, 502);
-  const w3 = await sl(`/campaigns/${CAMPAIGN_ID}/leads`, KEY, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lead_list: leads, settings: { ignore_global_block_list: false, ignore_unsubscribe_list: false, ignore_duplicate_leads_in_other_campaign: false } }) });
+  const w3 = useExisting ? { ok: true, status: 0, data: "skipped_existing_leads_kept" } : await sl(`/campaigns/${CAMPAIGN_ID}/leads`, KEY, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lead_list: leads, settings: { ignore_global_block_list: false, ignore_unsubscribe_list: false, ignore_duplicate_leads_in_other_campaign: false } }) });
   if (!w3.ok) return json({ ok: false, error: "lead_add_failed", http: w3.status, provider: w3.data, sequence_written: true, senders_attached: true, ...base }, 502);
 
   const [seqAfter, accAfter, leadsAfter, campAfter] = await Promise.all([
