@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
   const stage = String(input?.stage ?? "preview");
   if (stage !== "preview" && stage !== "check" && input?.confirm !== CONFIRM) return json({ ok: false, error: "confirmation_phrase_required" }, 400);
   const db = createClient(URL_, SERVICE, { auth: { persistSession: false } });
-  const audit = async (action: string, details: any) => { const { error } = await db.from("global_audit_events").insert({ business_id: BUSINESS_ID, actor_type: "founder", actor_id: u.user.id, event_type: action, event_category: "outbound", source_module: "smartlead-kindnesss-education-prepare", source_table: "smartlead", source_record_id: details?.campaign_id ? String(details.campaign_id) : null, action_summary: action, after_summary: details, external_side_effect: true }); if (error) console.error("audit_insert_failed", error.code); };
+  const audit = async (action: string, details: any) => { const { error } = await db.from("global_audit_events").insert({ business_id: BUSINESS_ID, actor_type: "founder", actor_id: u.user.id, event_type: action, event_category: "external_action", source_module: "smartlead-kindnesss-education-prepare", source_table: "smartlead", source_record_id: details?.campaign_id ? String(details.campaign_id) : null, action_summary: action, after_summary: details, external_side_effect: true }); if (error) console.error("audit_insert_failed", error.code); };
 
   // Campaign id recorded at creation (idempotent create).
   // 4664652 was created 20 Nov 2026 14:3x UTC before audit storage was fixed; pinned so create never duplicates.
