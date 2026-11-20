@@ -133,7 +133,20 @@ Deno.serve(async (req) => {
     if (!dry_run) {
       for (const p of proposed) {
         try {
-          const { data: handover, error: hErr } = await admin.from("agent_handover_log").insert(p).select("id").single();
+          // agent_handover_log has no customer-stage columns; keep them as context only.
+          const { from_customer_stage, to_customer_stage, ...row } = p;
+          const { data: handover, error: hErr } = await admin
+            .from("agent_handover_log")
+            .insert({
+              ...row,
+              context_payload: {
+                ...(p.context_payload ?? {}),
+                from_customer_stage,
+                to_customer_stage,
+              },
+            })
+            .select("id")
+            .single();
           if (hErr || !handover) continue;
           summary.created++;
 
