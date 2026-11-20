@@ -16,8 +16,8 @@ const hookMigration = readFileSync(
 describe("Inbox agent reply handover", () => {
   it("creates only founder-approved, non-executing inbox_agent tasks", () => {
     const taskInsert = handover.slice(
-      handover.indexOf('from("ai_agent_task_queue")'),
-      handover.indexOf("recommended_action"),
+      handover.indexOf('from("ai_agent_task_queue")', handover.indexOf("if (!dryRun)")),
+      handover.indexOf("recommended_action:\n"),
     );
     expect(taskInsert).toContain('agent_key: p.to_agent_key');
     expect(taskInsert).toContain("founder_approval_required: true");
@@ -46,7 +46,7 @@ describe("Inbox agent reply handover", () => {
   it("writes agent_handover_log using only columns that exist", () => {
     // agent_handover_log has no customer-stage columns; writing them fails the insert.
     const handoverInsert = handover.slice(
-      handover.indexOf('from("agent_handover_log")'),
+      handover.indexOf('from("agent_handover_log")', handover.indexOf("if (!dryRun)")),
       handover.indexOf("summary.created++"),
     );
     expect(handoverInsert).not.toContain("from_customer_stage:");
