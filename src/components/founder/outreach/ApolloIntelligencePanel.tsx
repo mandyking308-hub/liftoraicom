@@ -60,7 +60,7 @@ export default function ApolloIntelligencePanel() {
   }
 
   async function search() {
-    let query = db.from('apollo_contact_intelligence' as never).select('id,apollo_contact_id,first_name,last_name,company,primary_email,readiness_status,readiness_reasons,founder_mark,lists').not('primary_email', 'is', null).order('apollo_contact_id').limit(50);
+    let query = db.from('apollo_contact_intelligence' as never).select('id,apollo_contact_id,first_name,last_name,company,primary_email,readiness_status,readiness_reasons,founder_mark,lists').not('primary_email', 'is', null).eq('readiness_status', 'eligible_for_review').order('apollo_contact_id').limit(50);
     const t = q.trim().replace(/[%,()]/g, '');
     if (t) query = query.or(`first_name.ilike.%${t}%,last_name.ilike.%${t}%,company.ilike.%${t}%,primary_email.ilike.%${t}%,apollo_contact_id.eq.${t}`);
     const { data, error } = await query;
@@ -94,7 +94,7 @@ export default function ApolloIntelligencePanel() {
 
   return <section className="space-y-4 border-b border-border pb-6" aria-label="Kindnesss Apollo contact intelligence">
     <h2 className="text-xl font-semibold">Kindnesss · Apollo contact intelligence archive</h2>
-    <p className="text-sm text-muted-foreground">Keeps every Apollo row and all original columns, including people without email (kept but hidden from search). The archive is not a send list: nothing here starts outreach, and only the founder can see it.</p>
+    <p className="text-sm text-muted-foreground">Keeps every Apollo row and all original columns, but search shows only usable contacts (verified email, not catch-all); everything else is archived and hidden, never deleted. The archive is not a send list: nothing here starts outreach, and only the founder can see it.</p>
     <div className="flex flex-wrap items-end gap-3">
       <label className="max-w-sm space-y-1 text-sm">Full Apollo export CSV<Input aria-label="Full Apollo export CSV" type="file" accept=".csv,text/csv" disabled={busy} onChange={e => { void load(e.target.files?.[0]); e.target.value = ''; }} /></label>
       <Button variant="outline" onClick={() => run(true)} disabled={busy || !file}>Preview counts</Button>
