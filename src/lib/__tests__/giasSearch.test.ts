@@ -30,6 +30,7 @@ describe("GIAS validation helpers", () => {
 
 import { buildGiasGroupQuery, sanitiseFilterText, GIAS_GROUPS } from "@/lib/gias/giasSearch";
 import { navGroups } from "@/components/founder/FounderLayout";
+import { founderAreas } from "@/lib/founderAreas";
 
 describe("GIAS group filter", () => {
   it("accepts Independent schools with bounded range", () => {
@@ -47,9 +48,12 @@ describe("GIAS group filter", () => {
 });
 
 describe("Founder navigation", () => {
-  it("links School Register (GIAS) once to /founder/gias-search", () => {
-    const items = navGroups.flatMap((g) => g.items).filter((i) => i.to === "/founder/gias-search");
-    expect(items).toHaveLength(1);
-    expect(items[0].label).toBe("School Register (GIAS)");
+  it("registers School Register (GIAS) once, as a legacy route reached from Schools (private)", () => {
+    const sections = founderAreas.flatMap((a) => a.sections).filter((x) => x.route === "/founder/gias-search");
+    expect(sections).toHaveLength(1);
+    expect(sections[0].label).toBe("School Register (GIAS)");
+    expect(sections[0].legacy).toBe(true);
+    expect(navGroups.flatMap((g) => g.items).some((i) => i.to === "/founder/gias-search")).toBe(false);
+    expect(founderAreas.flatMap((a) => a.sections).some((x) => x.route === "/founder/school-visits")).toBe(true);
   });
 });

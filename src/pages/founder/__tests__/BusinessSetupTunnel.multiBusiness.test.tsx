@@ -83,6 +83,8 @@ function makeBusinessesQuery() {
   };
   query.eq = () => query;
   query.neq = () => query;
+  query.not = () => query;
+  query.limit = async () => ({ data: [], error: null });
   query.order = () => query;
   query.range = async (start: number, end: number) => {
     pageRequests.push({ start, end, search });
