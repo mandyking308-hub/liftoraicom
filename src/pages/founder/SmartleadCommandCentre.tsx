@@ -107,7 +107,6 @@ export default function SmartleadCommandCentre() {
     try {
       await invoke({ action: "set_tracking", business_id: sel.business_id, campaign_id: sel.provider_campaign_id, opens: wantOpens, clicks: wantClicks, confirmation: "CHANGE TRACKING FOR THIS CAMPAIGN ONLY" });
       toast({ title: "Tracking updated for this campaign only" });
-      setTrackConfirm("");
       await syncNow();
     } catch (e) { toast({ title: "Tracking not changed", description: (e as Error).message, variant: "destructive" }); }
     finally { setSavingTrack(false); }
