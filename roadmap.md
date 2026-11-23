@@ -124,3 +124,8 @@
 - [ ] Signed-in founders landing on / see the public marketing page; founder to decide whether to go straight to Liftor HQ
 - [ ] Lock ~30 open backend functions flagged by deep scan (e.g. founder-copilot, apollo-daily-runner, crm-send-check)
 - [ ] Single founder-only login; remove public login links; publish
+
+## Duplicate processes (23 Nov)
+- [x] Paused the old 2-minute mailbox check (job 12) and the empty Apollo daily job (job 14). Both can be switched back on.
+- [ ] Education campaign read-back (job 21, paused). The current sync makes one request per person, so it hit Smartlead's limit of 200 requests a minute. It needs a lighter, staggered version, built after the 24 Nov start.
+- [ ] Health check failing on every run (founder didn't choose this fix).

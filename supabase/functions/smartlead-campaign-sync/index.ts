@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
   let scheduledScope: { business_id: string; provider_campaign_id: string } | null = null;
   if (syncToken) {
     // Scheduler path: random token held only in a locked table; read-only sync for its one campaign.
-    const { data: sch } = await admin.from("smartlead_sync_schedule").select("token, business_id, provider_campaign_id, enabled").eq("id", 1).maybeSingle();
+    const { data: sch } = await admin.from("smartlead_sync_schedule").select("token, business_id, provider_campaign_id, enabled").eq("token", syncToken).maybeSingle();
     if (!sch || !sch.enabled || syncToken.length < 32 || sch.token !== syncToken) return json({ ok: false, error: "auth_invalid" }, 401);
     scheduledScope = { business_id: sch.business_id, provider_campaign_id: sch.provider_campaign_id };
   } else if (!auth.startsWith("Bearer ")) return json({ ok: false, error: "auth_missing" }, 401);
