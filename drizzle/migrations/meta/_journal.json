@@ -302,6 +302,13 @@
       "when": 1795442725927,
       "tag": "0042_smartlead_sync_education_campaign",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1795444490138,
+      "tag": "0043_fix_system_health_nulls",
+      "breakpoints": true
     }
   ]
 }
