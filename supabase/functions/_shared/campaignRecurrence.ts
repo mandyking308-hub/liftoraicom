@@ -35,24 +35,29 @@ export interface RoundContact {
 }
 export type HoldReason = "no_email_or_first_name" | "suppressed" | "prior_bounce_or_reply" | "not_verified" | "catch_all" | "catch_all_unassessed";
 
-export function classifyContact(c: RoundContact): HoldReason | null {
+export function classifyContact(c: RoundContact, skipVerification = false): HoldReason | null {
   const e = String(c.email ?? "").trim();
   if (!e.includes("@") || !String(c.first_name ?? "").trim()) return "no_email_or_first_name";
   if (c.suppressed || c.do_not_contact_business) return "suppressed";
   if (c.history) return "prior_bounce_or_reply";
-  const es = String(c.email_status ?? "").toLowerCase();
-  if (es !== "verified" && es !== "valid") return "not_verified";
-  const ca = String(c.catch_all ?? "").trim().toLowerCase();
-  if (ca === "catch-all") return "catch_all";
-  if (ca !== "not catch-all") return "catch_all_unassessed";
+  // skipVerification is a per-plan founder decision (pilot 4103531, 23 Nov 2026): those
+  // addresses were already emailed with zero bounces, so Apollo re-verification is not
+  // required. Suppression, bounce and reply checks above always still apply.
+  if (!skipVerification) {
+    const es = String(c.email_status ?? "").toLowerCase();
+    if (es !== "verified" && es !== "valid") return "not_verified";
+    const ca = String(c.catch_all ?? "").trim().toLowerCase();
+    if (ca === "catch-all") return "catch_all";
+    if (ca !== "not catch-all") return "catch_all_unassessed";
+  }
   return null;
 }
 
-export function filterRound(contacts: RoundContact[]) {
+export function filterRound(contacts: RoundContact[], skipVerification = false) {
   const eligible: RoundContact[] = []; const held: Record<string, number> = {};
   const seen = new Set<string>();
   for (const c of contacts) {
-    const r = classifyContact(c);
+    const r = classifyContact(c, skipVerification);
     if (r) { held[r] = (held[r] ?? 0) + 1; continue; }
     const k = String(c.email).trim().toLowerCase();
     if (seen.has(k)) continue; seen.add(k); eligible.push(c);

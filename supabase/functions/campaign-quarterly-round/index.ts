@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
           contacts.push({ id: c.id, email: c.email, first_name: c.first_name, suppressed: !!(c.is_globally_suppressed || c.unsubscribed_at || c.hard_bounced || c.do_not_contact_at), do_not_contact_business: !r || !!r.do_not_contact || r.campaign_eligible === false, history: hist.has(c.id), email_status: raw["Email Status"] ?? null, catch_all: raw["Primary Email Catch-all Status"] ?? null });
         }
       }
-      ({ eligible, held } = filterRound(contacts));
+      ({ eligible, held } = filterRound(contacts, p.skip_email_verification === true));
       notes.push(`data set ${uniq.length}, eligible ${eligible.length}`);
       // 2. Approved 4 emails from the source campaign.
       const seq = await sl(`/campaigns/${p.source_campaign_id}/sequences`, KEY);

@@ -1,0 +1,2 @@
+ALTER TABLE public.campaign_recurrence_plans ADD COLUMN IF NOT EXISTS skip_email_verification boolean NOT NULL DEFAULT false;
+UPDATE public.campaign_recurrence_plans SET skip_email_verification = true, updated_at = now() WHERE source_campaign_id = '4103531';

@@ -288,6 +288,13 @@
       "when": 1795433909546,
       "tag": "0040_campaign_quarterly_recurrence",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1795435437489,
+      "tag": "0041_recurrence_plan_skip_verification_pilot",
+      "breakpoints": true
     }
   ]
 }

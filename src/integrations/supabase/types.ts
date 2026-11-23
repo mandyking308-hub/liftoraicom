@@ -14569,6 +14569,7 @@ export type Database = {
           rounds_completed: number
           send_days: number
           sequence_steps: number
+          skip_email_verification: boolean
           source_campaign_id: string
           source_provider: string
           updated_at: string
@@ -14588,6 +14589,7 @@ export type Database = {
           rounds_completed?: number
           send_days?: number
           sequence_steps?: number
+          skip_email_verification?: boolean
           source_campaign_id: string
           source_provider?: string
           updated_at?: string
@@ -14607,6 +14609,7 @@ export type Database = {
           rounds_completed?: number
           send_days?: number
           sequence_steps?: number
+          skip_email_verification?: boolean
           source_campaign_id?: string
           source_provider?: string
           updated_at?: string

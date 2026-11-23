@@ -27,6 +27,18 @@ describe("quarterly campaign repeat", () => {
     expect(eligible.map((c) => c.id)).toEqual(["1"]);
     expect(held).toEqual({ suppressed: 1, prior_bounce_or_reply: 1, not_verified: 1, catch_all: 1 });
   });
+  it("pilot plan skips re-verification but still drops suppressed and bounced/replied people", () => {
+    const emailed = { ...ok, email_status: null, catch_all: null };
+    const { eligible, held } = filterRound([
+      emailed,
+      { ...emailed, id: "2", email: "b@x.org", suppressed: true },
+      { ...emailed, id: "3", email: "c@x.org", history: true },
+    ], true);
+    expect(eligible.map((c) => c.id)).toEqual(["1"]);
+    expect(held).toEqual({ suppressed: 1, prior_bounce_or_reply: 1 });
+    // Without the flag the same contact is still held as unverified.
+    expect(filterRound([emailed]).held).toEqual({ not_verified: 1 });
+  });
   it("stays paused when a check fails", () => {
     expect(roundCritical({ eligible: 10, healthySenders: 5, charitySender: false, sequence: [], calendarClash: false })).toEqual([]);
     expect(roundCritical({ eligible: 10, healthySenders: 5, charitySender: true, sequence: [], calendarClash: true }).length).toBe(2);
