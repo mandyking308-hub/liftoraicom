@@ -309,6 +309,20 @@
       "when": 1795444490138,
       "tag": "0043_fix_system_health_nulls",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1795445514898,
+      "tag": "0044_views_security_invoker_fix",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1795445557662,
+      "tag": "0045_proposal_recon_view_invoker",
+      "breakpoints": true
     }
   ]
 }

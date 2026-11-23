@@ -219,6 +219,19 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
         }, { onConflict: "business_id,provider_campaign_id,dedupe_key", ignoreDuplicates: true }).select("id");
         if (!insEv?.length) continue;
         newEvents++;
+        // Keep the central CRM contact current (this business's matched contact only).
+        if (rel) {
+          const at = ev.occurred_at ?? nowIso();
+          if (ev.event_type === "email_reply") {
+            await admin.from("contacts").update({ conversation_active: true, last_replied_at: at } as never).eq("id", rel.contact_id);
+            await admin.from("contacts").update({ status: "ENGAGED" } as never).eq("id", rel.contact_id).in("status", ["NEW", "CONTACTED"]);
+          } else if (ev.event_type === "email_sent" || ev.event_type === "first_email_sent") {
+            await admin.from("contacts").update({ last_contacted_at: at } as never).eq("id", rel.contact_id).or(`last_contacted_at.is.null,last_contacted_at.lt.${at}`);
+            await admin.from("contacts").update({ status: "CONTACTED" } as never).eq("id", rel.contact_id).eq("status", "NEW");
+          } else if (ev.event_type === "lead_blocked_or_bounced") {
+            await admin.from("contacts").update({ hard_bounced: true } as never).eq("id", rel.contact_id);
+          }
+        }
         if (rel && action === "do_not_contact") {
           await admin.from("business_contact_relationships").update({ do_not_contact: true, campaign_eligible: false, do_not_contact_reason: `smartlead_${ev.event_type}` } as never).eq("id", rel.id).eq("business_id", businessId);
           if (ev.event_type === "lead_unsubscribed") await admin.from("contacts").update({ status: "DO_NOT_CONTACT" } as never).eq("id", rel.contact_id);

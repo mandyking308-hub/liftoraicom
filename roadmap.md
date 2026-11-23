@@ -131,11 +131,13 @@
 - [ ] Health check failing on every run (founder didn't choose this fix).
 
 ## Integration & reliability stage (asked 23 Nov 2026)
-- [ ] Park 1,579/1,588/1,590 differences (do not force)
+- [x] Park 1,579/1,588/1,590 differences (do not force)
 - [ ] Trace one labelled test record end-to-end (CRM → business → outreach → sales → workflows → HQ); no sends/payments
 - [ ] Safe test-data cleanup (only confirmed disposable; uncertain kept)
-- [ ] Reduce health monitoring to minimal essential checks
+- [x] Reduce health monitoring to minimal essential checks (3 documentation mirror jobs paused; health/anomaly/retry/auto-resolve kept; health check passing since 14:45)
 - [ ] Lightweight incremental Smartlead education read-back — AFTER 24 Nov 10:15 check is stable
-- [ ] Permission boundary tests (RLS across tables)
+- [x] Permission boundary tests (stranger test across all tables; 5 CRM views fixed to founder-only)
 - [ ] Pages read from authoritative sources; HQ shows freshness
 - [ ] Final acceptance report (verified vs assumed)
+- [x] Smartlead reply/send/bounce now update the CRM contact; 6 pilot contacts backfilled as contacted
+- [ ] Review 6 businesses named test/demo (origin unconfirmed, kept)
