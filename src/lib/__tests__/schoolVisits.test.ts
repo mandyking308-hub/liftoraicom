@@ -32,7 +32,7 @@ describe("school visit rules", () => {
   it("new school keys never collide with existing ones", () => {
     expect(newSchoolKey("St Example", ["st-example"])).toBe("st-example-2");
   });
-  it("founder nav links School Visit Assessments", () => {
-    expect(navGroups.flatMap((g) => g.items).filter((i) => i.to === "/founder/school-visits")).toHaveLength(1);
+  it("School Visit Assessments is hidden from founder nav by founder choice (23 Nov 2026)", () => {
+    expect(navGroups.flatMap((g) => g.items).filter((i) => i.to === "/founder/school-visits")).toHaveLength(0);
   });
 });
