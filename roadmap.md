@@ -111,8 +111,9 @@
 - [x] Review areas one by one (founder picks which pages to keep; the rest hidden, not deleted): 1 Daily running, 2 Radars & prospecting, 3 Sales, 4 Email outreach, 5 Social media (both kept), 6 Marketing (all three kept), 7 Customers (success, support, delivery, portals kept; scheduling and trust-safety hidden)
 - [x] Verified hidden Customers pages still open at /founder/scheduling and /founder/trust-safety with no runtime errors (23 Nov 2026)
 - [x] Verified all 58 pages left in the founder menu load signed-in with real content and no runtime errors (23 Nov 2026)
-- [ ] Review areas 8 Money onwards, one section at a time with the founder choosing
-- [ ] Tracking disclosure: open/click tracking is ON for pilot campaign 4103531 and the email copy does not disclose it — founder to switch tracking off, update the privacy notice, or add disclosure before the 24 Nov 10:00 education start
+- [x] Section 8 Money: founder kept all three (Finance hub, Collections, Reconciliation) — no changes needed (23 Nov 2026)
+- [ ] Review areas 9 Legal onwards, one section at a time with the founder choosing
+- [x] Tracking disclosure decided (23 Nov 2026): tracking stays ON for pilot campaign 4103531; founder will update the privacy notice the emails link to so it mentions open and click tracking before the 24 Nov 10:00 education start
 - [ ] Signed-in founders landing on / see the public marketing page; founder to decide whether to go straight to Liftor HQ
 - [ ] Lock ~30 open backend functions flagged by deep scan (e.g. founder-copilot, apollo-daily-runner, crm-send-check)
 - [ ] Single founder-only login; remove public login links; publish
