@@ -27557,6 +27557,213 @@ export type Database = {
           },
         ]
       }
+      education_harvest_buyer_evidence: {
+        Row: {
+          buyer_role: string
+          confidence: string
+          created_at: string
+          id: string
+          named_person: string | null
+          retrieved_at: string
+          run_key: string
+          source_url: string
+          urn: string
+          verification_status: string
+        }
+        Insert: {
+          buyer_role: string
+          confidence: string
+          created_at?: string
+          id?: string
+          named_person?: string | null
+          retrieved_at: string
+          run_key: string
+          source_url: string
+          urn: string
+          verification_status?: string
+        }
+        Update: {
+          buyer_role?: string
+          confidence?: string
+          created_at?: string
+          id?: string
+          named_person?: string | null
+          retrieved_at?: string
+          run_key?: string
+          source_url?: string
+          urn?: string
+          verification_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "education_harvest_buyer_evidence_run_key_fkey"
+            columns: ["run_key"]
+            isOneToOne: false
+            referencedRelation: "education_harvest_runs"
+            referencedColumns: ["run_key"]
+          },
+          {
+            foreignKeyName: "education_harvest_buyer_evidence_urn_fkey"
+            columns: ["urn"]
+            isOneToOne: false
+            referencedRelation: "education_harvest_queue"
+            referencedColumns: ["urn"]
+          },
+        ]
+      }
+      education_harvest_queue: {
+        Row: {
+          buyer_researched_at: string | null
+          claimed_run_key: string | null
+          completed_run_key: string | null
+          confidence: string | null
+          county: string | null
+          created_at: string
+          establishment_name: string | null
+          establishment_status: string | null
+          establishment_type: string | null
+          evidence_retrieved_at: string | null
+          evidence_urls: string[]
+          last_error: string | null
+          lease_expires_at: string | null
+          organisation_id: string | null
+          phase: string | null
+          postcode: string | null
+          product_fit: string | null
+          purchasing_route: string | null
+          retries: number
+          screened_at: string | null
+          status: string
+          town: string | null
+          updated_at: string
+          urn: string
+          verified_trust_or_group: string | null
+          website: string | null
+        }
+        Insert: {
+          buyer_researched_at?: string | null
+          claimed_run_key?: string | null
+          completed_run_key?: string | null
+          confidence?: string | null
+          county?: string | null
+          created_at?: string
+          establishment_name?: string | null
+          establishment_status?: string | null
+          establishment_type?: string | null
+          evidence_retrieved_at?: string | null
+          evidence_urls?: string[]
+          last_error?: string | null
+          lease_expires_at?: string | null
+          organisation_id?: string | null
+          phase?: string | null
+          postcode?: string | null
+          product_fit?: string | null
+          purchasing_route?: string | null
+          retries?: number
+          screened_at?: string | null
+          status?: string
+          town?: string | null
+          updated_at?: string
+          urn: string
+          verified_trust_or_group?: string | null
+          website?: string | null
+        }
+        Update: {
+          buyer_researched_at?: string | null
+          claimed_run_key?: string | null
+          completed_run_key?: string | null
+          confidence?: string | null
+          county?: string | null
+          created_at?: string
+          establishment_name?: string | null
+          establishment_status?: string | null
+          establishment_type?: string | null
+          evidence_retrieved_at?: string | null
+          evidence_urls?: string[]
+          last_error?: string | null
+          lease_expires_at?: string | null
+          organisation_id?: string | null
+          phase?: string | null
+          postcode?: string | null
+          product_fit?: string | null
+          purchasing_route?: string | null
+          retries?: number
+          screened_at?: string | null
+          status?: string
+          town?: string | null
+          updated_at?: string
+          urn?: string
+          verified_trust_or_group?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "education_harvest_queue_claimed_run_key_fkey"
+            columns: ["claimed_run_key"]
+            isOneToOne: false
+            referencedRelation: "education_harvest_runs"
+            referencedColumns: ["run_key"]
+          },
+          {
+            foreignKeyName: "education_harvest_queue_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      education_harvest_runs: {
+        Row: {
+          buyer_researched_count: number
+          claim_calls: number
+          claimed_count: number
+          error_count: number
+          finished_at: string | null
+          held_count: number
+          notes: string | null
+          run_date: string
+          run_key: string
+          screened_count: number
+          slot: string
+          started_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          buyer_researched_count?: number
+          claim_calls?: number
+          claimed_count?: number
+          error_count?: number
+          finished_at?: string | null
+          held_count?: number
+          notes?: string | null
+          run_date: string
+          run_key: string
+          screened_count?: number
+          slot: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          buyer_researched_count?: number
+          claim_calls?: number
+          claimed_count?: number
+          error_count?: number
+          finished_at?: string | null
+          held_count?: number
+          notes?: string | null
+          run_date?: string
+          run_key?: string
+          screened_count?: number
+          slot?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_events: {
         Row: {
           contact_id: string
@@ -74544,6 +74751,29 @@ export type Database = {
           replies?: never
           revenue?: never
           wins?: never
+        }
+        Relationships: []
+      }
+      education_harvest_open_schools: {
+        Row: {
+          county: string | null
+          establishment_group: string | null
+          establishment_name: string | null
+          establishment_status: string | null
+          establishment_type: string | null
+          phase: string | null
+          postcode: string | null
+          town: string | null
+          urn: string | null
+          website: string | null
+        }
+        Relationships: []
+      }
+      education_harvest_weekly: {
+        Row: {
+          schools_buyer_researched: number | null
+          schools_screened: number | null
+          week_start: string | null
         }
         Relationships: []
       }

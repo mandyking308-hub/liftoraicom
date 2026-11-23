@@ -1,0 +1,2 @@
+REVOKE ALL ON public.education_harvest_runs, public.education_harvest_queue, public.education_harvest_buyer_evidence, public.education_harvest_open_schools, public.education_harvest_weekly FROM anon;
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.education_harvest_runs, public.education_harvest_queue, public.education_harvest_buyer_evidence FROM authenticated;

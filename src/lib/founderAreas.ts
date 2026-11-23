@@ -36,6 +36,7 @@ export const founderAreas: FounderArea[] = [
     s("/global-pr-radar", "PR radar", "Media opportunities, journalists and coverage."),
     s("/distressed-radar", "Distressed radar", "Distressed acquisitions and asset disposals."),
     s("/retirement-succession", "Retirement & Succession", "Established UK businesses sold because the owner is retiring, incl. seller-finance evidence (research only)."),
+    s("/education-harvest", "Daily Education Harvest", "Private AM/PM research progress through open schools (research only, schedule runs in ChatGPT)."),
     s("/billionaire-intelligence", "Billionaire intelligence", "Billionaire coverage and research routes (research only)."),
     s("/relationship-intelligence", "Relationship intelligence", "Your network memory, with Strategic organisations and Relationship health tabs."),
     s("/strategic-organisations", "Strategic organisations", "Now a tab in Relationship intelligence.", true),
