@@ -323,6 +323,13 @@
       "when": 1795445557662,
       "tag": "0045_proposal_recon_view_invoker",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1795446681407,
+      "tag": "0046_communications_to_interaction_ledger",
+      "breakpoints": true
     }
   ]
 }
