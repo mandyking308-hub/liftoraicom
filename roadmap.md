@@ -112,7 +112,9 @@
 - [x] Verified hidden Customers pages still open at /founder/scheduling and /founder/trust-safety with no runtime errors (23 Nov 2026)
 - [x] Verified all 58 pages left in the founder menu load signed-in with real content and no runtime errors (23 Nov 2026)
 - [x] Section 8 Money: founder kept all three (Finance hub, Collections, Reconciliation) — no changes needed (23 Nov 2026)
-- [ ] Review areas 9 Legal onwards, one section at a time with the founder choosing
+- [x] Section 9 Legal & tax: founder kept Compliance, Privacy, Policies & contracts, Company & tax; Insurance and Wind-down hidden, not deleted (23 Nov 2026)
+- [ ] Review areas 10 Portfolio & exit onwards, one section at a time with the founder choosing
+- [x] Signed-in founders opening / now go straight to Liftor HQ; signed-out visitors still see the marketing page (23 Nov 2026)
 - [x] Tracking disclosure decided (23 Nov 2026): tracking stays ON for pilot campaign 4103531; founder will update the privacy notice the emails link to so it mentions open and click tracking before the 24 Nov 10:00 education start
 - [ ] Signed-in founders landing on / see the public marketing page; founder to decide whether to go straight to Liftor HQ
 - [ ] Lock ~30 open backend functions flagged by deep scan (e.g. founder-copilot, apollo-daily-runner, crm-send-check)
