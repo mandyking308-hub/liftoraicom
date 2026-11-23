@@ -11,12 +11,12 @@ const s = (route: string, label: string, desc: string, legacy = false): FounderS
   ({ route: route === "/" ? "/founder" : `/founder${route}`, label, desc, ...(legacy ? { legacy } : {}) });
 
 export const founderAreas: FounderArea[] = [
-  { key: "daily", n: 1, title: "Daily running", summary: "Priorities, decisions, approvals, alerts and reports across every business.", sections: [
-    s("/approvals-ops", "Approvals", "Everything blocked, paused, pending or waiting for you."),
-    s("/work-queue", "Work queue", "All open work, with Today, Overdue, Priority, Attention guard and Hand-offs tabs."),
-    s("/notifications", "Alerts", "Warnings, incidents and escalations ranked by severity."),
-    s("/decisions", "Decisions", "Your decisions and their follow-through across businesses."),
-    s("/reports", "Reviews & reports", "Daily summaries, weekly review, reports and reporting truth in one place."),
+  { key: "daily", n: 1, title: "Daily running", summary: "One To do list: approvals and open work across every business.", sections: [
+    s("/work-queue", "To do", "Everything waiting for you: approvals, open work, overdue and blocked items in one place."),
+    s("/approvals-ops", "Approvals", "Now part of To do.", true),
+    s("/notifications", "Alerts", "Hidden by founder choice (23 Nov 2026).", true),
+    s("/decisions", "Decisions", "Hidden by founder choice (23 Nov 2026).", true),
+    s("/reports", "Reviews & reports", "Hidden by founder choice (23 Nov 2026).", true),
     s("/priority", "Priority", "Now a tab in Work queue.", true),
     s("/attention-guard", "Attention guard", "Now a tab in Work queue.", true),
     s("/internal-sla", "Hand-offs & deadlines", "Now a tab in Work queue.", true),
