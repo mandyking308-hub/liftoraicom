@@ -281,6 +281,13 @@
       "when": 1795432039167,
       "tag": "0039_education_harvest_durable_run_cap",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1795433909546,
+      "tag": "0040_campaign_quarterly_recurrence",
+      "breakpoints": true
     }
   ]
 }

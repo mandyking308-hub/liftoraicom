@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { AlertTriangle, MessageSquare, RefreshCw } from "lucide-react";
 import { FunctionsHttpError } from "@supabase/supabase-js";
+import QuarterlyRoundsPanel from "@/components/founder/outreach/QuarterlyRoundsPanel";
 import { trackingFlags } from "../../../supabase/functions/_shared/smartleadCampaignSync";
 
 type Mapping = { business_id: string; provider_campaign_id: string; provider_campaign_name: string | null };
@@ -178,6 +179,7 @@ export default function SmartleadCommandCentre() {
             <Button onClick={syncNow} disabled={!sel || syncing}><RefreshCw className={`mr-2 h-4 w-4 ${syncing ? "animate-spin" : ""}`} />Sync now</Button>
           </div>
         </div>
+        <QuarterlyRoundsPanel />
 
         {!sel && <Card><CardContent className="p-6 text-sm text-muted-foreground">No Smartlead campaign is mapped to an active business yet.</CardContent></Card>}
 

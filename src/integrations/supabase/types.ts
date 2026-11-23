@@ -14553,6 +14553,122 @@ export type Database = {
           },
         ]
       }
+      campaign_recurrence_plans: {
+        Row: {
+          active: boolean
+          auto_start: boolean
+          business_id: string
+          campaign_name: string
+          created_at: string
+          first_sent_at: string
+          id: string
+          interval_months: number
+          max_rounds: number | null
+          next_round_at: string
+          notes: string | null
+          rounds_completed: number
+          send_days: number
+          sequence_steps: number
+          source_campaign_id: string
+          source_provider: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          auto_start?: boolean
+          business_id: string
+          campaign_name: string
+          created_at?: string
+          first_sent_at: string
+          id?: string
+          interval_months?: number
+          max_rounds?: number | null
+          next_round_at: string
+          notes?: string | null
+          rounds_completed?: number
+          send_days?: number
+          sequence_steps?: number
+          source_campaign_id: string
+          source_provider?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          auto_start?: boolean
+          business_id?: string
+          campaign_name?: string
+          created_at?: string
+          first_sent_at?: string
+          id?: string
+          interval_months?: number
+          max_rounds?: number | null
+          next_round_at?: string
+          notes?: string | null
+          rounds_completed?: number
+          send_days?: number
+          sequence_steps?: number
+          source_campaign_id?: string
+          source_provider?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      campaign_recurrence_rounds: {
+        Row: {
+          business_id: string
+          checked_at: string | null
+          created_at: string
+          critical: Json
+          due_at: string
+          eligible_count: number
+          held_counts: Json
+          id: string
+          notes: Json
+          plan_id: string
+          provider_campaign_id: string | null
+          round_number: number
+          status: string
+        }
+        Insert: {
+          business_id: string
+          checked_at?: string | null
+          created_at?: string
+          critical?: Json
+          due_at: string
+          eligible_count?: number
+          held_counts?: Json
+          id?: string
+          notes?: Json
+          plan_id: string
+          provider_campaign_id?: string | null
+          round_number: number
+          status?: string
+        }
+        Update: {
+          business_id?: string
+          checked_at?: string | null
+          created_at?: string
+          critical?: Json
+          due_at?: string
+          eligible_count?: number
+          held_counts?: Json
+          id?: string
+          notes?: Json
+          plan_id?: string
+          provider_campaign_id?: string | null
+          round_number?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_recurrence_rounds_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_recurrence_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       capacity_plans: {
         Row: {
           business_id: string | null
@@ -27710,6 +27826,39 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organisations"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      education_harvest_run_claims: {
+        Row: {
+          reserved_at: string
+          run_key: string
+          urn: string
+        }
+        Insert: {
+          reserved_at?: string
+          run_key: string
+          urn: string
+        }
+        Update: {
+          reserved_at?: string
+          run_key?: string
+          urn?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "education_harvest_run_claims_run_key_fkey"
+            columns: ["run_key"]
+            isOneToOne: false
+            referencedRelation: "education_harvest_runs"
+            referencedColumns: ["run_key"]
+          },
+          {
+            foreignKeyName: "education_harvest_run_claims_urn_fkey"
+            columns: ["urn"]
+            isOneToOne: false
+            referencedRelation: "education_harvest_queue"
+            referencedColumns: ["urn"]
           },
         ]
       }
