@@ -233,10 +233,10 @@ export const founderAreas: FounderArea[] = [
     s("/access-governance", "Access governance", "System access and secret rotation checklists.", true),
     s("/security-vault", "Security vault", "Snapshots, secrets register and backups.", true),
     s("/incidents", "Incidents", "Incident tracking.", true),
-    s("/context-fabric", "Business separation", "Stops businesses' data mixing."),
+    s("/context-fabric", "Business separation", "Stops businesses' data mixing.", true),
     s("/cross-contamination", "Cross-business checks", "Integrity checks between businesses.", true),
     s("/recovery", "Recovery", "Recovery controls.", true),
-    s("/backup-recovery", "Backups", "Backup and emergency packs."),
+    s("/backup-recovery", "Backups", "Backup and emergency packs.", true),
     s("/context-guard", "Context guard (old link)", "Forwards to Business separation.", true),
   ]},
 ];
