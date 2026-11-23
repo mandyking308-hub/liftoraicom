@@ -49,7 +49,7 @@ export const areaMetrics: Record<string, Metric[]> = {
   portfolio: [{ label: "Active businesses", spec: { table: "businesses", eq: { portfolio_status: "active" } }, goodIfAbove: 0 }],
   setup: [
     { label: "Manuals uploaded", spec: { table: "business_knowledge_uploads", biz: true }, goodIfAbove: 0 },
-    { label: "Usable Apollo contacts", spec: { table: "apollo_contact_intelligence", biz: true, notNull: "primary_email", eq: { readiness_status: "eligible_for_review" } } },
+    { label: "Usable Apollo contacts (archive)", spec: { table: "apollo_contact_intelligence", biz: true, notNull: "primary_email", eq: { readiness_status: "eligible_for_review" } } },
   ],
   people: [
     { label: "Suppliers", spec: { table: "suppliers" } },
