@@ -239,6 +239,13 @@
       "when": 1795182693521,
       "tag": "0033_inbox_agent_hourly_sweep",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1795429062546,
+      "tag": "0034_retirement_succession_discovery",
+      "breakpoints": true
     }
   ]
 }

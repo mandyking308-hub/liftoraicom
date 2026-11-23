@@ -35,6 +35,7 @@ export const founderAreas: FounderArea[] = [
     s("/funding-radar", "Funding radar", "Funded companies and build opportunities."),
     s("/global-pr-radar", "PR radar", "Media opportunities, journalists and coverage."),
     s("/distressed-radar", "Distressed radar", "Distressed acquisitions and asset disposals."),
+    s("/retirement-succession", "Retirement & Succession", "Established UK businesses sold because the owner is retiring, incl. seller-finance evidence (research only)."),
     s("/billionaire-intelligence", "Billionaire intelligence", "Billionaire coverage and research routes (research only)."),
     s("/relationship-intelligence", "Relationship intelligence", "Your network memory, with Strategic organisations and Relationship health tabs."),
     s("/strategic-organisations", "Strategic organisations", "Now a tab in Relationship intelligence.", true),

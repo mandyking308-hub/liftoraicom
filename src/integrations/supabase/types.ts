@@ -53675,6 +53675,239 @@ export type Database = {
           },
         ]
       }
+      retirement_acquisition_activity: {
+        Row: {
+          action: string
+          actor: string | null
+          channel: string | null
+          created_at: string
+          detail: Json
+          id: string
+          inserted_count: number
+          rejected_count: number
+          updated_count: number
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          channel?: string | null
+          created_at?: string
+          detail?: Json
+          id?: string
+          inserted_count?: number
+          rejected_count?: number
+          updated_count?: number
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          channel?: string | null
+          created_at?: string
+          detail?: Json
+          id?: string
+          inserted_count?: number
+          rejected_count?: number
+          updated_count?: number
+        }
+        Relationships: []
+      }
+      retirement_acquisition_candidates: {
+        Row: {
+          asking_price: number | null
+          country: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          deposit_required: string
+          evidence_quality: string
+          evidence_summary: string | null
+          evidence_url: string | null
+          first_seen_at: string
+          id: string
+          ingest_channel: string
+          is_franchise: boolean | null
+          is_test: boolean
+          last_seen_at: string
+          listing_availability: string
+          location: string | null
+          next_action: string | null
+          normalized_url: string
+          owner_hours_per_week: number | null
+          owner_role: string | null
+          premises_only: boolean | null
+          profit: number | null
+          recurring_revenue: string
+          red_flags: string[]
+          replacement_manager_cost: number | null
+          retirement_confidence: string
+          sale_reason: string | null
+          score: number | null
+          sector: string | null
+          seller_finance_evidence: string | null
+          seller_finance_status: string
+          source_key: string
+          source_listing_id: string | null
+          source_url: string
+          staff_count: number | null
+          status: string
+          third_party_finance_note: string | null
+          title: string
+          turnover: number | null
+          unverified_fields: string[]
+          updated_at: string
+          years_trading: number | null
+        }
+        Insert: {
+          asking_price?: number | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          deposit_required?: string
+          evidence_quality?: string
+          evidence_summary?: string | null
+          evidence_url?: string | null
+          first_seen_at?: string
+          id?: string
+          ingest_channel?: string
+          is_franchise?: boolean | null
+          is_test?: boolean
+          last_seen_at?: string
+          listing_availability?: string
+          location?: string | null
+          next_action?: string | null
+          normalized_url: string
+          owner_hours_per_week?: number | null
+          owner_role?: string | null
+          premises_only?: boolean | null
+          profit?: number | null
+          recurring_revenue?: string
+          red_flags?: string[]
+          replacement_manager_cost?: number | null
+          retirement_confidence?: string
+          sale_reason?: string | null
+          score?: number | null
+          sector?: string | null
+          seller_finance_evidence?: string | null
+          seller_finance_status?: string
+          source_key: string
+          source_listing_id?: string | null
+          source_url: string
+          staff_count?: number | null
+          status?: string
+          third_party_finance_note?: string | null
+          title: string
+          turnover?: number | null
+          unverified_fields?: string[]
+          updated_at?: string
+          years_trading?: number | null
+        }
+        Update: {
+          asking_price?: number | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          deposit_required?: string
+          evidence_quality?: string
+          evidence_summary?: string | null
+          evidence_url?: string | null
+          first_seen_at?: string
+          id?: string
+          ingest_channel?: string
+          is_franchise?: boolean | null
+          is_test?: boolean
+          last_seen_at?: string
+          listing_availability?: string
+          location?: string | null
+          next_action?: string | null
+          normalized_url?: string
+          owner_hours_per_week?: number | null
+          owner_role?: string | null
+          premises_only?: boolean | null
+          profit?: number | null
+          recurring_revenue?: string
+          red_flags?: string[]
+          replacement_manager_cost?: number | null
+          retirement_confidence?: string
+          sale_reason?: string | null
+          score?: number | null
+          sector?: string | null
+          seller_finance_evidence?: string | null
+          seller_finance_status?: string
+          source_key?: string
+          source_listing_id?: string | null
+          source_url?: string
+          staff_count?: number | null
+          status?: string
+          third_party_finance_note?: string | null
+          title?: string
+          turnover?: number | null
+          unverified_fields?: string[]
+          updated_at?: string
+          years_trading?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retirement_acquisition_candidates_source_key_fkey"
+            columns: ["source_key"]
+            isOneToOne: false
+            referencedRelation: "retirement_acquisition_sources"
+            referencedColumns: ["source_key"]
+          },
+        ]
+      }
+      retirement_acquisition_sources: {
+        Row: {
+          access_mode: string
+          alert_status: string
+          created_at: string
+          discovery_connector: string
+          id: string
+          last_checked_at: string | null
+          name: string
+          notes: string | null
+          scraping_allowed: boolean
+          source_key: string
+          terms_note: string | null
+          updated_at: string
+          url: string
+          verified_alert_at: string | null
+        }
+        Insert: {
+          access_mode: string
+          alert_status?: string
+          created_at?: string
+          discovery_connector?: string
+          id?: string
+          last_checked_at?: string | null
+          name: string
+          notes?: string | null
+          scraping_allowed?: boolean
+          source_key: string
+          terms_note?: string | null
+          updated_at?: string
+          url: string
+          verified_alert_at?: string | null
+        }
+        Update: {
+          access_mode?: string
+          alert_status?: string
+          created_at?: string
+          discovery_connector?: string
+          id?: string
+          last_checked_at?: string | null
+          name?: string
+          notes?: string | null
+          scraping_allowed?: boolean
+          source_key?: string
+          terms_note?: string | null
+          updated_at?: string
+          url?: string
+          verified_alert_at?: string | null
+        }
+        Relationships: []
+      }
       retry_queue: {
         Row: {
           action_type: Database["public"]["Enums"]["retry_action_type"]
@@ -56393,6 +56626,8 @@ export type Database = {
       }
       smartlead_reply_drafts: {
         Row: {
+          agent_category: string | null
+          agent_summary: string | null
           body: string
           business_id: string
           created_at: string
@@ -56404,10 +56639,13 @@ export type Database = {
           reply_to_message_id: string | null
           sent_at: string | null
           sent_by: string | null
+          source_task_id: string | null
           status: string
           updated_at: string
         }
         Insert: {
+          agent_category?: string | null
+          agent_summary?: string | null
           body: string
           business_id: string
           created_at?: string
@@ -56419,10 +56657,13 @@ export type Database = {
           reply_to_message_id?: string | null
           sent_at?: string | null
           sent_by?: string | null
+          source_task_id?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
+          agent_category?: string | null
+          agent_summary?: string | null
           body?: string
           business_id?: string
           created_at?: string
@@ -56434,6 +56675,7 @@ export type Database = {
           reply_to_message_id?: string | null
           sent_at?: string | null
           sent_by?: string | null
+          source_task_id?: string | null
           status?: string
           updated_at?: string
         }
@@ -75557,6 +75799,10 @@ export type Database = {
       resolve_entity_country: {
         Args: { _business?: string; _contact_id: string }
         Returns: string
+      }
+      retirement_candidates_upsert: {
+        Args: { _channel?: string; _rows: Json }
+        Returns: Json
       }
       run_billionaire_enrichment_batches: {
         Args: { p_batch_size?: number; p_max_batches?: number }
