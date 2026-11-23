@@ -236,10 +236,10 @@ export const REGISTRY: RegistryItem[] = [
   // ─────────── 2 · AI Agent Control Room (canonical concepts; live ai_agents=0)
   { name: "Agent Directory", path: "/founder/agents", section: "2", risk: "live-action", status: "valid", source: "App.tsx" },
   { name: "Lead Quality Autopilot", path: "", nearest: "/founder/agents", section: "2", risk: "live-action", status: "no-dedicated-ui", source: "edge-fn:lead-quality-autopilot" },
-  { name: "Apollo Daily Runner", path: "", nearest: "/founder/outreach/apollo", section: "2", risk: "external-integration", status: "no-dedicated-ui", source: "edge-fn:apollo-daily-runner" },
+  { name: "Apollo Daily Runner (schedule paused 23 Nov 2026)", path: "", nearest: "/founder/outreach/apollo", section: "2", risk: "external-integration", status: "no-dedicated-ui", source: "edge-fn:apollo-daily-runner" },
   { name: "Autopilot Orchestrator", path: "", nearest: "/founder/agents", section: "2", risk: "live-action", status: "no-dedicated-ui", source: "edge-fn:autopilot-orchestrator" },
   { name: "Outreach Send Worker", path: "", nearest: "/founder/sending", section: "2", risk: "send-adjacent", status: "no-dedicated-ui", source: "edge-fn:outreach-send-worker" },
-  { name: "Inbound Poller / Webhook", path: "", nearest: "/founder/conversations", section: "2", risk: "external-integration", status: "no-dedicated-ui", source: "edge-fn:outreach-inbound-poll" },
+  { name: "Inbound Poller / Webhook (2-min poll paused 23 Nov 2026)", path: "", nearest: "/founder/conversations", section: "2", risk: "external-integration", status: "no-dedicated-ui", source: "edge-fn:outreach-inbound-poll" },
   { name: "AI Conversation Engine", path: "", nearest: "/founder/conversations", section: "2", risk: "live-action", status: "no-dedicated-ui", source: "edge-fn:ai-conversation-engine" },
   { name: "Compliance Approver", path: "", nearest: "/founder/compliance", section: "2", risk: "compliance-sensitive", status: "no-dedicated-ui", source: "edge-fn:compliance-approve" },
   { name: "Finance Chaser", path: "", nearest: "/founder/finance/invoices", section: "2", risk: "financial", status: "no-dedicated-ui", source: "edge-fn:finance-chase-overdue" },

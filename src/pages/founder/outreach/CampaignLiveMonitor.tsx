@@ -628,10 +628,7 @@ const CampaignLiveMonitor = () => {
                 <Button size="sm" variant="outline" onClick={testImap} disabled={!inbox || testing}>
                   {testing ? "Testing…" : "Test IMAP connection"}
                 </Button>
-                <Button size="sm" onClick={pollNow} disabled={!inbox || polling}>
-                  <RefreshCw className={`h-3 w-3 mr-1 ${polling ? "animate-spin" : ""}`} />
-                  {polling ? "Polling…" : "Poll now"}
-                </Button>
+                {/* Manual "Poll now" hidden 23 Nov 2026: old mailbox check retired; replies come via Smartlead read-back. */}
               </div>
               <p className="text-xs text-muted-foreground">
                 Last test: {fmtTime(inbox?.last_test_send_at)} ({inbox?.last_test_send_status ?? "—"})

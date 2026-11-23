@@ -1027,6 +1027,10 @@ following gates were verified in the same diagnostic window:
    command references \`outreach-send-worker\` were removed from
    \`cron.job\`. Only \`outreach-inbound-poll-every-2min\` (inbound only)
    remains active.
+   *Update 23 Nov 2026:* \`outreach-inbound-poll-every-2min\` is now paused too
+   (founder decision, duplicate of the Smartlead read-back). Its manual
+   "Poll now" buttons are hidden. Replies arrive through Smartlead and the
+   10-minute Smartlead read-back.
 2. **Global kill switch.** \`system_settings.auto_send_enabled\` is set
    to \`false\` and is the single source of truth. Missing / non-true
    values are treated as \`false\` (fail-closed).

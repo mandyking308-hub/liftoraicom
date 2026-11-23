@@ -705,9 +705,7 @@ const CRMInboxConfigure = () => {
               <Button variant="outline" onClick={testImap} disabled={testingImap || inboundForm.inbound_provider !== "ionos_imap"}>
                 <ShieldCheck className="h-3.5 w-3.5 mr-1" /> {testingImap ? "Testing…" : "Test IMAP connection"}
               </Button>
-              <Button variant="outline" onClick={pollNow} disabled={pollingNow || inboundForm.inbound_provider !== "ionos_imap"}>
-                <RefreshCw className="h-3.5 w-3.5 mr-1" /> {pollingNow ? "Polling…" : "Poll now"}
-              </Button>
+              {/* Manual "Poll now" hidden 23 Nov 2026: old mailbox check retired; replies come via Smartlead read-back. */}
             </div>
           </CardContent>
         </Card>

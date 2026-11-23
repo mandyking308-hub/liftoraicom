@@ -396,6 +396,8 @@ cost preview on unlocks; CRM/suppression/duplicate checks around reveal and impo
 3. **No portfolio-wide Apollo credit ledger/ceiling** across every paid enrichment path.
 4. \`apollo-daily-runner\` can invoke enrichment when a segment sets \`auto_enrich=true\`; paid
    automatic enrichment must stay disabled until the global credit firewall exists.
+   *Update 23 Nov 2026:* the \`apollo-daily-runner-06utc\` schedule is paused (founder
+   decision; no segments were enabled and it had done no work since 23 Oct 2026).
 5. Bulk enrichment can fall back to individual \`people/match\` calls — the future firewall must
    guard the combined operation, not just the first call.
 6. No production orchestrator yet for: supplied company universe → best decision-makers per
