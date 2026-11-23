@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   buildCandidate, dedupeRows, parseBulk, economics, isDueDiligenceReady, fmtMoney,
+  effectiveZeroUpfrontStatus, inZeroUpfrontShortlist, isZeroUpfrontDDReady, ZERO_UPFRONT_LABEL,
   SOURCE_STATUS_LABEL, SELLER_FINANCE_LABEL, type CandidateInput, type CandidateRow, type SellerFinance,
 } from "@/lib/retirement/retirementAcquisition";
 
@@ -23,7 +24,9 @@ const db = supabase as unknown as { from: (t: string) => any; rpc: (f: string, a
 
 export function CandidateCard({ c }: { c: Candidate }) {
   const e = economics(c);
-  const dd = isDueDiligenceReady(c);
+  const zc = c as any;
+  const dd = isZeroUpfrontDDReady(zc);
+  const zu = effectiveZeroUpfrontStatus(zc);
   return (
     <Card className="tech-card" data-testid="retirement-candidate">
       <CardContent className="p-4 space-y-2 text-xs">
@@ -35,7 +38,8 @@ export function CandidateCard({ c }: { c: Candidate }) {
           <div className="flex flex-wrap gap-1">
             <Badge variant={c.seller_finance_status === "explicit" ? "default" : "outline"}>{SELLER_FINANCE_LABEL[c.seller_finance_status as SellerFinance]}</Badge>
             <Badge variant="outline">Score {c.score ?? "—"}</Badge>
-            <Badge variant={dd ? "default" : "secondary"}>{dd ? "Due-diligence ready" : "Interesting — not DD ready"}</Badge>
+            <Badge variant={zu === "confirmed_zero" ? "default" : zu === "cash_required" ? "destructive" : "outline"} data-testid="zero-upfront-badge">{ZERO_UPFRONT_LABEL[zu]}</Badge>
+            <Badge variant={dd ? "default" : "secondary"}>{dd ? "Due-diligence ready" : isDueDiligenceReady(c) ? "Not DD ready — £0 upfront not confirmed" : "Interesting — not DD ready"}</Badge>
             <Badge variant="outline">Status: {c.status}</Badge>
           </div>
         </div>
@@ -53,6 +57,14 @@ export function CandidateCard({ c }: { c: Candidate }) {
           <div>Listing: {c.listing_availability}</div>
           <div>Deposit: {c.deposit_required}</div>
         </div>
+        <div className="grid md:grid-cols-4 gap-2">
+          <div>Upfront cash: {zc.upfront_cash_required == null ? "Unknown (not £0)" : fmtMoney(zc.upfront_cash_required)}</div>
+          <div>Seller finance %: {zc.seller_finance_percent ?? "Unknown"}</div>
+          <div>Terms confirmed: {zc.terms_confirmed_at ? new Date(zc.terms_confirmed_at).toLocaleDateString("en-GB") : "No"}</div>
+          <div>Seller enquiry: {(zc.seller_contact_status ?? "not_contacted").replace(/_/g, " ")}</div>
+        </div>
+        {zc.zero_upfront_evidence && <div>£0-upfront evidence: “{zc.zero_upfront_evidence}”</div>}
+        {zc.outstanding_costs?.length > 0 && <div className="text-muted-foreground">Separate costs still to fund/assess: {zc.outstanding_costs.join(", ")}</div>}
         {c.seller_finance_evidence && <div>Seller-finance proof: “{c.seller_finance_evidence}”</div>}
         {c.third_party_finance_note && <div className="text-muted-foreground">Third-party finance mentioned (not seller finance): “{c.third_party_finance_note}”</div>}
         {c.unverified_fields?.length > 0 && <div className="text-muted-foreground">Unverified: {c.unverified_fields.join(", ")}</div>}
@@ -87,13 +99,17 @@ export default function RetirementSuccession() {
   const srcKeys = (sources.data ?? []).map((s) => s.source_key);
   const list = candidates.data ?? [];
   const [showExcluded, setShowExcluded] = useState(false);
-  const visible = list.filter((c) => showExcluded || !(c.is_franchise || c.premises_only || c.status === "rejected"));
+  const [zeroOnly, setZeroOnly] = useState(false);
+  const visible = list.filter((c) => (showExcluded || !(c.is_franchise || c.premises_only || c.status === "rejected")) && (!zeroOnly || inZeroUpfrontShortlist(c as any)));
   const totals = useMemo(() => ({
     all: list.length,
     explicit: list.filter((c) => c.seller_finance_status === "explicit").length,
     possible: list.filter((c) => c.seller_finance_status === "possible").length,
     unknown: list.filter((c) => c.seller_finance_status === "unknown" || c.seller_finance_status === "none").length,
-    dd: list.filter(isDueDiligenceReady).length,
+    dd: list.filter((c) => isZeroUpfrontDDReady(c as any)).length,
+    zero: list.filter((c) => inZeroUpfrontShortlist(c as any)).length,
+    cash: list.filter((c) => effectiveZeroUpfrontStatus(c as any) === "cash_required").length,
+    nego: list.filter((c) => effectiveZeroUpfrontStatus(c as any) === "negotiation_candidate").length,
     shortlist: list.filter((c) => c.status === "shortlist").length,
   }), [list]);
 
@@ -149,8 +165,9 @@ export default function RetirementSuccession() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-          {[["Candidates", totals.all], ["Seller finance (proof)", totals.explicit], ["Seller finance possible", totals.possible], ["Seller finance unknown", totals.unknown], ["Due-diligence ready", totals.dd], ["Shortlisted", totals.shortlist]].map(([l, v]) => (
+        <div className="text-xs text-muted-foreground">Rule: £0 of the purchase price payable upfront. Seller finance offered ≠ zero down — partial seller finance or any deposit is excluded from the £0 shortlist. Score measures operational fit only; it never makes a deal eligible.</div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {[["Confirmed £0 upfront", totals.zero], ["Potentially negotiable", totals.nego], ["Cash/deposit required", totals.cash], ["Candidates", totals.all], ["Seller finance (proof)", totals.explicit], ["Seller finance possible", totals.possible], ["Seller finance unknown", totals.unknown], ["Due-diligence ready", totals.dd], ["Shortlisted", totals.shortlist]].map(([l, v]) => (
             <Card key={l as string} className="tech-card"><CardContent className="p-3"><div className="text-[11px] text-muted-foreground">{l}</div><div className="text-2xl font-bold" data-testid={`total-${l}`}>{v as number}</div></CardContent></Card>
           ))}
         </div>
@@ -166,6 +183,7 @@ export default function RetirementSuccession() {
           <TabsContent value="opportunities" className="space-y-3">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>Default filter: UK, retirement/succession, 2+ years trading; franchises, empty premises and rejected hidden.</span>
+              <Button size="sm" variant={zeroOnly ? "default" : "outline"} onClick={() => setZeroOnly((v) => !v)} data-testid="zero-upfront-filter">{zeroOnly ? "Showing £0 purchase price only" : "£0 purchase-price screen"}</Button>
               <Button size="sm" variant="outline" onClick={() => setShowExcluded((v) => !v)}>{showExcluded ? "Hide excluded" : "Show excluded"}</Button>
             </div>
             {candidates.isLoading ? <div className="text-sm">Loading…</div> : visible.length === 0 ? (

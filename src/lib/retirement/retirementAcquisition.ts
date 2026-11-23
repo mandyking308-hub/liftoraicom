@@ -304,3 +304,48 @@ export const SELLER_FINANCE_LABEL: Record<SellerFinance, string> = {
 };
 export const fmtMoney = (v: number | null | undefined, cur = "GBP") =>
   v == null ? "Unknown" : new Intl.NumberFormat("en-GB", { style: "currency", currency: cur, maximumFractionDigits: 0 }).format(v);
+
+/* ---------- £0 upfront purchase-consideration rule (founder non-negotiable) ---------- */
+export type ZeroUpfrontStatus = "confirmed_zero" | "negotiation_candidate" | "cash_required" | "unknown";
+export interface ZeroUpfrontTerms {
+  zero_upfront_status?: string | null;
+  upfront_cash_required?: number | null;
+  seller_finance_percent?: number | null;
+  zero_upfront_evidence?: string | null;
+  zero_upfront_evidence_url?: string | null;
+  terms_confirmed_at?: string | null;
+}
+export const ZERO_UPFRONT_LABEL: Record<ZeroUpfrontStatus, string> = {
+  confirmed_zero: "Confirmed £0 upfront (source-backed)",
+  negotiation_candidate: "Potentially negotiable to £0 upfront",
+  cash_required: "Cash/deposit required on advertised terms",
+  unknown: "£0 upfront unknown",
+};
+
+/** True only with proof: £0 cash, 100% deferred, evidence text + source URL + confirmation date. NULL cash is never zero. */
+export function isConfirmedZeroUpfront(t: ZeroUpfrontTerms): boolean {
+  return t.zero_upfront_status === "confirmed_zero"
+    && t.upfront_cash_required === 0
+    && t.seller_finance_percent === 100
+    && !!t.zero_upfront_evidence?.trim()
+    && /^https?:\/\//.test(t.zero_upfront_evidence_url ?? "")
+    && !!t.terms_confirmed_at;
+}
+
+/** Status shown/used: an unproven "confirmed_zero" is downgraded; known partial finance or cash is cash_required. */
+export function effectiveZeroUpfrontStatus(t: ZeroUpfrontTerms): ZeroUpfrontStatus {
+  if (isConfirmedZeroUpfront(t)) return "confirmed_zero";
+  if ((t.upfront_cash_required ?? 0) > 0) return "cash_required";
+  if (t.seller_finance_percent != null && t.seller_finance_percent < 100) return "cash_required";
+  const s = t.zero_upfront_status as ZeroUpfrontStatus;
+  if (s === "cash_required" || s === "negotiation_candidate") return s;
+  return "unknown";
+}
+
+/** £0 purchase-price shortlist: confirmed proof only. Everything else stays in general research. */
+export const inZeroUpfrontShortlist = (t: ZeroUpfrontTerms) => effectiveZeroUpfrontStatus(t) === "confirmed_zero";
+
+/** Due-diligence ready requires both the operational checks and confirmed £0 upfront. */
+export function isZeroUpfrontDDReady(row: Parameters<typeof isDueDiligenceReady>[0] & ZeroUpfrontTerms): boolean {
+  return isDueDiligenceReady(row) && isConfirmedZeroUpfront(row);
+}

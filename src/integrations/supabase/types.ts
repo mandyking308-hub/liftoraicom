@@ -53732,6 +53732,7 @@ export type Database = {
           location: string | null
           next_action: string | null
           normalized_url: string
+          outstanding_costs: string[]
           owner_hours_per_week: number | null
           owner_role: string | null
           premises_only: boolean | null
@@ -53743,19 +53744,26 @@ export type Database = {
           sale_reason: string | null
           score: number | null
           sector: string | null
+          seller_contact_status: string
           seller_finance_evidence: string | null
+          seller_finance_percent: number | null
           seller_finance_status: string
           source_key: string
           source_listing_id: string | null
           source_url: string
           staff_count: number | null
           status: string
+          terms_confirmed_at: string | null
           third_party_finance_note: string | null
           title: string
           turnover: number | null
           unverified_fields: string[]
           updated_at: string
+          upfront_cash_required: number | null
           years_trading: number | null
+          zero_upfront_evidence: string | null
+          zero_upfront_evidence_url: string | null
+          zero_upfront_status: string
         }
         Insert: {
           asking_price?: number | null
@@ -53777,6 +53785,7 @@ export type Database = {
           location?: string | null
           next_action?: string | null
           normalized_url: string
+          outstanding_costs?: string[]
           owner_hours_per_week?: number | null
           owner_role?: string | null
           premises_only?: boolean | null
@@ -53788,19 +53797,26 @@ export type Database = {
           sale_reason?: string | null
           score?: number | null
           sector?: string | null
+          seller_contact_status?: string
           seller_finance_evidence?: string | null
+          seller_finance_percent?: number | null
           seller_finance_status?: string
           source_key: string
           source_listing_id?: string | null
           source_url: string
           staff_count?: number | null
           status?: string
+          terms_confirmed_at?: string | null
           third_party_finance_note?: string | null
           title: string
           turnover?: number | null
           unverified_fields?: string[]
           updated_at?: string
+          upfront_cash_required?: number | null
           years_trading?: number | null
+          zero_upfront_evidence?: string | null
+          zero_upfront_evidence_url?: string | null
+          zero_upfront_status?: string
         }
         Update: {
           asking_price?: number | null
@@ -53822,6 +53838,7 @@ export type Database = {
           location?: string | null
           next_action?: string | null
           normalized_url?: string
+          outstanding_costs?: string[]
           owner_hours_per_week?: number | null
           owner_role?: string | null
           premises_only?: boolean | null
@@ -53833,19 +53850,26 @@ export type Database = {
           sale_reason?: string | null
           score?: number | null
           sector?: string | null
+          seller_contact_status?: string
           seller_finance_evidence?: string | null
+          seller_finance_percent?: number | null
           seller_finance_status?: string
           source_key?: string
           source_listing_id?: string | null
           source_url?: string
           staff_count?: number | null
           status?: string
+          terms_confirmed_at?: string | null
           third_party_finance_note?: string | null
           title?: string
           turnover?: number | null
           unverified_fields?: string[]
           updated_at?: string
+          upfront_cash_required?: number | null
           years_trading?: number | null
+          zero_upfront_evidence?: string | null
+          zero_upfront_evidence_url?: string | null
+          zero_upfront_status?: string
         }
         Relationships: [
           {
