@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 /** Read-only count used by Liftor HQ. Returns null when the table can't be read, so the UI shows "—" instead of guessing. */
-export type CountSpec = { table: string; biz?: boolean; eq?: Record<string, unknown>; in?: [string, unknown[]]; gte?: [string, string] };
+export type CountSpec = { table: string; biz?: boolean; eq?: Record<string, unknown>; in?: [string, unknown[]]; gte?: [string, string]; notNull?: string };
 
 export async function hqCount(spec: CountSpec, businessId: string | null): Promise<number | null> {
   let q: any = supabase.from(spec.table as never).select("*", { count: "exact", head: true });
@@ -9,6 +9,7 @@ export async function hqCount(spec: CountSpec, businessId: string | null): Promi
   for (const [k, v] of Object.entries(spec.eq ?? {})) q = q.eq(k, v);
   if (spec.in) q = q.in(spec.in[0], spec.in[1]);
   if (spec.gte) q = q.gte(spec.gte[0], spec.gte[1]);
+  if (spec.notNull) q = q.not(spec.notNull, "is", null);
   const { count, error } = await q;
   return error ? null : count ?? 0;
 }
@@ -48,7 +49,7 @@ export const areaMetrics: Record<string, Metric[]> = {
   portfolio: [{ label: "Active businesses", spec: { table: "businesses", eq: { portfolio_status: "active" } }, goodIfAbove: 0 }],
   setup: [
     { label: "Manuals uploaded", spec: { table: "business_knowledge_uploads", biz: true }, goodIfAbove: 0 },
-    { label: "Apollo records kept", spec: { table: "apollo_contact_intelligence", biz: true } },
+    { label: "Apollo records with email", spec: { table: "apollo_contact_intelligence", biz: true, notNull: "primary_email" } },
   ],
   people: [
     { label: "Suppliers", spec: { table: "suppliers" } },
