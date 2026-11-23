@@ -129,3 +129,13 @@
 - [x] Paused the old 2-minute mailbox check (job 12) and the empty Apollo daily job (job 14). Both can be switched back on.
 - [ ] Education campaign read-back (job 21, paused). The current sync makes one request per person, so it hit Smartlead's limit of 200 requests a minute. It needs a lighter, staggered version, built after the 24 Nov start.
 - [ ] Health check failing on every run (founder didn't choose this fix).
+
+## Integration & reliability stage (asked 23 Nov 2026)
+- [ ] Park 1,579/1,588/1,590 differences (do not force)
+- [ ] Trace one labelled test record end-to-end (CRM → business → outreach → sales → workflows → HQ); no sends/payments
+- [ ] Safe test-data cleanup (only confirmed disposable; uncertain kept)
+- [ ] Reduce health monitoring to minimal essential checks
+- [ ] Lightweight incremental Smartlead education read-back — AFTER 24 Nov 10:15 check is stable
+- [ ] Permission boundary tests (RLS across tables)
+- [ ] Pages read from authoritative sources; HQ shows freshness
+- [ ] Final acceptance report (verified vs assumed)
