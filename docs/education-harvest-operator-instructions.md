@@ -28,3 +28,17 @@ Run key = today's UK date + slot, e.g. `2026-11-24-AM` / `2026-11-24-PM`.
 
 Friday review: SELECT * FROM public.education_harvest_weekly ORDER BY week_start DESC;
 (counts completed unique school URNs only, not attempts).
+
+## Per-run cap (hardened 2026-11-23)
+Each run key can reserve at most 500 distinct schools, ever. Every school a run picks up is
+recorded in `public.education_harvest_run_claims`; finished, held, errored or released schools
+still count. Re-running `claim` for the same run key only returns that run's still-open schools and
+tops up only while the lifetime total is under 500. `education_harvest_runs.claimed_count` equals
+that lifetime total. Verified by a rolled-back test: claim 5 → complete 3 (screened/held/error) →
+re-claim returned 2, lifetime 5; a PM run re-took the errored school and AM stayed at 5.
+
+## Next phase (not built): public professional email in staged buyer evidence
+Deferred deliberately. Before adding it: a published-on-page source URL per email, a verification
+status (staged_unverified/verified/rejected), a rule that personal or guessed patterns are refused,
+retention/lawful-basis notes, and a separate founder-approved step to promote anything into the CRM.
+Until then buyer evidence holds role, optional public name, source URL, date and confidence only.
