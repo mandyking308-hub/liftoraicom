@@ -114,7 +114,8 @@
 - [x] Section 8 Money: founder kept all three (Finance hub, Collections, Reconciliation) — no changes needed (23 Nov 2026)
 - [x] Section 9 Legal & tax: founder kept Compliance, Privacy, Policies & contracts, Company & tax; Insurance and Wind-down hidden, not deleted (23 Nov 2026)
 - [x] Section 10 Portfolio & exit: founder kept all four (Build & priorities, Portfolio risk, Portfolio & exit, Data room) — no changes needed (23 Nov 2026)
-- [ ] Review areas 11 Business setup onwards, one section at a time with the founder choosing
+- [x] Section 11 Business setup & knowledge: founder kept Add a business, Launch & go-live, Products & offers, Manuals & knowledge; Documents & SOPs hidden, not deleted (23 Nov 2026)
+- [ ] Review areas 12 People & suppliers onwards, one section at a time with the founder choosing
 - [x] Signed-in founders opening / now go straight to Liftor HQ; signed-out visitors still see the marketing page (23 Nov 2026)
 - [x] Tracking disclosure decided (23 Nov 2026): tracking stays ON for pilot campaign 4103531; founder will update the privacy notice the emails link to so it mentions open and click tracking before the 24 Nov 10:00 education start
 - [ ] Signed-in founders landing on / see the public marketing page; founder to decide whether to go straight to Liftor HQ

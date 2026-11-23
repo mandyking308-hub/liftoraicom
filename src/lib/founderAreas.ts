@@ -149,7 +149,7 @@ export const founderAreas: FounderArea[] = [
     s("/launch-factory", "Launch & go-live", "Launch packs, with Internal activation and Go-live readiness tabs."),
     s("/product-catalogue", "Products & offers", "Offers and catalogue, with Product, Online shop, Marketplace and Education tabs."),
     s("/business-manuals", "Manuals & knowledge", "Business manuals, with Manuals hub, Liftor manual, User guide, Knowledge and Quality tabs."),
-    s("/documents", "Documents & SOPs", "Evidence vault, with SOPs, Automation book and Video tabs."),
+    s("/documents", "Documents & SOPs", "Evidence vault, with SOPs, Automation book and Video tabs.", true),
     s("/business-onboarding-factory", "Onboarding factory", "Now a tab in Add a business.", true),
     s("/business-archetypes", "Business types", "Now a tab in Add a business.", true),
     s("/business-templates", "Business templates", "Now a tab in Add a business.", true),
