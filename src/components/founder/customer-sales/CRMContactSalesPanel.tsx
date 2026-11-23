@@ -17,7 +17,7 @@ export default function CRMContactSalesPanel({ contactId }: { contactId: string 
         sb.from("customer_sales_close_actions").select("id,action_type,action_status,approval_status,estimated_pipeline_value").eq("contact_id", contactId).order("created_at", { ascending: false }).limit(10),
         sb.from("customer_sales_follow_up_tasks").select("id,task_type,task_status,approval_status,due_at").eq("contact_id", contactId).order("created_at", { ascending: false }).limit(10),
         sb.from("customer_sales_human_handoff_tasks").select("id,task_status,risk_flags").eq("contact_id", contactId).order("created_at", { ascending: false }).limit(5),
-      ].map((p: any) => p.catch(() => ({ data: [] }))));
+      ].map((p: any) => Promise.resolve(p).catch(() => ({ data: [] }))));
       return {
         convos: convos.data ?? [],
         calls: calls.data ?? [],

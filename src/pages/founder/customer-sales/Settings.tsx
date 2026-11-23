@@ -19,7 +19,7 @@ export default function CustomerSalesSettings() {
         sb.from("customer_sales_provider_settings").select("*"),
         sb.from("customer_sales_knowledge_sources").select("*").order("created_at", { ascending: false }).limit(20),
         sb.from("customer_sales_close_provider_settings").select("*").order("provider_label"),
-      ].map(p => p.catch(() => ({ data: [] }))));
+      ].map(p => Promise.resolve(p).catch(() => ({ data: [] }))));
       return {
         providers: (providers.data ?? []) as any[],
         knowledge: (knowledge.data ?? []) as any[],

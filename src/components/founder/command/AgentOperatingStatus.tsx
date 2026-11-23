@@ -173,7 +173,7 @@ export default function AgentOperatingStatus() {
         sb.from("ai_usage_ledger").select("task_category,action_type,cost_usd,created_at").gte("created_at", since),
         sb.from("ai_runtime_events").select("event_type,severity,metadata,created_at").gte("created_at", since),
         sb.from("founder_approval_items").select("approval_type,status,created_at").gte("created_at", since),
-      ].map((p) => p.catch(() => ({ data: [] }))));
+      ].map((p) => Promise.resolve(p).catch(() => ({ data: [] }))));
 
       return CORE_AGENTS.map((a) => {
         const used = (ledger.data ?? []).filter((l: any) =>

@@ -108,6 +108,7 @@
 - [x] Explain legacy dashboards
 - [x] Full Liftor capability map (all ~200 founder pages) before designing one dashboard
 - [x] Lock founder area + fix 22 open data rules (founder/admin only)
-- [ ] Review areas one by one starting with 1 Daily running
+- [x] Review areas one by one (founder picks which pages to keep; the rest hidden, not deleted): 1 Daily running, 2 Radars & prospecting, 3 Sales, 4 Email outreach
+- [ ] Review areas 4 Email outreach onwards, one section at a time with the founder choosing
 - [ ] Lock ~30 open backend functions flagged by deep scan (e.g. founder-copilot, apollo-daily-runner, crm-send-check)
 - [ ] Single founder-only login; remove public login links; publish

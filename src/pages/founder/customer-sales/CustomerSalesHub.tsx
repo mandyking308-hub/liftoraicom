@@ -36,7 +36,7 @@ export default function CustomerSalesHub() {
         sb.from("customer_sales_conversations").select("id", head).gte("close_probability", 0.7),
         sb.from("customer_sales_provider_settings").select("provider_type,provider_status,active").eq("active", true),
         sb.from("customer_sales_objection_library").select("id", head).eq("active", true),
-      ].map(p => p.catch(() => ({ count: 0, data: [] }))));
+      ].map(p => Promise.resolve(p).catch(() => ({ count: 0, data: [] }))));
       return {
         products: products.count ?? 0, offers: offers.count ?? 0, playbooks: playbooks.count ?? 0,
         convsLive: convsLive.count ?? 0, convsFollowUp: convsFollowUp.count ?? 0,

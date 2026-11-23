@@ -19,7 +19,7 @@ export default function VoiceProviderStatusCard() {
         sb.from("customer_sales_call_logs").select("id", head).gte("started_at", today.toISOString()),
         sb.from("customer_sales_call_logs").select("id", head).gte("started_at", today.toISOString()).in("outcome", ["failed","busy","no_answer","escalated_no_provider"]),
         sb.from("customer_sales_close_actions").select("id", head).eq("action_status", "approval_required"),
-      ].map(p => p.catch(() => ({ count: 0, data: [] }))));
+      ].map(p => Promise.resolve(p).catch(() => ({ count: 0, data: [] }))));
       return {
         providers: (providers.data ?? []) as any[],
         callsToday: callsToday.count ?? 0,

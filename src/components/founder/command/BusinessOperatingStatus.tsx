@@ -46,7 +46,7 @@ export default function BusinessOperatingStatus() {
         sb.from("deals").select("business_name,estimated_value_max,status"),
         sb.from("customer_sales_call_logs").select("business_id,started_at").gte("started_at", since),
         sb.from("customer_sales_close_actions").select("business_id,action_status"),
-      ].map((p) => p.catch(() => ({ data: [] }))));
+      ].map((p) => Promise.resolve(p).catch(() => ({ data: [] }))));
 
       return (businesses as any[]).map((b) => {
         const spend = (ledger.data ?? []).filter((l: any) => l.business_id === b.id)

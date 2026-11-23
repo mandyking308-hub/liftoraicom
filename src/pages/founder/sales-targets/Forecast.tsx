@@ -13,7 +13,7 @@ export default function Forecast() {
       const [targets, closes] = await Promise.all([
         sb.from("sales_revenue_targets").select("*").eq("active", true).lte("target_start_date", today).gte("target_end_date", today),
         sb.from("customer_sales_close_actions").select("id,action_status,estimated_pipeline_value,close_probability,created_at"),
-      ].map((p: any) => p.catch(() => ({ data: [] }))));
+      ].map((p: any) => Promise.resolve(p).catch(() => ({ data: [] }))));
       return { targets: targets.data ?? [], closes: closes.data ?? [] };
     },
   });

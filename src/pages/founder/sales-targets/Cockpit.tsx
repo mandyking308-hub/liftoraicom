@@ -25,7 +25,7 @@ export default function SalesTargetsCockpit() {
         sb.from("customer_sales_conversations").select("id,call_outcome,close_probability,conversation_status,started_at"),
         sb.from("customer_sales_call_logs").select("id,started_at"),
         sb.from("customer_sales_follow_up_tasks").select("id,task_status,approval_status,due_at"),
-      ].map((p: any) => p.catch(() => ({ data: [] }))));
+      ].map((p: any) => Promise.resolve(p).catch(() => ({ data: [] }))));
       return {
         targets: targets.data ?? [],
         activity: activity.data ?? [],

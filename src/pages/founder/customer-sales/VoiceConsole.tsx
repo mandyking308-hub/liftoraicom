@@ -14,7 +14,7 @@ export default function VoiceConsole() {
       const [providers, recent] = await Promise.all([
         sb.from("customer_sales_provider_settings").select("*").eq("active", true),
         sb.from("customer_sales_call_logs").select("*").order("started_at", { ascending: false }).limit(10),
-      ].map(p => p.catch(() => ({ data: [] }))));
+      ].map(p => Promise.resolve(p).catch(() => ({ data: [] }))));
       return { providers: (providers.data ?? []) as any[], recent: (recent.data ?? []) as any[] };
     },
   });

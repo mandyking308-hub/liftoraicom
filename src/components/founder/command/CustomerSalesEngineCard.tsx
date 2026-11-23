@@ -24,7 +24,7 @@ export default function CustomerSalesEngineCard() {
         sb.from("customer_sales_call_logs").select("id", head).eq("consent_recorded", false).not("transcript_text", "is", null),
         sb.from("customer_sales_call_logs").select("id", head).is("transcript_text", null),
         sb.from("customer_sales_conversations").select("id", head).eq("call_outcome", "ready_to_buy"),
-      ].map(p => p.catch(() => ({ count: 0, data: [] }))));
+      ].map(p => Promise.resolve(p).catch(() => ({ count: 0, data: [] }))));
       return {
         providers: (providers.data ?? []) as any[],
         callsToday: callsToday.count ?? 0,

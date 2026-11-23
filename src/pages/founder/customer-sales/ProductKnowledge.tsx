@@ -122,7 +122,7 @@ export default function ProductKnowledge() {
         sb.from("customer_sales_offers").select("*"),
         sb.from("customer_sales_objection_library").select("*"),
         sb.from("customer_sales_knowledge_sources").select("*").eq("active", true).order("created_at", { ascending: false }).limit(200),
-      ].map(p => p.catch(() => ({ data: [] }))));
+      ].map(p => Promise.resolve(p).catch(() => ({ data: [] }))));
       return {
         products: ((products as any).data ?? []) as ProductRow[],
         offers: ((offers as any).data ?? []) as OfferRow[],

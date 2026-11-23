@@ -13,7 +13,7 @@ export default function Conversion() {
         sb.from("customer_sales_close_actions").select("id,action_status,estimated_pipeline_value"),
         sb.from("customer_sales_close_actions").select("id").eq("action_type", "proposal"),
         sb.from("leads").select("id"),
-      ].map((p: any) => p.catch(() => ({ data: [] }))));
+      ].map((p: any) => Promise.resolve(p).catch(() => ({ data: [] }))));
       return {
         convos: convos.data ?? [], calls: calls.data ?? [], closes: closes.data ?? [],
         proposals: proposals.data ?? [], leads: leads.data ?? [],

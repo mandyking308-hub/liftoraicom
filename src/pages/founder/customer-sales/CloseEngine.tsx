@@ -58,7 +58,7 @@ export default function CloseEngine() {
         sb.from("customer_sales_close_provider_settings").select("*").order("provider_label"),
         sb.from("customer_sales_products").select("id,name,price,currency"),
         sb.from("customer_sales_offers").select("id,name,price,currency"),
-      ].map(p => p.catch(() => ({ data: [] }))));
+      ].map(p => Promise.resolve(p).catch(() => ({ data: [] }))));
       return {
         actions: (actions.data ?? []) as any[],
         providers: (providers.data ?? []) as any[],

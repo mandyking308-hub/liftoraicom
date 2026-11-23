@@ -29,7 +29,7 @@ export default function CustomerUpgradesHub() {
         sb.from("product_upgrade_ladders").select("id", head).eq("active", true),
         sb.from("customer_upgrade_rules").select("id", head).eq("active", true),
         sb.from("customer_upgrade_opportunities").select("estimated_value,currency,status"),
-      ].map((p: any) => p.catch(() => ({ count: 0, data: [] }))));
+      ].map((p: any) => Promise.resolve(p).catch(() => ({ count: 0, data: [] }))));
       const won = (wonOpps.data ?? []).filter((o: any) => o.status === "won");
       const pipeline = (wonOpps.data ?? []).filter((o: any) => !["won", "lost", "parked"].includes(o.status));
       return {

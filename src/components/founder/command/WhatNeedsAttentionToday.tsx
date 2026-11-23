@@ -95,7 +95,7 @@ export default function WhatNeedsAttentionToday() {
         sb.from("qtc_quotes").select("id", head).eq("quote_status", "approval_required"),
         sb.from("qtc_invoices").select("id", head).eq("invoice_status", "approval_required"),
         sb.from("qtc_invoices").select("id", head).eq("invoice_status", "overdue"),
-      ].map((p) => p.catch(() => ({ count: 0 }))));
+      ].map((p) => Promise.resolve(p).catch(() => ({ count: 0 }))));
       return {
         approvalsPending: approvalsPending?.count ?? 0,
         alertsOpen: alertsOpen?.count ?? 0,

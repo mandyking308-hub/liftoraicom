@@ -46,23 +46,23 @@ export const founderAreas: FounderArea[] = [
     s("/school-admissions", "Admissions tracker", "Now a tab in Schools (private).", true),
     s("/gias-search", "School Register (GIAS)", "Now a tab in Schools (private).", true),
   ]},
-  { key: "sales", n: 3, title: "Sales", summary: "Pipeline, sales targets, coaching, proposals, demos and quote-to-cash.", sections: [
+  { key: "sales", n: 3, title: "Sales", summary: "Pipeline, sales targets, sales conversations and quote-to-cash.", sections: [
     s("/pipeline", "Pipeline", "Move leads through stages."),
     s("/sales-targets", "Sales targets", "Works back from revenue goals to daily activity targets."),
     s("/customer-sales", "Sales conversations", "Qualification, objections and closing hand-offs, with a Sales coaching tab."),
-    s("/demos", "Demos", "Sandbox demo passes without real client data."),
+    s("/demos", "Demos", "Hidden by founder choice (23 Nov 2026).", true),
     s("/quote-to-cash", "Quote to cash", "Quote, invoice, payment and delivery, with tabs for both kinds of proposal."),
     s("/sales-coaching", "Sales coaching", "Now a tab in Sales conversations.", true),
     s("/internal-proposals", "Proposals (to contacts)", "Now a tab in Quote to cash.", true),
     s("/proposals", "Website proposal requests", "Now a tab in Quote to cash.", true),
   ]},
-  { key: "outreach", n: 4, title: "Email outreach", summary: "Send calendar, 180 GSM mailboxes, Smartlead campaigns and replies.", sections: [
+  { key: "outreach", n: 4, title: "Email outreach", summary: "Send calendar, Smartlead campaigns, unified inbox and the 180 GSM mailboxes.", sections: [
     s("/portfolio-calendar", "Send calendar & launch control", "Book campaigns across the shared mailboxes; readiness checks; Campaign factory tab."),
     s("/outreach-command-centre", "Smartlead campaigns", "Campaign activity and conversations synced from Smartlead."),
     s("/communications", "Unified inbox & log", "All channels in one log, with Replies tab, quarantine and privacy queue."),
-    s("/outreach", "Outreach data", "Lead datasets, Apollo archive and CRM checks."),
     s("/gsm-outbound", "GSM mailboxes", "The shared commercial sending estate, with Sending health and Sending infrastructure tabs."),
-    s("/ghat-outbound", "GHAT mailboxes", "Charity estate, kept separate from commercial sending."),
+    s("/outreach", "Outreach data", "Hidden by founder choice (23 Nov 2026). Lead datasets, Apollo archive and CRM checks.", true),
+    s("/ghat-outbound", "GHAT mailboxes", "Hidden by founder choice (23 Nov 2026). Charity estate, kept separate from commercial sending.", true),
     s("/conversations", "Replies", "Now a tab in Unified inbox & log.", true),
     s("/sending", "Sending health", "Now a tab in GSM mailboxes.", true),
     s("/sending-infrastructure", "Sending infrastructure", "Now a tab in GSM mailboxes.", true),

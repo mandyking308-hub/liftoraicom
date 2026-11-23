@@ -42,7 +42,7 @@ export default function FollowUp() {
         sb.from("customer_sales_human_handoff_tasks").select("*").order("created_at", { ascending: false }).limit(100),
         sb.from("customer_sales_follow_up_templates").select("*").eq("active", true).order("template_label"),
         sb.from("customer_sales_conversations").select("id,customer_name,customer_email,customer_phone,recommended_next_action,customer_need,close_probability,conversation_status").order("updated_at", { ascending: false }).limit(50),
-      ].map(p => p.catch(() => ({ data: [] }))));
+      ].map(p => Promise.resolve(p).catch(() => ({ data: [] }))));
       return {
         tasks: (tasks.data ?? []) as any[],
         handoffs: (handoffs.data ?? []) as any[],

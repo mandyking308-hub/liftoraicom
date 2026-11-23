@@ -26,7 +26,7 @@ export default function SafetyCentre() {
         sb.from("customer_sales_contact_safety").select("*"),
         sb.from("customer_sales_prohibited_claims").select("*").eq("active", true).order("severity"),
         sb.from("customer_sales_escalation_triggers").select("*").eq("active", true).order("severity"),
-      ].map(p => p.catch(() => ({ data: [] }))));
+      ].map(p => Promise.resolve(p).catch(() => ({ data: [] }))));
       return {
         events: (events.data ?? []) as any[],
         conversations: (conversations.data ?? []) as any[],
