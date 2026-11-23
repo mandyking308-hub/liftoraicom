@@ -116,7 +116,8 @@
 - [x] Section 10 Portfolio & exit: founder kept all four (Build & priorities, Portfolio risk, Portfolio & exit, Data room) — no changes needed (23 Nov 2026)
 - [x] Section 11 Business setup & knowledge: founder kept Add a business, Launch & go-live, Products & offers, Manuals & knowledge; Documents & SOPs hidden, not deleted (23 Nov 2026)
 - [x] Section 12 People & suppliers: founder kept all three (People, Suppliers, Vendors & tools) — no changes needed (23 Nov 2026)
-- [ ] Review areas 13 AI onwards, one section at a time with the founder choosing
+- [x] Section 13 AI: founder kept all four (AI co-pilot, AI brain, Agents, AI costs & approvals) — no changes needed (23 Nov 2026)
+- [ ] Review area 14 Platform & security with the founder choosing
 - [x] Signed-in founders opening / now go straight to Liftor HQ; signed-out visitors still see the marketing page (23 Nov 2026)
 - [x] Tracking disclosure decided (23 Nov 2026): tracking stays ON for pilot campaign 4103531; founder will update the privacy notice the emails link to so it mentions open and click tracking before the 24 Nov 10:00 education start
 - [ ] Signed-in founders landing on / see the public marketing page; founder to decide whether to go straight to Liftor HQ
