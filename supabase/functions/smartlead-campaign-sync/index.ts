@@ -231,6 +231,20 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
           } else if (ev.event_type === "lead_blocked_or_bounced") {
             await admin.from("contacts").update({ hard_bounced: true } as never).eq("id", rel.contact_id);
           }
+          // Record it once in the shared CRM interaction history (duplicates ignored by dedupe_key).
+          if (["email_reply", "email_sent", "first_email_sent", "lead_blocked_or_bounced", "lead_unsubscribed"].includes(ev.event_type)) {
+            const inbound = ev.event_type === "email_reply";
+            await admin.from("crm_interaction_ledger").insert({
+              business_id: businessId, contact_id: rel.contact_id, business_contact_relationship_id: rel.id,
+              source_system: "smartlead", source_channel: "email", channel_key: "email", source_table: "smartlead_activity_events", source_id: insEv[0].id,
+              interaction_type: ev.event_type, direction: inbound ? "inbound" : ev.event_type.includes("sent") ? "outbound" : "system",
+              provider_type: "smartlead", provider_message_id: ev.provider_message_id, provider_campaign_id: campaignId, provider_lead_id: leadId,
+              contact_email: normEmail(lead.email), summary: ev.event_type.replace(/_/g, " "),
+              body_preview: inbound ? (ev.details as { preview?: string | null })?.preview ?? null : null,
+              occurred_at: at, matched_status: "matched", dedupe_key: `smartlead:${businessId}:${campaignId}:${ev.dedupe_key}`,
+              founder_review_required: inbound, ai_relevant: inbound,
+            } as never);
+          }
         }
         if (rel && action === "do_not_contact") {
           await admin.from("business_contact_relationships").update({ do_not_contact: true, campaign_eligible: false, do_not_contact_reason: `smartlead_${ev.event_type}` } as never).eq("id", rel.id).eq("business_id", businessId);
