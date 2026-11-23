@@ -152,7 +152,7 @@ export default function SmartleadCommandCentre() {
   const metrics: [string, unknown, string?][] = snap ? [
     ["Status", snap.campaign_status], ["Contacts", snap.total_leads], ["Not started", snap.not_started],
     ["In progress", snap.in_progress], ["Sent", snap.sent_count],
-    ["Opens (approx.)", opensOff ? "tracking off" : snap.unique_open_count, "Tracked opens are approximate; Apple Mail privacy can inflate them."],
+    ["Opens (approx.)", opensOff ? "tracking off" : snap.unique_open_count, "Approximate. Only counts emails sent after tracking was switched on — earlier emails always show 0."],
     ["Clicks", clicksOff ? "tracking off" : snap.unique_click_count], ["Replies", snap.reply_count],
     ["Interested (Smartlead)", snap.interested], ["Bounced", snap.bounce_count], ["Unsubscribed", snap.unsubscribed_count],
     ["Daily cap", snap.max_leads_per_day],
@@ -253,7 +253,9 @@ export default function SmartleadCommandCentre() {
               <CardContent className="space-y-3 text-sm">
                 {snap?.send_as_plain_text === true && <p className="rounded-md border border-destructive/50 p-2 text-destructive">This campaign sends plain text. Smartlead cannot track opens or clicks in plain text and may strip the unsubscribe link — switch to HTML before enabling tracking.</p>}
                 {snap?.send_as_plain_text === false && <p className="text-muted-foreground">Emails are sent as HTML, so the unsubscribe link is kept and tracking is technically possible.</p>}
-                <p className="text-muted-foreground">Before enabling tracking, the Kindnesss privacy notice must mention email open/click tracking — it currently says there is no marketing or behavioural tracking.</p>
+                {(tf.opensTracked || tf.clicksTracked)
+                  ? <p className="rounded-md border border-destructive/50 p-2 text-destructive">Tracking is ON. Check the privacy notice linked from these emails mentions open/click tracking — if it still says there is no tracking, update the notice or switch tracking off.</p>
+                  : <p className="text-muted-foreground">Before switching tracking on, the privacy notice linked from these emails must mention open/click tracking.</p>}
                 <p className="text-muted-foreground">
                   Currently: opens <span className="text-foreground">{tf.opensTracked === null ? "unknown" : tf.opensTracked ? "tracked" : "off"}</span>,
                   clicks <span className="text-foreground">{tf.clicksTracked === null ? "unknown" : tf.clicksTracked ? "tracked" : "off"}</span>.
@@ -275,19 +277,19 @@ export default function SmartleadCommandCentre() {
               <CardContent className="space-y-2 text-sm text-muted-foreground">
                 {Array.isArray(snap?.webhooks) && snap.webhooks.length ? snap.webhooks.map((w: Snap) => (
                   <div key={w.id} className="space-y-1">
-                    <div className="flex flex-wrap items-center gap-2"><span className="text-foreground">{w.name}</span><Badge variant="outline">#{w.id}</Badge><Badge variant="secondary">Configured on Smartlead</Badge><Badge variant="destructive">Liftor receiver disabled until signing key is verified</Badge></div>
+                    <div className="flex flex-wrap items-center gap-2"><span className="text-foreground">{w.name}</span><Badge variant="outline">#{w.id}</Badge><Badge variant="secondary">Set up on Smartlead</Badge><Badge variant="outline">Instant updates paused — using 10-minute sync</Badge></div>
                     <div>Events: {(w.event_types ?? []).join(", ").toLowerCase().replace(/_/g, " ")}{w.categories?.length ? ` · categories: ${w.categories.join(", ")}` : ""}</div>
                     <div>Last changed on Smartlead: {fmtTime(w.updated_at)} · target {w.url_path}</div>
                   </div>
                 )) : <p>No webhook found on Smartlead for this campaign (as of the last sync).</p>}
-                <p>Until the receiver is enabled, Liftor mirrors everything by reading Smartlead directly (Sync now and the automatic sync). Unsigned updates are always rejected.</p>
+                <p>Prospects can reply normally — replies land in the mailboxes and appear here within about 10 minutes (or press Sync now). Only instant push updates are paused until the security key is checked.</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between gap-2"><CardTitle className="text-base">Activity log (real Smartlead events)</CardTitle><Button size="sm" variant="outline" onClick={load}>Update activity</Button></CardHeader>
               <CardContent className="space-y-1 text-sm">
-                {events.map((e) => {
+                {[...events].sort((a, b) => new Date(b.occurred_at ?? b.created_at).getTime() - new Date(a.occurred_at ?? a.created_at).getTime()).map((e) => {
                   const who = leads.find((l) => l.provider_lead_id === e.provider_lead_id);
                   return (
                     <div key={e.id} className="flex flex-wrap gap-3 text-muted-foreground">
