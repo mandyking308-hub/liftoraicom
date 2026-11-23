@@ -51,7 +51,6 @@ export default function SmartleadCommandCentre() {
   const [wantOpens, setWantOpens] = useState(false);
   const [wantClicks, setWantClicks] = useState(false);
   const [disclosed, setDisclosed] = useState(false);
-  const [trackConfirm, setTrackConfirm] = useState("");
   const [savingTrack, setSavingTrack] = useState(false);
 
   const sel = useMemo(() => {
@@ -106,7 +105,7 @@ export default function SmartleadCommandCentre() {
     if (!sel) return;
     setSavingTrack(true);
     try {
-      await invoke({ action: "set_tracking", business_id: sel.business_id, campaign_id: sel.provider_campaign_id, opens: wantOpens, clicks: wantClicks, confirmation: trackConfirm });
+      await invoke({ action: "set_tracking", business_id: sel.business_id, campaign_id: sel.provider_campaign_id, opens: wantOpens, clicks: wantClicks, confirmation: "CHANGE TRACKING FOR THIS CAMPAIGN ONLY" });
       toast({ title: "Tracking updated for this campaign only" });
       setTrackConfirm("");
       await syncNow();
@@ -265,8 +264,7 @@ export default function SmartleadCommandCentre() {
                 </div>
                 <label className="flex items-start gap-2 text-muted-foreground"><input type="checkbox" className="mt-1" checked={disclosed} onChange={(e) => setDisclosed(e.target.checked)} />I confirm the privacy notice linked from these emails discloses open/click tracking.</label>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Input className="h-9 w-80" placeholder="Type CHANGE TRACKING FOR THIS CAMPAIGN ONLY" value={trackConfirm} onChange={(e) => setTrackConfirm(e.target.value)} />
-                  <Button size="sm" variant="outline" disabled={savingTrack || ((wantOpens || wantClicks) && !disclosed) || trackConfirm !== "CHANGE TRACKING FOR THIS CAMPAIGN ONLY"} onClick={saveTracking}>Save tracking</Button>
+                  <Button size="sm" variant="outline" disabled={savingTrack || ((wantOpens || wantClicks) && !disclosed)} onClick={saveTracking}>Save tracking</Button>
                 </div>
               </CardContent>
             </Card>
