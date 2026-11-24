@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { LayoutDashboard, FileInput, GitBranch, FolderKanban, Activity, FileText, LogOut, Menu, X, Monitor, Bot, Workflow, Plug, Play, Command, Network, Layers, Rocket, BarChart3, Zap, BookOpen, Globe, Building2, Shield, ShieldAlert, ShieldCheck, LayoutTemplate, Sparkles, BookOpenCheck, ClipboardList, PoundSterling, Brain, Scale, Compass, MessageSquare, FlaskConical, Users, Banknote, Send, MessagesSquare, FileSignature, MonitorPlay, Briefcase, ClipboardCheck, Gavel, TrendingUp, Radar, Siren, Target, Calculator, Trophy, Handshake, Coins, Flame, Swords, Cpu, ChevronDown, ChevronRight, Stethoscope, Megaphone, Settings, ArrowRightCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -165,16 +165,17 @@ const FounderLayout = ({ children }: { children: React.ReactNode }) => {
     </>
   );
 
+  useEffect(() => { document.body.classList.add("theme-light"); return () => document.body.classList.remove("theme-light"); }, []);
   return (
-    <div className="min-h-screen bg-background flex">
-      <aside className="hidden lg:flex flex-col w-60 border-r border-border/50 bg-card fixed inset-y-0 left-0 z-30">
+    <div className="theme-light min-h-screen bg-background flex">
+      <aside className="hidden lg:flex flex-col w-60 border-r border-border bg-secondary fixed inset-y-0 left-0 z-30">
         {sidebarContent}
       </aside>
 
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-40">
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <aside className="relative w-60 h-full bg-card border-r border-border/50 flex flex-col z-50">
+          <aside className="relative w-60 h-full bg-secondary border-r border-border/50 flex flex-col z-50">
             {sidebarContent}
           </aside>
         </div>
