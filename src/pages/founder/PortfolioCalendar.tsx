@@ -155,5 +155,4 @@ export default function PortfolioCalendar({ embedded = false }: { embedded?: boo
       </div>
   );
   return embedded ? body : <FounderLayout>{body}</FounderLayout>;
-  );
 }
