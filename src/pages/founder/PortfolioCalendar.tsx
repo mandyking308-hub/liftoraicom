@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import SendingReadinessPanel from "@/components/founder/portfolio/SendingReadinessPanel";
-import BusinessKnowledgeUploadTrainingPanel from "@/components/founder/knowledge/BusinessKnowledgeUploadTrainingPanel";
 import { SEQUENCE_STEPS, checkWindow, onboardingSteps, splitRecipients, stepsBooked, type Booking } from "@/lib/portfolio/sendCalendar";
 
 // Mounted inside FounderRoute; founder/admin RLS and the DB trigger are authoritative. Planning only — no sending.
@@ -20,7 +19,7 @@ type Biz = { id: string; name: string };
 type Mailbox = { id: string; email: string; warmup_status: string | null; readiness_state: string | null };
 const stateTone: Record<string, "default" | "secondary" | "destructive" | "outline"> = { done: "default", todo: "outline", optional: "secondary", blocked: "destructive" };
 
-export default function PortfolioCalendar() {
+export default function PortfolioCalendar({ embedded = false }: { embedded?: boolean } = {}) {
   const qc = useQueryClient();
   const { data } = useQuery({
     queryKey: ["portfolio-calendar"],
@@ -75,12 +74,11 @@ export default function PortfolioCalendar() {
     if (error) return toast.error(error.message);
     qc.invalidateQueries({ queryKey: ["portfolio-calendar"] });
   }
-  return (
-    <FounderLayout>
-      <div className="space-y-8 p-6">
-        <RelatedToolTabs tabs={[{ to: "/founder/portfolio-calendar", label: "Send calendar" }, { to: "/founder/campaign-factory", label: "Campaign factory" }]} />
+  const body = (
+      <div className={embedded ? "space-y-8" : "space-y-8 p-6"}>
+        {!embedded && <RelatedToolTabs tabs={[{ to: "/founder/outreach-command-centre", label: "Campaigns" }, { to: "/founder/campaign-factory", label: "Campaign factory" }]} />}
         <header>
-          <h1 className="text-2xl font-semibold text-foreground">Portfolio launch control</h1>
+          <h2 className="text-xl font-semibold text-foreground">Send calendar & launch control</h2>
           <p className="text-sm text-muted-foreground">One shared GSM mailbox pool for every business. Each business campaign is five emails, sent to all its recipients across the whole pool, then it stops and the next business takes its dates. Bookings are plans only — sending stays off.</p>
         </header>
 
@@ -153,12 +151,9 @@ export default function PortfolioCalendar() {
                 </tr>))}</tbody>
             </table>)}
         </section>
-        <section id="business-manual" className="space-y-2">
-          <h2 className="font-medium text-foreground">Upload the business manual</h2>
-          <p className="text-sm text-muted-foreground">Add each business's manual, offers, FAQs and policies so Liftor can answer questions about it. Customer replies stay human-approved.</p>
-          <BusinessKnowledgeUploadTrainingPanel />
-        </section>
+        <p className="text-xs text-muted-foreground">Business manual uploads now live in Business setup → Manuals & knowledge.</p>
       </div>
-    </FounderLayout>
+  );
+  return embedded ? body : <FounderLayout>{body}</FounderLayout>;
   );
 }

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
+import EmailOutreachTabs from "@/components/founder/EmailOutreachTabs";
+import PortfolioCalendar from "@/pages/founder/PortfolioCalendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -161,10 +163,11 @@ export default function SmartleadCommandCentre() {
   return (
     <FounderLayout>
       <div className="min-w-0 max-w-full space-y-6 overflow-x-hidden p-4 md:p-6">
+        <EmailOutreachTabs />
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">Outreach Command Centre</h1>
-            <p className="text-sm text-muted-foreground">Smartlead campaign activity and conversations, synchronised into Liftor. Sync now for latest activity.</p>
+            <h1 className="text-2xl font-semibold text-foreground">Campaigns</h1>
+            <p className="text-sm text-muted-foreground">Every campaign in one place: live Smartlead results, quarterly rounds and the send calendar. Mailbox health is on Mailboxes; replies are on Replies.</p>
           </div>
           <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
             <select className="h-9 min-w-0 max-w-full rounded-md border border-border bg-background px-2 text-sm text-foreground"
@@ -360,6 +363,7 @@ export default function SmartleadCommandCentre() {
             </div>
           </DialogContent>
         </Dialog>
+        <section className="border-t border-border pt-6"><PortfolioCalendar embedded /></section>
       </div>
     </FounderLayout>
   );

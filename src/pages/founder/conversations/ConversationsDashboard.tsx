@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
+import EmailOutreachTabs from "@/components/founder/EmailOutreachTabs";
 import MultilingualIntelligencePanel from "@/components/founder/global/MultilingualIntelligencePanel";
 import MultiChannelInboxPanel from "@/components/founder/channels/MultiChannelInboxPanel";
 import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
@@ -106,11 +107,12 @@ const ConversationsDashboard = () => {
   return (
     <FounderLayout>
       <div className="max-w-6xl space-y-6">
+        <EmailOutreachTabs />
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold">AI Conversations</h1>
+            <h1 className="text-2xl font-semibold">Replies</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Inbound replies are auto-classified and answered. Escalations require human review.
+              Replies from every campaign, linked to the person and campaign. Liftor suggests a category; nothing is sent without your approval.
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={load}>Refresh</Button>

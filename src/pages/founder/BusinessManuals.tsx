@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BUSINESS_MANUALS, BusinessManualKind } from "@/lib/businessManuals/registry";
 import { EDUCATION_BUSINESSES, EducationBusinessSlug } from "@/lib/education/educationBusinesses";
 import { BookOpen, Github } from "lucide-react";
+import BusinessKnowledgeUploadTrainingPanel from "@/components/founder/knowledge/BusinessKnowledgeUploadTrainingPanel";
 
 const KINDS: { key: BusinessManualKind; label: string }[] = [
   { key: "technical-manual", label: "Technical Manual" },
@@ -79,6 +80,11 @@ export default function BusinessManualsPage() {
             </article>
           </CardContent>
         </Card>
+        <section id="business-manual" className="space-y-2">
+          <h2 className="font-medium text-foreground">Upload the business manual</h2>
+          <p className="text-sm text-muted-foreground">Add each business's manual, offers, FAQs and policies so Liftor can answer questions about it. Customer replies stay human-approved.</p>
+          <BusinessKnowledgeUploadTrainingPanel />
+        </section>
       </div>
     </FounderLayout>
   );

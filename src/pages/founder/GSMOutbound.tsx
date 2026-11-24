@@ -1,6 +1,7 @@
 import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useCallback, useEffect, useState } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
+import EmailOutreachTabs from "@/components/founder/EmailOutreachTabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -183,9 +184,9 @@ export default function GSMOutboundPage() {
   return (
     <FounderLayout>
       <div className="space-y-6">
-        <RelatedToolTabs tabs={[{ to: "/founder/gsm-outbound", label: "Mailboxes" }, { to: "/founder/sending", label: "Sending health" }, { to: "/founder/sending-infrastructure", label: "Sending infrastructure" }]} />
+        <EmailOutreachTabs />
         <div>
-          <h1 className="text-3xl font-semibold">GSM Outbound Infrastructure</h1>
+          <h1 className="text-3xl font-semibold">Mailboxes</h1>
           <p className="text-muted-foreground">
             One shared portfolio sending estate owned by {GSM_OWNER_LEGAL_ENTITY}. The Winnr estate is purchased; Liftor
             is the system of record and Smartlead remains the delivery engine. This page never sends a campaign email.
