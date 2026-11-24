@@ -26,9 +26,9 @@ import MondayLaunchOverview from "@/pages/founder/monday-launch/Overview";
 import PartnerRoute from "@/components/partner/PartnerRoute";
 import ScrollToTop from "@/components/ScrollToTop";
 import WorkerRoute from "@/components/worker/WorkerRoute";
-import OperatorLogin from "@/pages/worker/OperatorLogin";
+// OperatorLogin hidden: staff login not public
 import OperatorPortal from "@/pages/worker/OperatorPortal";
-import OversightLogin from "@/pages/worker/OversightLogin";
+// OversightLogin hidden: staff login not public
 import OversightPortal from "@/pages/worker/OversightPortal";
 import HumanWorkforceControl from "@/pages/founder/HumanWorkforceControl";
 import InsuranceClaimsPage from "@/pages/founder/operating-loops/InsuranceClaims";
@@ -1814,20 +1814,20 @@ const App = () => (
             <Route path="/partner/messages" element={<PartnerRoute><PartnerMessages /></PartnerRoute>} />
 
             {/* Worker portals */}
-            <Route path="/operator-login" element={<OperatorLogin />} />
+            <Route path="/operator-login" element={<Navigate to="/" replace />} />
             <Route
               path="/operator-portal"
               element={
-                <WorkerRoute portal="operator" loginPath="/operator-login">
+                <WorkerRoute portal="operator" loginPath="/">
                   <OperatorPortal />
                 </WorkerRoute>
               }
             />
-            <Route path="/oversight-login" element={<OversightLogin />} />
+            <Route path="/oversight-login" element={<Navigate to="/" replace />} />
             <Route
               path="/oversight-portal"
               element={
-                <WorkerRoute portal="oversight" loginPath="/oversight-login">
+                <WorkerRoute portal="oversight" loginPath="/">
                   <OversightPortal />
                 </WorkerRoute>
               }
