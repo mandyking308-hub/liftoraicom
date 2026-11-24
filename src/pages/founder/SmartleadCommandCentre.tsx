@@ -87,7 +87,7 @@ export default function SmartleadCommandCentre() {
     setEvents((ev.data as Snap[]) ?? []);
     setSnap((s.data as Snap) ?? null); setLeads((l.data as Snap[]) ?? []); setRuns((r.data as Snap[]) ?? []);
   }, [sel]);
-  const updatedAt = useLiveRefresh(load);
+  const live = useLiveRefresh(load);
 
   const syncNow = async () => {
     if (!sel) return;
@@ -164,7 +164,7 @@ export default function SmartleadCommandCentre() {
   return (
     <FounderLayout>
       <div className="min-w-0 max-w-full space-y-6 overflow-x-hidden p-4 md:p-6">
-        <EmailOutreachTabs updatedAt={updatedAt} />
+        <EmailOutreachTabs live={live} />
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Campaigns</h1>

@@ -1,7 +1,9 @@
 import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
-/** The three Email outreach pages, with a live-refresh indicator. Each fact lives on one page only. */
-export default function EmailOutreachTabs({ updatedAt }: { updatedAt?: Date | null }) {
+/** The three Email outreach pages, with an on-demand Update button. Each fact lives on one page only. */
+export default function EmailOutreachTabs({ live }: { live?: { at: Date | null; refresh: () => void; busy: boolean } }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
       <RelatedToolTabs tabs={[
@@ -9,10 +11,14 @@ export default function EmailOutreachTabs({ updatedAt }: { updatedAt?: Date | nu
         { to: "/founder/gsm-outbound", label: "Mailboxes" },
         { to: "/founder/conversations", label: "Replies" },
       ]} />
-      <span className="flex items-center gap-1.5 text-xs text-muted-foreground" aria-live="polite">
-        <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-        Live · refreshes every 30 seconds{updatedAt ? ` · updated ${updatedAt.toLocaleTimeString("en-GB")}` : ""}
-      </span>
+      {live && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span aria-live="polite">{live.at ? `Figures as of ${live.at.toLocaleTimeString("en-GB")}` : "Loading…"}</span>
+          <Button size="sm" variant="outline" onClick={live.refresh} disabled={live.busy}>
+            <RefreshCw className={`mr-1 h-3 w-3 ${live.busy ? "animate-spin" : ""}`} />Update
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

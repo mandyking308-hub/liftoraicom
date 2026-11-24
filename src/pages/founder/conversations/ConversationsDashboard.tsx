@@ -106,12 +106,12 @@ const ConversationsDashboard = () => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const stableLoad = useCallback(() => load(), []);
-  const updatedAt = useLiveRefresh(stableLoad);
+  const live = useLiveRefresh(stableLoad);
 
   return (
     <FounderLayout>
       <div className="max-w-6xl space-y-6">
-        <EmailOutreachTabs updatedAt={updatedAt} />
+        <EmailOutreachTabs live={live} />
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold">Replies</h1>

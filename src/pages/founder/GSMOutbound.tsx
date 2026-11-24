@@ -129,7 +129,7 @@ export default function GSMOutboundPage() {
     setLastSync(((s ?? [])[0] as SyncRun) ?? null);
   }, []);
 
-  const updatedAt = useLiveRefresh(load);
+  const live = useLiveRefresh(load);
 
   const [canaryText, setCanaryText] = useState("");
 
@@ -183,7 +183,7 @@ export default function GSMOutboundPage() {
   return (
     <FounderLayout>
       <div className="space-y-6">
-        <EmailOutreachTabs updatedAt={updatedAt} />
+        <EmailOutreachTabs live={live} />
         <div>
           <h1 className="text-3xl font-semibold">Mailboxes</h1>
           <p className="text-muted-foreground">
