@@ -140,3 +140,37 @@
 .animate-pulse-glow {
   animation: pulse-glow 3s ease-in-out infinite;
 }
+
+/* Bright dashboard theme: white surfaces, black text, colour-coded meaning */
+.theme-light {
+  --background: 0 0% 100%;
+  --foreground: 222 47% 8%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 8%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 8%;
+  --primary: 206 100% 45%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 8%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 35%;
+  --accent: 206 100% 45%;
+  --accent-foreground: 0 0% 100%;
+  --border: 214 32% 88%;
+  --input: 214 32% 85%;
+  --ring: 206 100% 45%;
+  --tone-blue: 206 100% 45%;
+  --tone-violet: 262 83% 58%;
+  --tone-green: 152 69% 36%;
+  --tone-amber: 32 95% 48%;
+  --tone-rose: 346 77% 50%;
+  --tone-teal: 178 80% 32%;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+.theme-light .tech-card { border-color: hsl(var(--border)); box-shadow: 0 1px 2px hsl(222 47% 8% / 0.06); }
+.theme-light .tech-card:hover { box-shadow: 0 8px 24px -8px hsl(var(--tone, var(--primary)) / 0.35); border-color: hsl(var(--tone, var(--primary)) / 0.5); }
+.tone-blue { --tone: var(--tone-blue); } .tone-violet { --tone: var(--tone-violet); }
+.tone-green { --tone: var(--tone-green); } .tone-amber { --tone: var(--tone-amber); }
+.tone-rose { --tone: var(--tone-rose); } .tone-teal { --tone: var(--tone-teal); }

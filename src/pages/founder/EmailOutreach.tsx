@@ -95,10 +95,10 @@ export default function EmailOutreach() {
 
   return (
     <FounderLayout>
-      <div className="space-y-6 p-4 md:p-8">
+      <div className="theme-light min-h-full space-y-6 p-4 md:p-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold">Email outreach</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Email outreach</h1>
             <p className="text-sm text-muted-foreground">Every business, every campaign, every send date.</p>
           </div>
           <div className="flex items-center gap-2">
@@ -110,12 +110,12 @@ export default function EmailOutreach() {
 
         {/* Totals */}
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-          <Stat icon={Building2} label="Businesses" value={n(d?.biz.length)} />
-          <Stat icon={Megaphone} label="Campaigns running" value={n(d ? running : null)} />
-          <Stat icon={Users} label="People in campaigns" value={n(d ? sum("people") : null)} />
-          <Stat icon={Send} label="Emails sent" value={n(d ? sum("sent") : null)} />
-          <Stat icon={MessageSquare} label="Replies" value={n(d ? sum("replies") : null)} />
-          <Stat icon={Server} label="Healthy mailboxes" value={d ? `${healthy} / ${d.boxes.length}` : "—"} />
+          <Stat tone="blue" icon={Building2} label="Businesses" value={n(d?.biz.length)} />
+          <Stat tone="violet" icon={Megaphone} label="Campaigns running" value={n(d ? running : null)} />
+          <Stat tone="teal" icon={Users} label="People in campaigns" value={n(d ? sum("people") : null)} />
+          <Stat tone="blue" icon={Send} label="Emails sent" value={n(d ? sum("sent") : null)} />
+          <Stat tone="green" icon={MessageSquare} label="Replies" value={n(d ? sum("replies") : null)} />
+          <Stat tone="amber" icon={Server} label="Healthy mailboxes" value={d ? `${healthy} / ${d.boxes.length}` : "—"} />
         </div>
 
         {/* Businesses */}
@@ -130,7 +130,7 @@ export default function EmailOutreach() {
                   <CollapsibleTrigger asChild>
                     <button className="flex w-full items-center justify-between gap-3 p-4 text-left">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary"><Building2 className="h-5 w-5" /></div>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground"><Building2 className="h-5 w-5" /></div>
                         <div>
                           <div className="font-semibold">{b.name}</div>
                           <div className="text-xs text-muted-foreground">{mine.length} campaign{mine.length === 1 ? "" : "s"} · {n(d.rel[b.id])} people in CRM</div>
@@ -174,31 +174,29 @@ export default function EmailOutreach() {
   );
 }
 
-function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+function Stat({ icon: Icon, label, value, tone = "blue" }: { icon: any; label: string; value: string; tone?: string }) {
   return (
-    <Card className="tech-card"><CardContent className="p-4">
-      <div className="flex items-center gap-2 text-xs text-muted-foreground"><Icon className="h-4 w-4 text-primary" />{label}</div>
-      <div className="mt-2 text-2xl font-semibold tabular-nums">{value}</div>
+    <Card className={`tech-card tone-${tone} relative overflow-hidden`}><CardContent className="p-4">
+      <div className="absolute inset-x-0 top-0 h-1 bg-[hsl(var(--tone))]" />
+      <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground"><span className="flex h-7 w-7 items-center justify-center rounded-md bg-[hsl(var(--tone)/0.12)] text-[hsl(var(--tone))]"><Icon className="h-4 w-4" /></span>{label}</div>
+      <div className="mt-3 whitespace-nowrap text-2xl font-bold tabular-nums xl:text-3xl text-[hsl(var(--tone))]">{value}</div>
     </CardContent></Card>
   );
 }
 
-function statusVariant(s: string) {
-  return s === "Running" ? "default" : "outline";
-}
 
 function CampaignCard({ c, onOpen }: { c: Camp; onOpen: () => void }) {
   const pct = c.people && c.sent != null ? Math.min(100, Math.round((c.sent / c.people) * 100)) : null;
   return (
-    <button onClick={onOpen} className="rounded-lg border border-border bg-card/50 p-4 text-left transition-colors hover:border-primary/60">
+    <button onClick={onOpen} className={`tech-card ${c.status === "Running" ? "tone-green" : c.status === "Approved" ? "tone-blue" : "tone-amber"} rounded-lg border border-l-4 border-border border-l-[hsl(var(--tone))] bg-card p-4 text-left transition-all`}>
       <div className="flex items-start justify-between gap-2">
         <div className="font-medium">{c.name}</div>
-        <Badge variant={statusVariant(c.status) as any}>{c.status}</Badge>
+        <Badge className="border-0 bg-[hsl(var(--tone)/0.15)] text-[hsl(var(--tone))] hover:bg-[hsl(var(--tone)/0.15)]">{c.status}</Badge>
       </div>
       <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
-        <div><div className="text-lg font-semibold tabular-nums">{n(c.people)}</div><div className="text-muted-foreground">People</div></div>
-        <div><div className="text-lg font-semibold tabular-nums">{n(c.sent)}</div><div className="text-muted-foreground">Sent</div></div>
-        <div><div className="text-lg font-semibold tabular-nums">{n(c.replies)}</div><div className="text-muted-foreground">Replies</div></div>
+        <div className="rounded-md bg-[hsl(var(--tone-teal)/0.1)] py-2"><div className="text-lg font-bold tabular-nums text-[hsl(var(--tone-teal))]">{n(c.people)}</div><div className="text-muted-foreground">People</div></div>
+        <div className="rounded-md bg-[hsl(var(--tone-blue)/0.1)] py-2"><div className="text-lg font-bold tabular-nums text-[hsl(var(--tone-blue))]">{n(c.sent)}</div><div className="text-muted-foreground">Sent</div></div>
+        <div className="rounded-md bg-[hsl(var(--tone-green)/0.1)] py-2"><div className="text-lg font-bold tabular-nums text-[hsl(var(--tone-green))]">{n(c.replies)}</div><div className="text-muted-foreground">Replies</div></div>
       </div>
       {pct != null && <Progress value={pct} className="mt-3 h-1.5" />}
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -246,7 +244,7 @@ function CalendarView({ camps, names }: { camps: Camp[]; names: Record<string, s
                   {months.map((m, i) => <div key={i} className="absolute top-0 h-full border-l border-border/40" style={{ left: `${(i / 12) * 100}%` }} />)}
                   {rounds.map((r) => {
                     const es = emails.filter((e) => e.round === r);
-                    return <div key={r} className="absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-primary/25" style={{ left: pos(es[0].at), width: `calc(${pos(es[es.length - 1].at)} - ${pos(es[0].at)} + 8px)` }} title={`Round ${r}`} />;
+                    return <div key={r} className="absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-[hsl(var(--tone-violet)/0.2)]" style={{ left: pos(es[0].at), width: `calc(${pos(es[es.length - 1].at)} - ${pos(es[0].at)} + 8px)` }} title={`Round ${r}`} />;
                   })}
                   {emails.map((e) => (
                     <div key={`${e.round}-${e.step}`} title={`Round ${e.round}, email ${e.step} of ${EMAILS_PER_ROUND} · ${day(e.at)}`}
@@ -268,11 +266,11 @@ function DetailSheet({ c, onClose, onApprove }: { c: Camp | null; onClose: () =>
   const emails: Row[] = c?.draft?.email_sequence ?? [];
   return (
     <Sheet open={!!c} onOpenChange={(v) => !v && onClose()}>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
+      <SheetContent className="theme-light w-full overflow-y-auto sm:max-w-lg">
         {c && <>
           <SheetHeader><SheetTitle>{c.name}</SheetTitle></SheetHeader>
           <div className="mt-4 space-y-5 text-sm">
-            <Badge variant={statusVariant(c.status) as any}>{c.status}</Badge>
+            <Badge className="border-0 bg-[hsl(var(--tone)/0.15)] text-[hsl(var(--tone))] hover:bg-[hsl(var(--tone)/0.15)]">{c.status}</Badge>
             <div className="grid grid-cols-2 gap-3">
               {[["People", c.people], ["Sent", c.sent], ["Replies", c.replies], ["Bounces", c.bounces]].map(([l, v]) => (
                 <div key={l as string} className="rounded-lg border border-border p-3"><div className="text-xs text-muted-foreground">{l}</div><div className="text-xl font-semibold tabular-nums">{n(v as number | null)}</div></div>
@@ -328,7 +326,7 @@ function NewCampaignDialog({ open, onClose, businesses, onSaved }: { open: boole
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="theme-light max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader><DialogTitle>New campaign</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
