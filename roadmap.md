@@ -148,3 +148,15 @@
 - [x] 3. "Add people" on the dashboard: pick eligible CRM contacts for a business, preview, push to the Smartlead campaign (no typed phrases, audited).
 - [x] 4. "Approve - [ ] 4. "Approve & launch" launch": one approval creates the Smartlead campaign (4-email sequence, healthy GSM mailboxes, schedule, leads), marks it launched; background safeguards (eligibility, suppression, mailbox health) still run silently.
 - [x] 5. Problem warnings strip on the dashboard (failed sync, stale figures, high bounces, paused campaign) — shown only when something is wrong.
+
+## Email outreach fix list (24 Nov 2026, founder: do all)
+- [x] 25 emails/mailbox/day limit: dashboard shows 4,500/day max for 180; launch sets new people/day = mailboxes×25÷emails
+- [x] Calendar and mailbox-use grid page forward forever (rounds repeat quarterly)
+- [ ] Safe real test of "Approve & launch" in Smartlead (blocked: needs founder OK to create a test campaign; gates stay off)
+- [ ] Safe real test of "Add people" (same blocker)
+- [ ] Signed instant webhook (blocked: Smartlead signing key)
+- [ ] Book full education run + quarterly rounds into shared calendar; add pilot bookings
+- [ ] Match unmatched replies to CRM; classify bounce notices vs replies
+- [ ] AI light rewording of next round's four emails
+- [ ] Press Sync all / watch hourly run; check older pages for dark patches
+- [ ] Signup legal acceptance IP capture (founder to confirm)

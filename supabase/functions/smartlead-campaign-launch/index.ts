@@ -213,6 +213,7 @@ Deno.serve(async (req) => {
         });
 
         step = "assign_mailboxes";
+        // Daily limit: 25 emails per mailbox; new people/day = mailboxes*25 / emails in sequence.
         // Every warm, campaign-ready GSM mailbox with a fresh Winnr read that no other business holds in this slot.
         const slotStart = criteria.start_date ? new Date(String(criteria.start_date)) : new Date();
         const slotEnd = new Date(slotStart.getTime() + Math.max(emails.length, 1) * 7 * 86400000);
@@ -230,7 +231,7 @@ Deno.serve(async (req) => {
         step = "set_schedule";
         await sl(`/campaigns/${newId}/schedule`, KEY, {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ timezone: "Europe/London", days_of_the_week: [1, 2, 3, 4, 5], start_hour: "09:00", end_hour: "17:00", min_time_btw_emails: 12, max_new_leads_per_day: 100 }),
+          body: JSON.stringify({ timezone: "Europe/London", days_of_the_week: [1, 2, 3, 4, 5], start_hour: "09:00", end_hour: "17:00", min_time_btw_emails: 12, max_new_leads_per_day: Math.max(1, Math.floor((accountIds.length * 25) / Math.max(1, emails.length))) }),
         });
 
         step = "set_settings";

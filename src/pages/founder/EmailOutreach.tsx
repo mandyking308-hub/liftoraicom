@@ -15,9 +15,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Building2, ChevronDown, Mail, MessageSquare, Plus, RefreshCw, Send, Server, Users, Megaphone, Repeat, AlertTriangle } from "lucide-react";
+import { Building2, ChevronDown, Mail, MessageSquare, Plus, RefreshCw, Send, Server, Users, ChevronLeft, ChevronRight, Megaphone, Repeat, AlertTriangle } from "lucide-react";
 import { FunctionsHttpError } from "@supabase/supabase-js";
-import { scheduleBetween, nextEmail, EMAILS_PER_ROUND } from "@/lib/campaignSchedule";
+import { scheduleBetween, nextEmail, EMAILS_PER_ROUND, dailyEmailCapacity, newPeoplePerDay, MAILBOX_DAILY_LIMIT } from "@/lib/campaignSchedule";
 
 type Row = Record<string, any>;
 const day = (t?: string | Date | null) => (t ? new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—");
@@ -232,7 +232,7 @@ export default function EmailOutreach() {
         )}
 
         {d && <MailboxHealthPanel boxes={d.boxes} />}
-        {d && <MailboxUsePanel usage={d.usage} biz={d.biz} total={d.boxes.length} />}
+        {d && <MailboxUsePanel usage={d.usage} biz={d.biz} total={d.boxes.length} camps={camps} />}
 
         {/* Businesses */}
         <div className="space-y-3">
@@ -336,7 +336,8 @@ function CampaignCard({ c, onOpen, onSync, syncing }: { c: Camp; onOpen: () => v
 
 /** 12-month timeline: one row per campaign, a dot per email, rounds repeating every quarter. */
 function CalendarView({ camps, names }: { camps: Camp[]; names: Record<string, string> }) {
-  const from = new Date(); from.setUTCDate(1); from.setUTCHours(0, 0, 0, 0);
+  const [offset, setOffset] = useState(0);
+  const from = new Date(); from.setUTCDate(1); from.setUTCHours(0, 0, 0, 0); from.setUTCMonth(from.getUTCMonth() + offset * 12);
   const to = new Date(from); to.setUTCMonth(to.getUTCMonth() + 12);
   const span = to.getTime() - from.getTime();
   const pos = (t: Date) => `${((t.getTime() - from.getTime()) / span) * 100}%`;
@@ -350,6 +351,9 @@ function CalendarView({ camps, names }: { camps: Camp[]; names: Record<string, s
           <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-primary" />Email sent / due</span>
           <span className="flex items-center gap-1"><span className="h-3 w-0.5 bg-destructive" />Today</span>
           <span>Repeats every quarter, forever</span>
+          <Button size="sm" variant="outline" disabled={offset <= 0} onClick={() => setOffset((o) => o - 1)} aria-label="Previous 12 months"><ChevronLeft className="h-4 w-4" /></Button>
+          <span className="font-medium text-foreground">{months[0].toLocaleDateString("en-GB", { month: "short", year: "numeric" })} – {months[11].toLocaleDateString("en-GB", { month: "short", year: "numeric" })}</span>
+          <Button size="sm" variant="outline" onClick={() => setOffset((o) => o + 1)} aria-label="Next 12 months"><ChevronRight className="h-4 w-4" /></Button>
         </div>
       </CardHeader>
       <CardContent className="overflow-x-auto">
@@ -573,21 +577,43 @@ function MailboxHealthPanel({ boxes }: { boxes: any[] }) {
   );
 }
 
-function MailboxUsePanel({ usage, biz, total }: { usage: any[]; biz: any[]; total: number }) {
-  const weeks = Array.from({ length: 16 }, (_, i) => { const s = new Date(); s.setHours(0, 0, 0, 0); s.setDate(s.getDate() - ((s.getDay() + 6) % 7) + i * 7); return s; });
+function MailboxUsePanel({ usage, biz, total, camps }: { usage: any[]; biz: any[]; total: number; camps: Camp[] }) {
+  const [offset, setOffset] = useState(0);
+  const weeks = Array.from({ length: 16 }, (_, i) => { const s = new Date(); s.setHours(0, 0, 0, 0); s.setDate(s.getDate() - ((s.getDay() + 6) % 7) + (offset * 16 + i) * 7); return s; });
   const names = Object.fromEntries(biz.map((b) => [b.id, b.name]));
-  const ids = [...new Set(usage.map((u) => u.business_id))];
+  const live = camps.filter((c) => c.kind === "live" && c.start);
+  const ids = [...new Set([...usage.map((u) => u.business_id), ...live.map((c) => c.businessId)])];
   const tones = ["blue", "green", "violet", "teal"];
+  // Mailboxes a business normally uses: the most it has booked at once, or the whole pool if nothing is booked yet.
+  const typical = (id: string) => {
+    const per = new Map<string, Set<string>>();
+    usage.filter((u) => u.business_id === id).forEach((u) => { const k = String(u.starts_at).slice(0, 10); if (!per.has(k)) per.set(k, new Set()); per.get(k)!.add(u.mailbox_id); });
+    return Math.max(0, ...[...per.values()].map((x) => x.size)) || total;
+  };
   const cell = (id: string, w: Date) => {
     const e = new Date(w.getTime() + 7 * 86400000);
-    return new Set(usage.filter((u) => u.business_id === id && new Date(u.starts_at) < e && new Date(u.ends_at) > w).map((u) => u.mailbox_id)).size;
+    const booked = new Set(usage.filter((u) => u.business_id === id && new Date(u.starts_at) < e && new Date(u.ends_at) > w).map((u) => u.mailbox_id)).size;
+    if (booked) return booked;
+    // Beyond the booked weeks, use the repeating quarterly schedule so the grid runs forever.
+    const sending = live.some((c) => c.businessId === id && scheduleBetween(c.start!, w, new Date(e.getTime() - 1)).length > 0);
+    return sending ? Math.min(total, typical(id)) : 0;
   };
   return (
     <Card>
       <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-lg"><Mail className="h-5 w-5 text-primary" />Who is using the mailboxes</CardTitle>
-        <p className="text-sm text-muted-foreground">Each business can use many mailboxes at once. Two businesses never share a mailbox at the same time.</p></CardHeader>
+        <p className="text-sm text-muted-foreground">Each business can use many mailboxes at once. Two businesses never share a mailbox at the same time.</p>
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <div className="rounded-lg border border-border p-3"><div className="text-xs text-muted-foreground">Most emails per mailbox per day</div><div className="text-2xl font-semibold tone-blue text-[hsl(var(--tone))]">{MAILBOX_DAILY_LIMIT}</div></div>
+          <div className="rounded-lg border border-border p-3"><div className="text-xs text-muted-foreground">Most emails per day ({total} × {MAILBOX_DAILY_LIMIT})</div><div className="text-2xl font-semibold tone-green text-[hsl(var(--tone))]">{dailyEmailCapacity(total).toLocaleString("en-GB")}</div></div>
+          <div className="rounded-lg border border-border p-3"><div className="text-xs text-muted-foreground">New people per day (4-email sequence)</div><div className="text-2xl font-semibold tone-violet text-[hsl(var(--tone))]">{newPeoplePerDay(total).toLocaleString("en-GB")}</div></div>
+        </div>
+        <div className="mt-2 flex items-center gap-2 text-xs">
+          <Button size="sm" variant="outline" disabled={offset <= 0} onClick={() => setOffset((o) => o - 1)} aria-label="Earlier weeks"><ChevronLeft className="h-4 w-4" /></Button>
+          <span className="font-medium">{weeks[0].toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })} – {weeks[15].toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>
+          <Button size="sm" variant="outline" onClick={() => setOffset((o) => o + 1)} aria-label="Later weeks"><ChevronRight className="h-4 w-4" /></Button>
+        </div></CardHeader>
       <CardContent className="overflow-x-auto">
-        {ids.length === 0 ? <p className="text-sm text-muted-foreground">No mailbox bookings in the next 16 weeks — all {total} are free.</p> : (
+        {ids.length === 0 ? <p className="text-sm text-muted-foreground">No mailbox use in these 16 weeks — all {total} are free.</p> : (
           <table className="w-full min-w-[640px] text-xs">
             <thead><tr><th className="p-1 text-left">Business</th>{weeks.map((w) => <th key={+w} className="p-1 font-normal text-muted-foreground">{w.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</th>)}</tr></thead>
             <tbody>{ids.map((id, i) => (

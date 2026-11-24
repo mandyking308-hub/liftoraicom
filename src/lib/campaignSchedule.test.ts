@@ -16,3 +16,10 @@ describe("campaign rhythm", () => {
     expect(nextEmail(start, new Date("2031-06-01Z")).round).toBeGreaterThan(18);
   });
 });
+
+import { dailyEmailCapacity, newPeoplePerDay, MAILBOX_DAILY_LIMIT } from "./campaignSchedule";
+describe("mailbox sending limit", () => {
+  it("each mailbox sends at most 25 a day", () => expect(MAILBOX_DAILY_LIMIT).toBe(25));
+  it("180 mailboxes can send at most 4,500 emails a day", () => expect(dailyEmailCapacity(180)).toBe(4500));
+  it("with a 4-email sequence, 180 mailboxes take 1,125 new people a day", () => expect(newPeoplePerDay(180, 4)).toBe(1125));
+});

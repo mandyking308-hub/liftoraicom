@@ -26,3 +26,13 @@ export function scheduleBetween(start: Date, from: Date, to: Date): ScheduledEma
 export function nextEmail(start: Date, now: Date): ScheduledEmail {
   return scheduleBetween(start, now, addMonths(now, MONTHS_BETWEEN_ROUNDS + 1))[0];
 }
+
+/** Founder rule: each mailbox sends at most 25 emails a day. */
+export const MAILBOX_DAILY_LIMIT = 25;
+
+/** Most emails a set of mailboxes can send in one day. */
+export const dailyEmailCapacity = (mailboxes: number) => Math.max(0, Math.floor(mailboxes)) * MAILBOX_DAILY_LIMIT;
+
+/** New people per day so first emails plus follow-ups never pass the mailboxes' daily total. */
+export const newPeoplePerDay = (mailboxes: number, emailsPerPerson = EMAILS_PER_ROUND) =>
+  Math.floor(dailyEmailCapacity(mailboxes) / Math.max(1, emailsPerPerson));
