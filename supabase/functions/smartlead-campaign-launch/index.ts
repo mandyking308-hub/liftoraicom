@@ -174,6 +174,48 @@ Deno.serve(async (req) => {
       return json({ ok: true, started: true });
     }
 
+    // ---------- Founder-approved provider test: paused, no people, deleted afterwards ----------
+    if (action === "provider_test") {
+      const steps: Record<string, string> = {};
+      const created = (await sl(`/campaigns/create`, KEY, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: `LIFTOR TEST - delete ${new Date().toISOString()}` }) })) as { id?: number | string };
+      const id = String(created.id ?? "");
+      if (!id) return json({ ok: false, error: "campaign_create_returned_no_id" }, 502);
+      steps.create_campaign = "ok";
+      let failed: string | null = null;
+      const run = async (name: string, fn: () => Promise<unknown>) => {
+        if (failed) return;
+        try { await fn(); steps[name] = "ok"; } catch (e) { failed = name; steps[name] = e instanceof ProviderError ? e.code : "error"; }
+      };
+      const post = (path: string, b: unknown) => sl(path, KEY, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(b) });
+      await run("save_sequence", () => post(`/campaigns/${id}/sequences`, { sequences: [1, 2].map((n) => ({ seq_number: n, seq_delay_details: { delay_in_days: n === 1 ? 1 : 7 }, subject: `Test ${n}`, email_body: `Test body ${n}` })) }));
+      let picked = 0;
+      await run("assign_mailboxes", async () => {
+        const { data: boxes } = await admin.from("gsm_mailboxes")
+          .select("id, smartlead_email_account_id, warmup_status, readiness_state, health_score, last_provider_check_at, quarantined_reason")
+          .eq("estate_classification", "gsm").eq("active", true).eq("retired", false).limit(1000);
+        const sel = selectSlotMailboxes((boxes ?? []) as never, [] as never, "00000000-0000-0000-0000-000000000000", new Date(), new Date(Date.now() + 86400000));
+        picked = sel.length;
+        const ids = sel.slice(0, 1).map((b) => Number(b.smartlead_email_account_id)).filter((x) => Number.isFinite(x));
+        if (!ids.length) throw new ProviderError(0, "no_healthy_mailboxes_available");
+        await post(`/campaigns/${id}/email-accounts`, { email_account_ids: ids });
+      });
+      await run("set_schedule", () => post(`/campaigns/${id}/schedule`, { timezone: "Europe/London", days_of_the_week: [1, 2, 3, 4, 5], start_hour: "09:00", end_hour: "17:00", min_time_btw_emails: 12, max_new_leads_per_day: 1 }));
+      await run("set_settings", () => post(`/campaigns/${id}/settings`, { track_settings: ["DONT_EMAIL_OPEN", "DONT_LINK_CLICK"], stop_lead_settings: "REPLY_TO_AN_EMAIL", send_as_plain_text: true, follow_up_percentage: 100 }));
+      let status = "unknown"; let seqCount = -1; let leadCount = -1;
+      await run("read_back", async () => {
+        const c = (await sl(`/campaigns/${id}`, KEY)) as { status?: string };
+        status = String(c.status ?? "unknown");
+        const sq = (await sl(`/campaigns/${id}/sequences`, KEY)) as unknown[];
+        seqCount = Array.isArray(sq) ? sq.length : -1;
+        const ld = (await sl(`/campaigns/${id}/leads?limit=1`, KEY)) as { total_leads?: number | string };
+        leadCount = Number(ld.total_leads ?? 0);
+      });
+      let deleted = false;
+      try { await sl(`/campaigns/${id}`, KEY, { method: "DELETE" }); deleted = true; } catch { deleted = false; }
+      await audit(admin, "640de582-a112-4d16-a221-03c27f00c6ec", userId, `Smartlead provider test campaign ${id} (no people, never started) ${deleted ? "deleted" : "NOT deleted"}`, { campaign_id: id, steps, status, deleted });
+      return json({ ok: !failed, campaign_id: id, steps, status_after_setup: status, sequences_saved: seqCount, people_in_campaign: leadCount, healthy_mailboxes_selectable: picked, deleted });
+    }
+
     // ---------- Approve & launch a dashboard draft as a real Smartlead campaign ----------
     if (action === "launch") {
       const draftId = String(body.draft_id ?? "");
