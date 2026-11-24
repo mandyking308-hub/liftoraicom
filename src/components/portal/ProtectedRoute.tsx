@@ -14,7 +14,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!user) {
-    return <Navigate to="/portal/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;

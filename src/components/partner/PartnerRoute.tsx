@@ -28,7 +28,7 @@ const PartnerRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (!user) return <Navigate to="/portal/login" replace />;
+  if (!user) return <Navigate to="/" replace />;
   if (!isPartner) return <Navigate to="/portal/dashboard" replace />;
 
   return <>{children}</>;

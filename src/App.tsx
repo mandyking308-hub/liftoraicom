@@ -940,9 +940,9 @@ const App = () => (
             <Route path="/onboarding/:token" element={<CustomerOnboardingView />} />
 
             {/* Auth */}
-            <Route path="/portal/login" element={<Navigate to="/founder/login" replace />} />
+            <Route path="/portal/login" element={<Navigate to="/" replace />} />
             <Route path="/founder/login" element={<FounderLogin />} />
-            <Route path="/portal/signup" element={<Navigate to="/founder/login" replace />} />
+            <Route path="/portal/signup" element={<Navigate to="/" replace />} />
             <Route path="/portal/forgot-password" element={<ForgotPassword />} />
             <Route path="/portal/reset-password" element={<ResetPassword />} />
 
@@ -1800,7 +1800,7 @@ const App = () => (
             <Route path="/demo/:token" element={<PublicDemo />} />
 
             {/* Supplier Portal */}
-            <Route path="/supplier/login" element={<Navigate to="/founder/login" replace />} />
+            <Route path="/supplier/login" element={<Navigate to="/" replace />} />
             <Route path="/supplier/dashboard" element={<SupplierDashboard />} />
             <Route path="/supplier/assignments" element={<SupplierAssignments />} />
 

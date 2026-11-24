@@ -36,7 +36,7 @@ const SupplierRoute = ({ children }: { children: (s: SupplierSession) => ReactNo
       </div>
     );
   }
-  if (!session) return <Navigate to="/supplier/login" replace />;
+  if (!session) return <Navigate to="/" replace />;
   return <>{children(session)}</>;
 };
 
