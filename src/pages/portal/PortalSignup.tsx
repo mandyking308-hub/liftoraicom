@@ -44,12 +44,9 @@ const PortalSignup = () => {
     // Record legal acceptance
     if (data.user) {
       try {
-        await supabase.from("user_legal_acceptance" as any).insert({
-          user_id: data.user.id,
-          terms_version: "1.0",
-          privacy_version: "1.0",
-          ip_address: "",
-          user_agent: navigator.userAgent,
+        // Saved server-side so the real internet address (IP) is recorded.
+        await supabase.functions.invoke("record-legal-acceptance", {
+          body: { user_id: data.user.id, terms_version: "1.0", privacy_version: "1.0" },
         });
       } catch {
         // Non-blocking — acceptance may fail if email not confirmed yet
