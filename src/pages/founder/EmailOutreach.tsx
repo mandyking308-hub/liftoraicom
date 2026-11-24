@@ -23,7 +23,7 @@ type Row = Record<string, any>;
 const day = (t?: string | Date | null) => (t ? new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—");
 const n = (v?: number | null) => (v == null ? "—" : v.toLocaleString("en-GB"));
 const OK = ["ok", "connected", "healthy", "active"];
-const STALE_MS = 60 * 60 * 1000;
+const STALE_MS = 2 * 60 * 60 * 1000;
 
 type Camp = {
   key: string; businessId: string; campaignId: string | null; name: string; kind: "live" | "draft";
@@ -79,6 +79,21 @@ export default function EmailOutreach() {
       toast.error(`Couldn't launch ${c.name}: ${(e as Error).message}`);
     }
     setLaunching(false);
+  };
+
+  const [syncingAll, setSyncingAll] = useState(false);
+  const syncAll = async () => {
+    const targets = (d?.snaps ?? []).filter((x) => x.business_id && x.provider_campaign_id);
+    setSyncingAll(true);
+    let ok = 0; const failed: string[] = [];
+    for (const t of targets) {
+      try { await invokeSync({ action: "sync", business_id: t.business_id, campaign_id: String(t.provider_campaign_id) }); ok++; }
+      catch { failed.push(String(t.provider_campaign_id)); }
+    }
+    await live.refresh();
+    if (failed.length) toast.error(`Updated ${ok}; couldn't update campaign ${failed.join(", ")}`);
+    else toast.success(`All ${ok} campaigns updated from Smartlead`);
+    setSyncingAll(false);
   };
 
   const syncNow = async (c: Camp) => {
@@ -187,8 +202,8 @@ export default function EmailOutreach() {
             <p className="text-sm text-muted-foreground">Every business, every campaign, every send date.</p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">{live.at ? `Updated ${live.at.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}` : "Loading…"}</span>
-            <Button size="sm" variant="outline" onClick={live.refresh} disabled={live.busy}><RefreshCw className={`mr-1 h-3 w-3 ${live.busy ? "animate-spin" : ""}`} />Update</Button>
+            <span className="text-xs text-muted-foreground">{live.at ? `Auto-updates hourly · last ${live.at.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}` : "Loading…"}</span>
+            <Button size="sm" variant="outline" onClick={syncAll} disabled={syncingAll || live.busy}><RefreshCw className={`mr-1 h-3 w-3 ${syncingAll || live.busy ? "animate-spin" : ""}`} />{syncingAll ? "Syncing…" : "Sync all"}</Button>
             <Button size="sm" onClick={() => setCreating(true)}><Plus className="mr-1 h-4 w-4" />New campaign</Button>
           </div>
         </div>
