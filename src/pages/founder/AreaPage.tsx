@@ -8,6 +8,7 @@ export default function AreaPage() {
   const area = areaByKey(areaKey);
   if (!area) return <Navigate to="/founder" replace />;
   const main = area.sections.filter((s) => !s.legacy);
+  if (main.length === 1) return <Navigate to={main[0].route} replace />;
   return (
     <FounderLayout>
       <div className="space-y-6">

@@ -27,7 +27,8 @@ export const navGroups: NavGroup[] = [
     label: `${a.n}. ${a.title}`,
     icon: Layers,
     items: [
-      { label: `${a.title} overview`, to: areaRoute(a.key), icon: ArrowRightCircle },
+      // Areas with a single page link straight to it; no in-between overview page.
+      ...(a.sections.filter((x) => !x.legacy).length > 1 ? [{ label: `${a.title} overview`, to: areaRoute(a.key), icon: ArrowRightCircle }] : []),
       ...a.sections.filter((x) => !x.legacy).map((x) => ({ label: x.label, to: x.route, icon: ChevronRight })),
     ],
   })),
