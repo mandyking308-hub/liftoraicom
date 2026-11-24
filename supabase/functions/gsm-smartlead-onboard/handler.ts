@@ -311,7 +311,7 @@ export async function handleGsmSmartleadOnboard(req: Request, deps: GsmOnboardDe
               smtp_port: cred.smtp_port,
               imap_host: cred.imap_host,
               imap_port: cred.imap_port,
-              max_email_per_day: Number(row.configured_daily_limit ?? 50),
+              max_email_per_day: Math.min(25, Number(row.configured_daily_limit ?? 25)),
               custom_tracking_url: "",
               bcc: "",
               signature: "",

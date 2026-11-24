@@ -143,7 +143,8 @@ Deno.serve(async (req) => {
       critical.push(...roundCritical({ eligible: eligible.length, healthySenders: healthyIds.length, charitySender: false, sequence: sequenceProblems(steps, POSTAL[p.business_id] ?? null), calendarClash: (clash ?? []).length > 0 }));
     } catch (e) { critical.push(String((e as Error).message)); }
 
-    const perDay = Math.max(1, Math.ceil(eligible.length / p.send_days));
+    // Never more than 25 emails per mailbox per day across the whole sequence.
+    const perDay = Math.max(1, Math.min(Math.ceil(eligible.length / p.send_days), Math.floor((healthyIds.length * 25) / Math.max(1, Number(p.sequence_steps) || 4))));
     const report = { plan_id: p.id, campaign: p.campaign_name, round: roundNo, dry_run: dry, eligible: eligible.length, held, healthy_senders: healthyIds.length, per_day: perDay, critical, notes };
     if (dry) { results.push({ ok: critical.length === 0, ...report }); continue; }
     if (!p.auto_start) critical.push("auto_start_off");
