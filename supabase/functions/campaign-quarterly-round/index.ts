@@ -11,6 +11,7 @@
 //          copy the approved wording, add only eligible leads, attach healthy GSM senders and
 //          start it. Never touches the source campaign. GHAT charity mailboxes never used.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { lightRefresh } from "../_shared/emailRefresh.ts";
 import { addMonths, filterRound, hasMoreRounds, isDue, roundCritical, sequenceProblems, type RoundContact } from "../_shared/campaignRecurrence.ts";
 
 const BASE = "https://server.smartlead.ai/api/v1";
@@ -157,6 +158,9 @@ Deno.serve(async (req) => {
       results.push({ ok: false, ...report }); continue;
     }
     // Create, fill and start the new round's campaign.
+    // Light AI rewording (founder-approved); any unsafe change keeps the approved wording.
+    const rw = await lightRefresh(steps, POSTAL[p.business_id] ?? null, roundNo);
+    steps = rw.steps; notes.push(`AI light rewording applied to ${rw.refreshed} of ${steps.length} emails`);
     const name = `${p.campaign_name} — Q round ${roundNo}`;
     const fail = async (why: string, cid: string | null) => {
       critical.push(why); await finish("failed", cid); await audit("quarterly_round_failed", { ...report, critical });

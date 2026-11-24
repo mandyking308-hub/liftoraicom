@@ -93,3 +93,18 @@ describe("activity event derivation", () => {
     expect(suppressionFor("email_open_approximate")).toBeNull();
   });
 });
+
+import { classifyReply as _classify, deriveActivityEvents as _derive } from "../../../supabase/functions/_shared/smartleadCampaignSync";
+describe("reply sorting", () => {
+  it("treats a delivery failure notice as a bounce, not a reply", () => {
+    expect(_classify({ from: "MAILER-DAEMON@x.com", subject: "Undeliverable: Hello" })).toBe("bounce");
+    const ev = _derive("1", {}, [{ type: "REPLY", message_id: "m1", from: "postmaster@x.com", subject: "Delivery Status Notification (Failure)" }]);
+    expect(ev.map((e) => e.event_type)).toEqual(["lead_blocked_or_bounced"]);
+  });
+  it("treats out-of-office as an auto-reply", () => {
+    expect(_classify({ from: "a@school.org", subject: "Automatic reply: Kindness" })).toBe("auto_reply");
+  });
+  it("keeps a real reply as a reply", () => {
+    expect(_classify({ from: "head@school.org", subject: "Re: Kindness", email_body: "Yes, tell me more" })).toBe("reply");
+  });
+});

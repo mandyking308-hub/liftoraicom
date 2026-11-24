@@ -119,7 +119,7 @@ export default function EmailOutreach() {
       supabase.from("smartlead_campaign_snapshots").select("*").in("business_id", ids),
       supabase.from("outreach_campaign_drafts").select("*").in("business_id", ids).eq("lead_criteria->>created_from", "email_outreach_dashboard").order("created_at", { ascending: false }),
       supabase.from("gsm_mailboxes").select("email, smtp_status, imap_status, quarantined_reason, warmup_status, readiness_state, health_score, last_provider_check_at").eq("estate_classification", "gsm").eq("active", true).eq("retired", false).limit(1000),
-      supabase.from("smartlead_activity_events").select("id, business_id, provider_campaign_id, provider_lead_id, details, occurred_at").in("business_id", ids).ilike("event_type", "%repl%").order("occurred_at", { ascending: false }).limit(10),
+      supabase.from("smartlead_activity_events").select("id, business_id, provider_campaign_id, provider_lead_id, details, occurred_at").in("business_id", ids).eq("event_type", "email_reply").order("occurred_at", { ascending: false }).limit(10),
       supabase.from("portfolio_send_bookings").select("business_id, campaign_label, sequence_step, recipients_planned").in("business_id", ids).eq("sequence_step", 1),
       supabase.from("portfolio_send_bookings").select("business_id, mailbox_id, starts_at, ends_at, emails_planned").gte("ends_at", new Date().toISOString()).lte("starts_at", new Date(Date.now() + 120 * 86400000).toISOString()).limit(10000),
       ...ids.map((id) => supabase.from("business_contact_relationships").select("id", { count: "exact", head: true }).eq("business_id", id)),

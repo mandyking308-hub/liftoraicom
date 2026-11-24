@@ -171,10 +171,17 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
     }
 
     // Map provider leads to Liftor contacts only via this business's relationships + exact normalised email.
-    const { data: rels } = await admin.from("business_contact_relationships")
-      .select("id, contact_id, contacts!inner(email)").eq("business_id", businessId);
+    // Page through every relationship: a single read stops at 1,000 rows, which left later contacts unmatched.
+    const rels: unknown[] = [];
+    for (let from = 0; from < 100000; from += 1000) {
+      const { data: page, error: relErr } = await admin.from("business_contact_relationships")
+        .select("id, contact_id, contacts!inner(email)").eq("business_id", businessId).order("id").range(from, from + 999);
+      if (relErr) throw new ProviderError(0, "relationship_lookup_failed");
+      rels.push(...(page ?? []));
+      if ((page ?? []).length < 1000) break;
+    }
     const relByEmail = new Map<string, { id: string; contact_id: string }>();
-    for (const r of (rels ?? []) as Array<{ id: string; contact_id: string; contacts: { email: string | null } }>) {
+    for (const r of rels as Array<{ id: string; contact_id: string; contacts: { email: string | null } }>) {
       const e = normEmail(r.contacts?.email); if (e) relByEmail.set(e, { id: r.id, contact_id: r.contact_id });
     }
     // Light read-back for large campaigns: Smartlead allows 200 requests/min, so
@@ -315,8 +322,18 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
       }
     }
 
+    // Smartlead counts out-of-office and bounce notices as replies; Liftor counts real replies only.
+    const realCount = async (types: string[]) => {
+      const { count } = await admin.from("smartlead_activity_events").select("id", { count: "exact", head: true })
+        .eq("business_id", businessId).eq("provider_campaign_id", campaignId).in("event_type", types);
+      return count ?? 0;
+    };
+    const mapped = mapCampaignSnapshot(campaign, analytics);
+    const realReplies = await realCount(["email_reply"]);
+    const bounceEvents = await realCount(["lead_blocked_or_bounced"]);
     await admin.from("smartlead_campaign_snapshots").upsert({
-      business_id: businessId, provider_campaign_id: campaignId, ...mapCampaignSnapshot(campaign, analytics),
+      business_id: businessId, provider_campaign_id: campaignId, ...mapped,
+      reply_count: realReplies, bounce_count: Math.max(mapped.bounce_count ?? 0, bounceEvents),
       senders: sanitizeSenders(accounts), webhooks, send_as_plain_text: typeof campaign.send_as_plain_text === "boolean" ? campaign.send_as_plain_text : null, last_success_at: nowIso(), last_attempt_at: nowIso(), last_error: null, updated_at: nowIso(),
     });
     await admin.from("smartlead_sync_runs").update({

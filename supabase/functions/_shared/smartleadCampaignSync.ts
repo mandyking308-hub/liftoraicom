@@ -69,7 +69,7 @@ export const stripHtml = (h: string) =>
 
 export function summarizeHistory(history: HistoryMsg[]) {
   const sent = history.filter((m) => (m.type ?? "").toUpperCase() === "SENT");
-  const replies = history.filter((m) => (m.type ?? "").toUpperCase() === "REPLY");
+  const replies = history.filter((m) => (m.type ?? "").toUpperCase() === "REPLY" && classifyReply(m) === "reply");
   const times = (a: HistoryMsg[]) => a.map((m) => m.time).filter(Boolean).sort() as string[];
   const st = times(sent), rt = times(replies);
   const lastReply = replies.slice().sort((a, b) => String(a.time).localeCompare(String(b.time))).pop();
@@ -147,6 +147,10 @@ export function deriveActivityEvents(
       const opens = num(m.open_count) ?? 0, clicks = num(m.click_count) ?? 0;
       if (opens > 0) out.push({ event_type: "email_open_approximate", dedupe_key: `open:${base}:${opens}`, provider_message_id: m.message_id ?? null, occurred_at: null, details: { open_count: opens, note: "tracked open, approximate; not proof of read" } });
       if (clicks > 0) out.push({ event_type: "email_link_click", dedupe_key: `click:${base}:${clicks}`, provider_message_id: m.message_id ?? null, occurred_at: null, details: { click_count: clicks } });
+    } else if (t === "REPLY" && classifyReply(m) === "bounce") {
+      out.push({ event_type: "lead_blocked_or_bounced", dedupe_key: `bounce:${base}`, provider_message_id: m.message_id ?? null, occurred_at: occurred, details: { source: "bounce_notice_in_reply_thread", subject: m.subject ?? null } });
+    } else if (t === "REPLY" && classifyReply(m) === "auto_reply") {
+      out.push({ event_type: "email_auto_reply", dedupe_key: `auto:${base}`, provider_message_id: m.message_id ?? null, occurred_at: occurred, details: { subject: m.subject ?? null } });
     } else if (t === "REPLY") {
       out.push({ event_type: "email_reply", dedupe_key: `reply:${base}`, provider_message_id: m.message_id ?? null, occurred_at: occurred, details: { preview: m.email_body ? stripHtml(String(m.email_body)).slice(0, 200) : null } });
     } else if (t) {
@@ -166,4 +170,17 @@ export function suppressionFor(eventType: string): "do_not_contact" | "stop_foll
   if (eventType === "lead_unsubscribed" || eventType === "lead_blocked_or_bounced") return "do_not_contact";
   if (eventType === "email_reply") return "stop_followups";
   return null;
+}
+
+/** Sort a REPLY message: delivery-failure notices and out-of-office auto-replies are not real replies. */
+export function classifyReply(m: { from?: unknown; subject?: unknown; email_body?: unknown }): "bounce" | "auto_reply" | "reply" {
+  const from = String(m.from ?? "").toLowerCase();
+  const subject = String(m.subject ?? "").toLowerCase();
+  const body = stripHtml(String(m.email_body ?? "")).toLowerCase().slice(0, 1500);
+  if (/mailer-daemon|postmaster|mail delivery (subsystem|system)/.test(from)
+    || /undeliverable|undelivered mail|delivery status notification|delivery (has )?failed|mail delivery failed|returned mail|failure notice|address not found/.test(subject)
+    || /(550|554)[ -]5\.\d\.\d|recipient address rejected|mailbox (unavailable|not found|does not exist)|user unknown|could not be delivered|wasn't delivered|address couldn't be found/.test(body)) return "bounce";
+  if (/^(automatic reply|auto(matic)?[- ]?reply|out of (the )?office|ooo\b|away from)/.test(subject.replace(/^(re|aw|fw):\s*/, ""))
+    || /i am (currently )?out of (the )?office|i'm (currently )?out of (the )?office|on annual leave|limited access to (my )?email|i am away until|i will be away/.test(body)) return "auto_reply";
+  return "reply";
 }
