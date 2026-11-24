@@ -52,7 +52,7 @@ async function rewordOne(key: string, s: Step, round: number): Promise<{ subject
 }
 
 export async function lightRefresh(steps: Step[], postal: RegExp | null, round: number): Promise<{ steps: Step[]; refreshed: number }> {
-  const key = Deno.env.get("LOVABLE_API_KEY");
+  const key = (globalThis as unknown as { Deno?: { env: { get(k: string): string | undefined } } }).Deno?.env.get("LOVABLE_API_KEY");
   if (!key || steps.length === 0) return { steps, refreshed: 0 };
   let refreshed = 0;
   const out: Step[] = [];
