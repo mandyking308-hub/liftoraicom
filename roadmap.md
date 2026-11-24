@@ -141,3 +141,10 @@
 - [ ] Final acceptance report (verified vs assumed)
 - [x] Smartlead reply/send/bounce now update the CRM contact; 6 pilot contacts backfilled as contacted
 - [x] 6 test businesses: founder chose keep archived/hidden
+
+## Email outreach dashboard — five missing pieces (24 Nov 2026, founder approved all)
+- [x] 1. Education campaign figures: light read-back for campaign 4664652 (analytics + leads, history only for replied/categorised/blocked leads) so the 1,579-lead sync stops hitting Smartlead's 200-req/min limit.
+- [x] 2. Education replies into Liftor Replies + CRM (comes from the same light sync events).
+- [x] 3. "Add people" on the dashboard: pick eligible CRM contacts for a business, preview, push to the Smartlead campaign (no typed phrases, audited).
+- [x] 4. "Approve - [ ] 4. "Approve & launch" launch": one approval creates the Smartlead campaign (4-email sequence, healthy GSM mailboxes, schedule, leads), marks it launched; background safeguards (eligibility, suppression, mailbox health) still run silently.
+- [x] 5. Problem warnings strip on the dashboard (failed sync, stale figures, high bounces, paused campaign) — shown only when something is wrong.

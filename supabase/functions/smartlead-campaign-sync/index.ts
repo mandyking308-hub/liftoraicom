@@ -177,81 +177,141 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
     for (const r of (rels ?? []) as Array<{ id: string; contact_id: string; contacts: { email: string | null } }>) {
       const e = normEmail(r.contacts?.email); if (e) relByEmail.set(e, { id: r.id, contact_id: r.contact_id });
     }
+    // Light read-back for large campaigns: Smartlead allows 200 requests/min, so
+    // per-lead message history is only fetched for leads that can have meaningful
+    // events (replied/categorised, unsubscribed, or no longer in progress). All
+    // leads still get identity/status snapshots and state-based activity events.
+    const light = body.mode === "light" || leads.length > 200;
+    const LIGHT_HISTORY_CAP = 150;
+    let historyFetches = 0;
     let messagesSeen = 0, newMessages = 0, newEvents = 0;
+
+    // DB writes are batched: thousands of leads must not mean thousands of
+    // round-trips, or large campaigns exceed the function's time limit.
+    const snapRows: Record<string, unknown>[] = [];
+    const msgRows: Record<string, unknown>[] = [];
+    type EvMeta = { ev: ReturnType<typeof deriveActivityEvents>[number]; rel: { id: string; contact_id: string } | null; contactId: string | null; leadId: string; email: string | null; action: string | null };
+    const evRows: Record<string, unknown>[] = [];
+    const evMeta: EvMeta[] = [];
+
     for (const row of leads) {
       const lead = (row.lead ?? {}) as Record<string, unknown>;
       const leadId = String(lead.id);
-      const hist = (await sl(`/campaigns/${campaignId}/leads/${leadId}/message-history`, KEY)) as { history?: HistoryMsg[] };
-      const history = hist.history ?? [];
+      const st = String(row.status ?? "").toUpperCase();
+      const mayHaveEvents = lead.lead_category_id != null || lead.is_unsubscribed === true || (st !== "" && st !== "STARTED" && st !== "INPROGRESS");
+      const fetchHistory = !light || (mayHaveEvents && historyFetches < LIGHT_HISTORY_CAP);
+      let history: HistoryMsg[] = [];
+      if (fetchHistory) {
+        historyFetches++;
+        const hist = (await sl(`/campaigns/${campaignId}/leads/${leadId}/message-history`, KEY)) as { history?: HistoryMsg[] };
+        history = hist.history ?? [];
+      }
       messagesSeen += history.length;
       const sum = summarizeHistory(history);
-      const rel = relByEmail.get(normEmail(lead.email) ?? "");
+      const email = normEmail(lead.email);
+      const rel = relByEmail.get(email ?? "") ?? null;
       const contactId: string | null = rel?.contact_id ?? null;
-      await admin.from("smartlead_lead_snapshots").upsert({
+      snapRows.push({
         business_id: businessId, provider_campaign_id: campaignId, provider_lead_id: leadId,
         campaign_lead_map_id: row.campaign_lead_map_id ? String(row.campaign_lead_map_id) : null,
         liftor_contact_id: contactId,
-        first_name: lead.first_name ?? null, last_name: lead.last_name ?? null, email: normEmail(lead.email),
+        first_name: lead.first_name ?? null, last_name: lead.last_name ?? null, email,
         company_name: lead.company_name ?? null, lead_status: row.status ?? null,
         lead_category_id: row.lead_category_id != null ? String(row.lead_category_id) : null,
-        is_unsubscribed: lead.is_unsubscribed === true, ...sum, updated_at: nowIso(),
+        is_unsubscribed: lead.is_unsubscribed === true,
+        // In light mode, leads without a history fetch keep their previous summary.
+        ...(fetchHistory ? sum : {}),
+        updated_at: nowIso(),
       });
       for (const msg of history) {
-        const { data: ins } = await admin.from("smartlead_thread_messages").upsert({
+        msgRows.push({
           business_id: businessId, provider_campaign_id: campaignId, provider_lead_id: leadId,
           dedupe_key: dedupeKey(msg), provider_message_id: msg.message_id ?? null, provider_stats_id: msg.stats_id ?? null,
           direction: String(msg.type ?? "").toUpperCase() || "UNKNOWN", from_email: msg.from ?? null, to_email: msg.to ?? null,
           subject: msg.subject ?? null, body_html: msg.email_body ?? null,
           sequence_number: msg.email_seq_number != null ? Number(msg.email_seq_number) : null,
           sent_at: msg.time ?? null, open_count: msg.open_count ?? null, click_count: msg.click_count ?? null,
-        }, { onConflict: "business_id,provider_campaign_id,dedupe_key", ignoreDuplicates: true }).select("id");
-        newMessages += ins?.length ?? 0;
+        });
       }
       // Durable activity events (idempotent) + protective actions for this contact/business only.
       const events = deriveActivityEvents(leadId, { status: row.status, is_unsubscribed: lead.is_unsubscribed, lead_category_id: row.lead_category_id }, history);
       for (const ev of events) {
         const action = suppressionFor(ev.event_type);
-        const { data: insEv } = await admin.from("smartlead_activity_events").upsert({
+        evRows.push({
           business_id: businessId, provider_campaign_id: campaignId, provider_lead_id: leadId,
           liftor_contact_id: contactId, business_contact_relationship_id: rel?.id ?? null,
           event_type: ev.event_type, dedupe_key: ev.dedupe_key, provider_message_id: ev.provider_message_id,
           occurred_at: ev.occurred_at, details: ev.details, liftor_action: action,
-        }, { onConflict: "business_id,provider_campaign_id,dedupe_key", ignoreDuplicates: true }).select("id");
-        if (!insEv?.length) continue;
+        });
+        evMeta.push({ ev, rel, contactId, leadId, email, action });
+      }
+    }
+
+    const CHUNK = 500;
+    for (let i = 0; i < snapRows.length; i += CHUNK) {
+      await admin.from("smartlead_lead_snapshots").upsert(snapRows.slice(i, i + CHUNK));
+    }
+    for (let i = 0; i < msgRows.length; i += CHUNK) {
+      const { data: ins } = await admin.from("smartlead_thread_messages")
+        .upsert(msgRows.slice(i, i + CHUNK), { onConflict: "business_id,provider_campaign_id,dedupe_key", ignoreDuplicates: true }).select("id");
+      newMessages += ins?.length ?? 0;
+    }
+
+    // Insert events in chunks; only newly inserted events drive CRM updates.
+    const ledgerRows: Record<string, unknown>[] = [];
+    const contactUpdates: Array<{ ev: EvMeta["ev"]; rel: NonNullable<EvMeta["rel"]>; at: string }> = [];
+    const relUpdates: Array<{ relId: string; ev: EvMeta["ev"]; action: string; contactId: string }> = [];
+    for (let i = 0; i < evRows.length; i += CHUNK) {
+      const { data: insEv } = await admin.from("smartlead_activity_events")
+        .upsert(evRows.slice(i, i + CHUNK), { onConflict: "business_id,provider_campaign_id,dedupe_key", ignoreDuplicates: true }).select("id, dedupe_key");
+      const idByKey = new Map((insEv ?? []).map((r: { id: string; dedupe_key: string }) => [r.dedupe_key, r.id]));
+      for (let j = i; j < Math.min(i + CHUNK, evRows.length); j++) {
+        const meta = evMeta[j];
+        const evId = idByKey.get(meta.ev.dedupe_key);
+        if (!evId) continue; // already recorded by an earlier sync
         newEvents++;
-        // Keep the central CRM contact current (this business's matched contact only).
-        if (rel) {
-          const at = ev.occurred_at ?? nowIso();
-          if (ev.event_type === "email_reply") {
-            await admin.from("contacts").update({ conversation_active: true, last_replied_at: at } as never).eq("id", rel.contact_id);
-            await admin.from("contacts").update({ status: "ENGAGED" } as never).eq("id", rel.contact_id).in("status", ["NEW", "CONTACTED"]);
-          } else if (ev.event_type === "email_sent" || ev.event_type === "first_email_sent") {
-            await admin.from("contacts").update({ last_contacted_at: at } as never).eq("id", rel.contact_id).or(`last_contacted_at.is.null,last_contacted_at.lt.${at}`);
-            await admin.from("contacts").update({ status: "CONTACTED" } as never).eq("id", rel.contact_id).eq("status", "NEW");
-          } else if (ev.event_type === "lead_blocked_or_bounced") {
-            await admin.from("contacts").update({ hard_bounced: true } as never).eq("id", rel.contact_id);
-          }
-          // Record it once in the shared CRM interaction history (duplicates ignored by dedupe_key).
-          if (["email_reply", "email_sent", "first_email_sent", "lead_blocked_or_bounced", "lead_unsubscribed"].includes(ev.event_type)) {
-            const inbound = ev.event_type === "email_reply";
-            await admin.from("crm_interaction_ledger").insert({
-              business_id: businessId, contact_id: rel.contact_id, business_contact_relationship_id: rel.id,
-              source_system: "smartlead", source_channel: "email", channel_key: "email", source_table: "smartlead_activity_events", source_id: insEv[0].id,
-              interaction_type: ev.event_type, direction: inbound ? "inbound" : ev.event_type.includes("sent") ? "outbound" : "system",
-              provider_type: "smartlead", provider_message_id: ev.provider_message_id, provider_campaign_id: campaignId, provider_lead_id: leadId,
-              contact_email: normEmail(lead.email), summary: ev.event_type.replace(/_/g, " "),
-              body_preview: inbound ? (ev.details as { preview?: string | null })?.preview ?? null : null,
-              occurred_at: at, matched_status: "matched", dedupe_key: `smartlead:${businessId}:${campaignId}:${ev.dedupe_key}`,
+        const at = meta.ev.occurred_at ?? nowIso();
+        if (meta.rel) {
+          contactUpdates.push({ ev: meta.ev, rel: meta.rel, at });
+          if (["email_reply", "email_sent", "first_email_sent", "lead_blocked_or_bounced", "lead_unsubscribed"].includes(meta.ev.event_type)) {
+            const inbound = meta.ev.event_type === "email_reply";
+            ledgerRows.push({
+              business_id: businessId, contact_id: meta.rel.contact_id, business_contact_relationship_id: meta.rel.id,
+              source_system: "smartlead", source_channel: "email", channel_key: "email", source_table: "smartlead_activity_events", source_id: evId,
+              interaction_type: meta.ev.event_type, direction: inbound ? "inbound" : meta.ev.event_type.includes("sent") ? "outbound" : "system",
+              provider_type: "smartlead", provider_message_id: meta.ev.provider_message_id, provider_campaign_id: campaignId, provider_lead_id: meta.leadId,
+              contact_email: meta.email, summary: meta.ev.event_type.replace(/_/g, " "),
+              body_preview: inbound ? (meta.ev.details as { preview?: string | null })?.preview ?? null : null,
+              occurred_at: at, matched_status: "matched", dedupe_key: `smartlead:${businessId}:${campaignId}:${meta.ev.dedupe_key}`,
               founder_review_required: inbound, ai_relevant: inbound,
-            } as never);
+            });
           }
+          if (meta.action) relUpdates.push({ relId: meta.rel.id, ev: meta.ev, action: meta.action, contactId: meta.rel.contact_id });
         }
-        if (rel && action === "do_not_contact") {
-          await admin.from("business_contact_relationships").update({ do_not_contact: true, campaign_eligible: false, do_not_contact_reason: `smartlead_${ev.event_type}` } as never).eq("id", rel.id).eq("business_id", businessId);
-          if (ev.event_type === "lead_unsubscribed") await admin.from("contacts").update({ status: "DO_NOT_CONTACT" } as never).eq("id", rel.contact_id);
-        } else if (rel && action === "stop_followups") {
-          await admin.from("business_contact_relationships").update({ campaign_eligible: false } as never).eq("id", rel.id).eq("business_id", businessId);
-        }
+      }
+    }
+
+    for (let i = 0; i < ledgerRows.length; i += CHUNK) {
+      await admin.from("crm_interaction_ledger").insert(ledgerRows.slice(i, i + CHUNK) as never);
+    }
+    // Keep the central CRM contact current (this business's matched contact only).
+    for (const u of contactUpdates) {
+      if (u.ev.event_type === "email_reply") {
+        await admin.from("contacts").update({ conversation_active: true, last_replied_at: u.at } as never).eq("id", u.rel.contact_id);
+        await admin.from("contacts").update({ status: "ENGAGED" } as never).eq("id", u.rel.contact_id).in("status", ["NEW", "CONTACTED"]);
+      } else if (u.ev.event_type === "email_sent" || u.ev.event_type === "first_email_sent") {
+        await admin.from("contacts").update({ last_contacted_at: u.at } as never).eq("id", u.rel.contact_id).or(`last_contacted_at.is.null,last_contacted_at.lt.${u.at}`);
+        await admin.from("contacts").update({ status: "CONTACTED" } as never).eq("id", u.rel.contact_id).eq("status", "NEW");
+      } else if (u.ev.event_type === "lead_blocked_or_bounced") {
+        await admin.from("contacts").update({ hard_bounced: true } as never).eq("id", u.rel.contact_id);
+      }
+    }
+    for (const u of relUpdates) {
+      if (u.action === "do_not_contact") {
+        await admin.from("business_contact_relationships").update({ do_not_contact: true, campaign_eligible: false, do_not_contact_reason: `smartlead_${u.ev.event_type}` } as never).eq("id", u.relId).eq("business_id", businessId);
+        if (u.ev.event_type === "lead_unsubscribed") await admin.from("contacts").update({ status: "DO_NOT_CONTACT" } as never).eq("id", u.contactId);
+      } else if (u.action === "stop_followups") {
+        await admin.from("business_contact_relationships").update({ campaign_eligible: false } as never).eq("id", u.relId).eq("business_id", businessId);
       }
     }
 
