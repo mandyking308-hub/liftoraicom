@@ -56,10 +56,11 @@ export const founderAreas: FounderArea[] = [
     s("/internal-proposals", "Proposals (to contacts)", "Now a tab in Quote to cash.", true),
     s("/proposals", "Website proposal requests", "Now a tab in Quote to cash.", true),
   ]},
-  { key: "outreach", n: 4, title: "Email outreach", summary: "Three pages: Campaigns, Mailboxes and Replies.", sections: [
-    s("/outreach-command-centre", "Campaigns", "Live Smartlead results, quarterly rounds and the send calendar for every business."),
-    s("/gsm-outbound", "Mailboxes", "The 180 shared GSM mailboxes: health, warm-up and readiness."),
-    s("/conversations", "Replies", "Replies from every campaign, linked to the person and campaign."),
+  { key: "outreach", n: 4, title: "Email outreach", summary: "One page: campaigns running, replies, what's next, mailboxes and anything needing you.", sections: [
+    s("/email-outreach", "Email outreach", "Everything in one place; technical detail behind Details buttons."),
+    s("/outreach-command-centre", "Campaign details", "Opened from Details on Email outreach.", true),
+    s("/gsm-outbound", "Mailbox details", "Opened from Details on Email outreach.", true),
+    s("/conversations", "Reply details", "Opened from Details on Email outreach.", true),
     s("/portfolio-calendar", "Send calendar", "Now part of Campaigns.", true),
     s("/outreach", "Outreach data", "Hidden by founder choice (23 Nov 2026). Lead datasets, Apollo archive and CRM checks.", true),
     s("/ghat-outbound", "GHAT mailboxes", "Hidden by founder choice (23 Nov 2026). Charity estate, kept separate from commercial sending.", true),

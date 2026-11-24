@@ -7,6 +7,7 @@ export default function EmailOutreachTabs({ live }: { live?: { at: Date | null; 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
       <RelatedToolTabs tabs={[
+        { to: "/founder/email-outreach", label: "← Overview" },
         { to: "/founder/outreach-command-centre", label: "Campaigns" },
         { to: "/founder/gsm-outbound", label: "Mailboxes" },
         { to: "/founder/conversations", label: "Replies" },
