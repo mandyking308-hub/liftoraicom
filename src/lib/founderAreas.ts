@@ -57,7 +57,7 @@ export const founderAreas: FounderArea[] = [
     s("/proposals", "Website proposal requests", "Now a tab in Quote to cash.", true),
   ]},
   { key: "outreach", n: 4, title: "Email outreach", summary: "One page: campaigns running, replies, what's next, mailboxes and anything needing you.", sections: [
-    s("/email-outreach", "Email outreach", "Everything in one place; technical detail behind Details buttons."),
+    s("/email-outreach", "Email outreach", "Every business, campaign and send date in one dashboard."),
     s("/outreach-command-centre", "Campaign details", "Opened from Details on Email outreach.", true),
     s("/gsm-outbound", "Mailbox details", "Opened from Details on Email outreach.", true),
     s("/conversations", "Reply details", "Opened from Details on Email outreach.", true),
