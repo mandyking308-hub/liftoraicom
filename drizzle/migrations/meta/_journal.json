@@ -337,6 +337,13 @@
       "when": 1795525890799,
       "tag": "0047_smartlead_hourly_sync_all_campaigns",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1795526071774,
+      "tag": "0048_winnr_sync_schedule",
+      "breakpoints": true
     }
   ]
 }

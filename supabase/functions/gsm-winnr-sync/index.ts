@@ -63,7 +63,21 @@ Deno.serve(async (req) => {
   const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
   const TOKEN = Deno.env.get("WINNR_API_TOKEN");
 
+  const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
+
+  // Scheduled read-back: a locked per-job token allows ONLY the registry sync
+  // (Winnr reads -> Liftor mailbox/domain records). It can never warm up,
+  // provision or touch Smartlead.
+  const syncToken = req.headers.get("x-liftor-sync-token") ?? "";
+  let scheduled = false;
+  if (syncToken) {
+    const { data: sch } = await admin.from("winnr_sync_schedule").select("enabled").eq("token", syncToken).maybeSingle();
+    if (!sch?.enabled) return json({ ok: false, error: "sync_token_invalid" }, 401);
+    scheduled = true;
+  }
+
   const auth = req.headers.get("Authorization") ?? "";
+  if (!scheduled) {
   if (!auth.startsWith("Bearer ")) return json({ ok: false, error: "auth_missing" }, 401);
 
   const userClient = createClient(SUPABASE_URL, ANON_KEY, {
@@ -73,16 +87,17 @@ Deno.serve(async (req) => {
   const { data: u, error: ue } = await userClient.auth.getUser(auth.replace("Bearer ", ""));
   if (ue || !u?.user) return json({ ok: false, error: "auth_invalid" }, 401);
 
-  const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
   const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", u.user.id);
   const roleSet = new Set((roles ?? []).map((r: { role: string }) => r.role));
   if (!roleSet.has("founder") && !roleSet.has("admin")) return json({ ok: false, error: "forbidden" }, 403);
+  }
 
   let body: Record<string, unknown> = {};
   try {
     body = await req.json();
   } catch { /* empty body allowed */ }
 
+  if (scheduled) body = { action: "sync", estate: body.estate, apply: true, external_action_confirmation: SYNC_CONFIRMATION };
   const action = String(body.action ?? "test");
   // Which physically separate sending estate this run operates on. Estates are
   // never mixed: a GHAT mailbox can never be written or warmed as GSM.

@@ -90,9 +90,11 @@ export default function EmailOutreach() {
       try { await invokeSync({ action: "sync", business_id: t.business_id, campaign_id: String(t.provider_campaign_id) }); ok++; }
       catch { failed.push(String(t.provider_campaign_id)); }
     }
+    const w = await supabase.functions.invoke("gsm-winnr-sync", { body: { action: "sync", estate: "gsm", apply: true, external_action_confirmation: "SYNC GSM WINNR REGISTRY" } });
+    if (w.error || w.data?.ok === false) failed.push("Winnr mailbox health");
     await live.refresh();
     if (failed.length) toast.error(`Updated ${ok}; couldn't update campaign ${failed.join(", ")}`);
-    else toast.success(`All ${ok} campaigns updated from Smartlead`);
+    else toast.success(`All ${ok} campaigns and mailbox health updated`);
     setSyncingAll(false);
   };
 
