@@ -23,6 +23,7 @@ export default function PortfolioCalendar({ embedded = false }: { embedded?: boo
   const qc = useQueryClient();
   const { data } = useQuery({
     queryKey: ["portfolio-calendar"],
+    refetchInterval: 30_000,
     queryFn: async () => {
       const [biz, mb, bk, kp, cd, sp] = await Promise.all([
         db.from("businesses").select("id,name").is("archived_at", null).neq("portfolio_status", "legacy_prelaunch").order("name"),

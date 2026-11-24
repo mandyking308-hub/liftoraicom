@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
 import EmailOutreachTabs from "@/components/founder/EmailOutreachTabs";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import PortfolioCalendar from "@/pages/founder/PortfolioCalendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -86,7 +87,7 @@ export default function SmartleadCommandCentre() {
     setEvents((ev.data as Snap[]) ?? []);
     setSnap((s.data as Snap) ?? null); setLeads((l.data as Snap[]) ?? []); setRuns((r.data as Snap[]) ?? []);
   }, [sel]);
-  useEffect(() => { load(); }, [load]);
+  const updatedAt = useLiveRefresh(load);
 
   const syncNow = async () => {
     if (!sel) return;
@@ -163,7 +164,7 @@ export default function SmartleadCommandCentre() {
   return (
     <FounderLayout>
       <div className="min-w-0 max-w-full space-y-6 overflow-x-hidden p-4 md:p-6">
-        <EmailOutreachTabs />
+        <EmailOutreachTabs updatedAt={updatedAt} />
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Campaigns</h1>

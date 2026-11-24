@@ -2,6 +2,7 @@ import RelatedToolTabs from "@/components/founder/RelatedToolTabs";
 import { useCallback, useEffect, useState } from "react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import EmailOutreachTabs from "@/components/founder/EmailOutreachTabs";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -128,9 +129,7 @@ export default function GSMOutboundPage() {
     setLastSync(((s ?? [])[0] as SyncRun) ?? null);
   }, []);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const updatedAt = useLiveRefresh(load);
 
   const [canaryText, setCanaryText] = useState("");
 
@@ -184,7 +183,7 @@ export default function GSMOutboundPage() {
   return (
     <FounderLayout>
       <div className="space-y-6">
-        <EmailOutreachTabs />
+        <EmailOutreachTabs updatedAt={updatedAt} />
         <div>
           <h1 className="text-3xl font-semibold">Mailboxes</h1>
           <p className="text-muted-foreground">

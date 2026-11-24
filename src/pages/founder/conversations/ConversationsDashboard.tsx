@@ -1,7 +1,9 @@
+import { useCallback } from "react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
 import EmailOutreachTabs from "@/components/founder/EmailOutreachTabs";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import MultilingualIntelligencePanel from "@/components/founder/global/MultilingualIntelligencePanel";
 import MultiChannelInboxPanel from "@/components/founder/channels/MultiChannelInboxPanel";
 import HumanAccountManagerPanel from "@/components/founder/customer/HumanAccountManagerPanel";
@@ -102,12 +104,14 @@ const ConversationsDashboard = () => {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableLoad = useCallback(() => load(), []);
+  const updatedAt = useLiveRefresh(stableLoad);
 
   return (
     <FounderLayout>
       <div className="max-w-6xl space-y-6">
-        <EmailOutreachTabs />
+        <EmailOutreachTabs updatedAt={updatedAt} />
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold">Replies</h1>
