@@ -330,6 +330,13 @@
       "when": 1795446681407,
       "tag": "0046_communications_to_interaction_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1795525890799,
+      "tag": "0047_smartlead_hourly_sync_all_campaigns",
+      "breakpoints": true
     }
   ]
 }
