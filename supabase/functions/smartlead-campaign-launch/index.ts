@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { evaluateOutboundSendability } from "../_shared/outboundSendability.ts";
+import { selectSlotMailboxes } from "../_shared/mailboxSelection.ts";
 import { backoffMs, isRetryable, normEmail } from "../_shared/smartleadCampaignSync.ts";
 
 const corsHeaders = {
@@ -13,7 +14,6 @@ const json = (b: unknown, s = 200) =>
 const BASE = "https://server.smartlead.ai/api/v1";
 const LEAD_BATCH = 100;
 const MAX_LEADS_PER_CALL = 2000;
-const MAX_MAILBOXES = 20;
 
 class ProviderError extends Error {
   constructor(public status: number, public code: string) { super(code); }
@@ -213,13 +213,17 @@ Deno.serve(async (req) => {
         });
 
         step = "assign_mailboxes";
+        // Every warm, campaign-ready GSM mailbox with a fresh Winnr read that no other business holds in this slot.
+        const slotStart = criteria.start_date ? new Date(String(criteria.start_date)) : new Date();
+        const slotEnd = new Date(slotStart.getTime() + Math.max(emails.length, 1) * 7 * 86400000);
         const { data: boxes } = await admin.from("gsm_mailboxes")
-          .select("smartlead_email_account_id")
-          .eq("estate_classification", "gsm").eq("active", true).eq("retired", false)
-          .is("quarantined_reason", null).not("smartlead_email_account_id", "is", null)
-          .in("smtp_status", ["ok", "connected", "healthy"]).in("imap_status", ["ok", "connected", "healthy"])
-          .limit(MAX_MAILBOXES);
-        const accountIds = (boxes ?? []).map((b) => Number(b.smartlead_email_account_id)).filter((x) => Number.isFinite(x));
+          .select("id, smartlead_email_account_id, warmup_status, readiness_state, health_score, last_provider_check_at, quarantined_reason")
+          .eq("estate_classification", "gsm").eq("active", true).eq("retired", false).limit(1000);
+        const { data: bookings } = await admin.from("portfolio_send_bookings")
+          .select("mailbox_id, business_id, starts_at, ends_at")
+          .lt("starts_at", slotEnd.toISOString()).gt("ends_at", slotStart.toISOString()).limit(10000);
+        const picked = selectSlotMailboxes((boxes ?? []) as never, (bookings ?? []) as never, businessId, slotStart, slotEnd);
+        const accountIds = picked.map((b) => Number(b.smartlead_email_account_id)).filter((x) => Number.isFinite(x));
         if (accountIds.length === 0) throw new ProviderError(0, "no_healthy_mailboxes_available");
         await sl(`/campaigns/${newId}/email-accounts`, KEY, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email_account_ids: accountIds }) });
 

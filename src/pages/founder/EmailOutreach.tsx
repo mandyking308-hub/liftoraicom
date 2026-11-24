@@ -57,7 +57,7 @@ async function invokeLaunch(body: Record<string, unknown>) {
 }
 
 export default function EmailOutreach() {
-  const [d, setD] = useState<{ biz: Row[]; plans: Row[]; snaps: Row[]; drafts: Row[]; boxes: Row[]; replies: Row[]; books: Row[]; rel: Record<string, number> } | null>(null);
+  const [d, setD] = useState<{ biz: Row[]; plans: Row[]; snaps: Row[]; drafts: Row[]; boxes: Row[]; replies: Row[]; books: Row[]; usage: Row[]; rel: Record<string, number> } | null>(null);
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [detail, setDetail] = useState<Camp | null>(null);
   const [creating, setCreating] = useState(false);
@@ -114,13 +114,14 @@ export default function EmailOutreach() {
   const load = useCallback(async () => {
     const { data: biz } = await supabase.from("businesses").select("id, name").eq("portfolio_status", "active").order("name");
     const ids = (biz ?? []).map((b) => b.id);
-    const [plans, snaps, drafts, boxes, replies, books, ...counts] = await Promise.all([
+    const [plans, snaps, drafts, boxes, replies, books, usage, ...counts] = await Promise.all([
       supabase.from("campaign_recurrence_plans").select("*").eq("active", true).in("business_id", ids),
       supabase.from("smartlead_campaign_snapshots").select("*").in("business_id", ids),
       supabase.from("outreach_campaign_drafts").select("*").in("business_id", ids).eq("lead_criteria->>created_from", "email_outreach_dashboard").order("created_at", { ascending: false }),
-      supabase.from("gsm_mailboxes").select("email, smtp_status, imap_status, quarantined_reason").eq("estate_classification", "gsm").eq("active", true).eq("retired", false).limit(1000),
+      supabase.from("gsm_mailboxes").select("email, smtp_status, imap_status, quarantined_reason, warmup_status, readiness_state, health_score, last_provider_check_at").eq("estate_classification", "gsm").eq("active", true).eq("retired", false).limit(1000),
       supabase.from("smartlead_activity_events").select("id, business_id, provider_campaign_id, provider_lead_id, details, occurred_at").in("business_id", ids).ilike("event_type", "%repl%").order("occurred_at", { ascending: false }).limit(10),
       supabase.from("portfolio_send_bookings").select("business_id, campaign_label, sequence_step, recipients_planned").in("business_id", ids).eq("sequence_step", 1),
+      supabase.from("portfolio_send_bookings").select("business_id, mailbox_id, starts_at, ends_at, emails_planned").gte("ends_at", new Date().toISOString()).lte("starts_at", new Date(Date.now() + 120 * 86400000).toISOString()).limit(10000),
       ...ids.map((id) => supabase.from("business_contact_relationships").select("id", { count: "exact", head: true }).eq("business_id", id)),
     ]);
     // Attach the lead's email address to each reply so the list names real people.
@@ -134,7 +135,7 @@ export default function EmailOutreach() {
     setD({
       biz: biz ?? [], plans: plans.data ?? [], snaps: snaps.data ?? [], drafts: drafts.data ?? [], boxes: boxes.data ?? [],
       replies: replyRows.map((r) => ({ ...r, lead_email: emailByLead[r.provider_lead_id] ?? (r.details as any)?.lead_email ?? (r.details as any)?.email ?? null })),
-      books: books.data ?? [],
+      books: books.data ?? [], usage: usage.data ?? [],
       rel: Object.fromEntries(ids.map((id, i) => [id, (counts[i] as any).count ?? 0])),
     });
   }, []);
@@ -229,6 +230,9 @@ export default function EmailOutreach() {
             </CardContent>
           </Card>
         )}
+
+        {d && <MailboxHealthPanel boxes={d.boxes} />}
+        {d && <MailboxUsePanel usage={d.usage} biz={d.biz} total={d.boxes.length} />}
 
         {/* Businesses */}
         <div className="space-y-3">
@@ -536,5 +540,64 @@ function NewCampaignDialog({ open, onClose, businesses, onSaved }: { open: boole
         <DialogFooter><Button variant="outline" onClick={onClose}>Cancel</Button><Button disabled={!ok || saving} onClick={save}>{saving ? "Saving…" : "Save campaign"}</Button></DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function MailboxHealthPanel({ boxes }: { boxes: any[] }) {
+  const ready = boxes.filter((b) => b.readiness_state === "campaign_ready").length;
+  const warm = boxes.filter((b) => String(b.warmup_status).toLowerCase() === "warm").length;
+  const scores = boxes.map((b) => Number(b.health_score)).filter((x) => Number.isFinite(x) && x > 0);
+  const avg = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : null;
+  const low = scores.length ? Math.min(...scores) : null;
+  const last = boxes.map((b) => b.last_provider_check_at).filter(Boolean).sort().pop();
+  const stale = !last || Date.now() - new Date(last).getTime() > 26 * 3600000;
+  const weak = boxes.filter((b) => (Number(b.health_score) || 0) < 90 || b.readiness_state !== "campaign_ready" || b.quarantined_reason);
+  const tile = (label: string, value: string, tone: string) => (
+    <div className={`tone-${tone} rounded-lg border border-[hsl(var(--tone)/0.4)] bg-[hsl(var(--tone)/0.1)] p-3 text-[hsl(var(--tone))]`}><div className="text-xs font-medium opacity-80">{label}</div><div className="text-2xl font-bold">{value}</div></div>
+  );
+  return (
+    <Card>
+      <CardHeader className="pb-2"><CardTitle className="flex flex-wrap items-center justify-between gap-2 text-lg"><span className="flex items-center gap-2"><Server className="h-5 w-5 text-primary" />Mailbox health (Winnr)</span>
+        <Badge variant={stale ? "destructive" : "secondary"}>{last ? `Updated ${new Date(last).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}` : "Never updated"}</Badge></CardTitle></CardHeader>
+      <CardContent className="space-y-3">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {tile("Ready to send", `${ready} / ${boxes.length}`, ready === boxes.length ? "green" : "amber")}
+          {tile("Warmed up", `${warm} / ${boxes.length}`, warm === boxes.length ? "green" : "amber")}
+          {tile("Average health", avg == null ? "—" : avg.toFixed(1), "blue")}
+          {tile("Lowest health", low == null ? "—" : String(low), low != null && low < 90 ? "red" : "green")}
+        </div>
+        <Progress value={boxes.length ? (ready / boxes.length) * 100 : 0} />
+        {weak.length > 0 && <p className="text-sm text-destructive">Needs a look: {weak.slice(0, 5).map((b) => b.email).join(", ")}{weak.length > 5 ? ` and ${weak.length - 5} more` : ""}</p>}
+      </CardContent>
+    </Card>
+  );
+}
+
+function MailboxUsePanel({ usage, biz, total }: { usage: any[]; biz: any[]; total: number }) {
+  const weeks = Array.from({ length: 16 }, (_, i) => { const s = new Date(); s.setHours(0, 0, 0, 0); s.setDate(s.getDate() - ((s.getDay() + 6) % 7) + i * 7); return s; });
+  const names = Object.fromEntries(biz.map((b) => [b.id, b.name]));
+  const ids = [...new Set(usage.map((u) => u.business_id))];
+  const tones = ["blue", "green", "violet", "teal"];
+  const cell = (id: string, w: Date) => {
+    const e = new Date(w.getTime() + 7 * 86400000);
+    return new Set(usage.filter((u) => u.business_id === id && new Date(u.starts_at) < e && new Date(u.ends_at) > w).map((u) => u.mailbox_id)).size;
+  };
+  return (
+    <Card>
+      <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-lg"><Mail className="h-5 w-5 text-primary" />Who is using the mailboxes</CardTitle>
+        <p className="text-sm text-muted-foreground">Each business can use many mailboxes at once. Two businesses never share a mailbox at the same time.</p></CardHeader>
+      <CardContent className="overflow-x-auto">
+        {ids.length === 0 ? <p className="text-sm text-muted-foreground">No mailbox bookings in the next 16 weeks — all {total} are free.</p> : (
+          <table className="w-full min-w-[640px] text-xs">
+            <thead><tr><th className="p-1 text-left">Business</th>{weeks.map((w) => <th key={+w} className="p-1 font-normal text-muted-foreground">{w.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</th>)}</tr></thead>
+            <tbody>{ids.map((id, i) => (
+              <tr key={id}><td className="p-1 font-medium">{names[id] ?? "Other business"}</td>{weeks.map((w) => { const c = cell(id, w); return (
+                <td key={+w} className="p-1 text-center"><div className={`rounded py-1 ${c ? `tone-${tones[i % tones.length]} bg-[hsl(var(--tone))] text-primary-foreground` : "bg-muted text-muted-foreground"}`} title={`${c} of ${total} mailboxes`}>{c || "–"}</div></td>); })}</tr>
+            ))}
+              <tr><td className="p-1 text-muted-foreground">Free</td>{weeks.map((w) => { const used = ids.reduce((a, id) => a + cell(id, w), 0); return <td key={+w} className="p-1 text-center text-muted-foreground">{total - used}</td>; })}</tr>
+            </tbody>
+          </table>)}
+      </CardContent>
+    </Card>
   );
 }
