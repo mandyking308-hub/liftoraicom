@@ -163,12 +163,39 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
     } catch { webhooks = null; }
 
     const leads: Array<Record<string, unknown>> = [];
-    for (let off = 0; off < 2000; off += 100) {
+    for (let off = 0; off < 50000; off += 100) {
       const page = (await sl(`/campaigns/${campaignId}/leads?offset=${off}&limit=100`, KEY)) as { data?: unknown[] };
       const rows = (page.data ?? []) as Array<Record<string, unknown>>;
       leads.push(...rows);
       if (rows.length < 100) break;
     }
+
+    // Per-person send statistics (read-only). Gives emails sent, current step,
+    // opens/replies/bounces for every lead without per-lead history calls.
+    type Stat = { sent: number; step: number | null; first: string | null; last: string | null; opens: number; clicks: number; replied: boolean; lastReply: string | null; bounced: boolean; unsub: boolean };
+    const stats = new Map<string, Stat>();
+    let statsOk = false;
+    try {
+      for (let off = 0; off < 200000; off += 500) {
+        const pg = (await sl(`/campaigns/${campaignId}/statistics?offset=${off}&limit=500`, KEY)) as { data?: Array<Record<string, unknown>> };
+        const rows = pg.data ?? [];
+        for (const r of rows) {
+          const e = normEmail(r.lead_email); if (!e) continue;
+          const s = stats.get(e) ?? { sent: 0, step: null, first: null, last: null, opens: 0, clicks: 0, replied: false, lastReply: null, bounced: false, unsub: false };
+          const t = r.sent_time ? String(r.sent_time) : null;
+          if (t) { s.sent++; if (!s.first || t < s.first) s.first = t; if (!s.last || t > s.last) s.last = t; }
+          const seq = r.sequence_number != null ? Number(r.sequence_number) : null;
+          if (t && seq != null && (s.step == null || seq > s.step)) s.step = seq;
+          s.opens += Number(r.open_count ?? 0) || 0; s.clicks += Number(r.click_count ?? 0) || 0;
+          if (r.reply_time) { s.replied = true; const rt = String(r.reply_time); if (!s.lastReply || rt > s.lastReply) s.lastReply = rt; }
+          if (r.is_bounced === true) s.bounced = true;
+          if (r.is_unsubscribed === true) s.unsub = true;
+          stats.set(e, s);
+        }
+        if (rows.length < 500) break;
+      }
+      statsOk = true;
+    } catch { statsOk = false; }
 
     // Map provider leads to Liftor contacts only via this business's relationships + exact normalised email.
     // Page through every relationship: a single read stops at 1,000 rows, which left later contacts unmatched.
@@ -228,6 +255,13 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
         is_unsubscribed: lead.is_unsubscribed === true,
         // In light mode, leads without a history fetch keep their previous summary.
         ...(fetchHistory ? sum : {}),
+        ...(fetchHistory && history.length ? { sending_mailbox: history.filter((m) => (m.type ?? "").toUpperCase() === "SENT").map((m) => m.from).filter(Boolean).pop() ?? null } : {}),
+        ...(statsOk ? (() => { const s = stats.get(email ?? ""); return s ? {
+          sent_count: s.sent, current_step: s.step, first_sent_at: s.first, last_sent_at: s.last,
+          open_count: s.sent ? s.opens : null, click_count: s.sent ? s.clicks : null, is_bounced: s.bounced,
+          ...(fetchHistory ? {} : { last_reply_at: s.lastReply }),
+        } : { sent_count: 0, current_step: null }; })() : {}),
+        reconciled_at: nowIso(), removed_from_provider_at: null,
         updated_at: nowIso(),
       });
       for (const msg of history) {
@@ -254,10 +288,39 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
       }
     }
 
-    const CHUNK = 500;
-    for (let i = 0; i < snapRows.length; i += CHUNK) {
-      await admin.from("smartlead_lead_snapshots").upsert(snapRows.slice(i, i + CHUNK));
+    // Reconcile: anyone Liftor lists for this campaign that Smartlead no longer lists
+    // is marked removed (kept for history, never deleted).
+    const seenIds = new Set(snapRows.map((r) => String(r.provider_lead_id)));
+    const existing: string[] = [];
+    for (let from = 0; from < 200000; from += 1000) {
+      const { data: pg } = await admin.from("smartlead_lead_snapshots").select("provider_lead_id")
+        .eq("business_id", businessId).eq("provider_campaign_id", campaignId).is("removed_from_provider_at", null).order("provider_lead_id").range(from, from + 999);
+      existing.push(...((pg ?? []) as Array<{ provider_lead_id: string }>).map((r) => String(r.provider_lead_id)));
+      if ((pg ?? []).length < 1000) break;
     }
+    const CHUNK = 500;
+    // Rows carry different fields (with/without history), and a mixed bulk upsert
+    // nulls the missing ones. Write each field-shape group separately.
+    const groups = new Map<string, Record<string, unknown>[]>();
+    for (const r of snapRows) { const k = Object.keys(r).sort().join(","); (groups.get(k) ?? groups.set(k, []).get(k)!).push(r); }
+    for (const g of groups.values()) for (let i = 0; i < g.length; i += CHUNK) {
+      const { error: snapErr } = await admin.from("smartlead_lead_snapshots").upsert(g.slice(i, i + CHUNK));
+      if (snapErr) throw new ProviderError(0, `snapshot_write_failed:${snapErr.message}`.slice(0, 200));
+    }
+    const existingSet = new Set(existing);
+    // Never treat an empty read as "everyone left".
+    const gone = leads.length === 0 ? [] : existing.filter((id) => !seenIds.has(id));
+    for (let i = 0; i < gone.length; i += 200) {
+      await admin.from("smartlead_lead_snapshots").update({ removed_from_provider_at: nowIso() } as never)
+        .eq("business_id", businessId).eq("provider_campaign_id", campaignId).in("provider_lead_id", gone.slice(i, i + 200));
+    }
+    const unmatched = snapRows.filter((r) => !r.liftor_contact_id).length;
+    const reconciliation = {
+      smartlead_people: leads.length, liftor_people_before: existing.length,
+      newly_recorded: snapRows.filter((r) => !existingSet.has(String(r.provider_lead_id))).length,
+      no_longer_in_smartlead: gone.length, not_matched_to_crm: unmatched, per_person_stats: statsOk,
+      emails_sent_total: statsOk ? [...stats.values()].reduce((n, s) => n + s.sent, 0) : null,
+    };
     for (let i = 0; i < msgRows.length; i += CHUNK) {
       const { data: ins } = await admin.from("smartlead_thread_messages")
         .upsert(msgRows.slice(i, i + CHUNK), { onConflict: "business_id,provider_campaign_id,dedupe_key", ignoreDuplicates: true }).select("id");
@@ -338,9 +401,9 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
     });
     await admin.from("smartlead_sync_runs").update({
       status: "succeeded", finished_at: nowIso(), latency_ms: Date.now() - started,
-      leads_seen: leads.length, messages_seen: messagesSeen, new_messages: newMessages,
-    }).eq("id", run?.id);
-    return json({ ok: true, leads: leads.length, messages: messagesSeen, new_messages: newMessages, new_events: newEvents, campaign_status: campaign.status });
+      leads_seen: leads.length, messages_seen: messagesSeen, new_messages: newMessages, reconciliation,
+    } as never).eq("id", run?.id);
+    return json({ ok: true, leads: leads.length, messages: messagesSeen, new_messages: newMessages, new_events: newEvents, campaign_status: campaign.status, reconciliation });
   } catch (e) {
     const pe = e instanceof ProviderError ? e : new ProviderError(0, "sync_failed");
     await admin.from("smartlead_sync_runs").update({ status: "failed", finished_at: nowIso(), latency_ms: Date.now() - started, error_code: pe.code.slice(0, 200), http_status: pe.status }).eq("id", run?.id);

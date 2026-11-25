@@ -16,7 +16,7 @@ import SpreadsheetImportDialog from "@/components/founder/contacts/SpreadsheetIm
 import AddToCampaignDialog from "@/components/founder/contacts/AddToCampaignDialog";
 import { CRM_FIELDS } from "@/lib/spreadsheetImport";
 
-type Person = { id: string; email: string; name: string | null; company: string | null; role: string | null; country: string | null; tags: string[] | null; email_verified_status: string | null; last_contacted_at: string | null; blocked: boolean; campaigns: string[] };
+type Person = { id: string; email: string; name: string | null; company: string | null; role: string | null; country: string | null; tags: string[] | null; email_verified_status: string | null; last_contacted_at: string | null; blocked: boolean; campaigns: string[]; hard_bounced?: boolean | null; unsubscribed_at?: string | null; do_not_contact_at?: string | null; is_globally_suppressed?: boolean | null };
 type Summary = { total: number; usable: number; in_campaign: number; types: Record<string, number>; countries: string[] };
 const PAGE = 50;
 const ALL = "__all";
@@ -34,7 +34,7 @@ export default function CustomerCRM() {
   const [search, setSearch] = useState("");
   const [type, setType] = useState(ALL);
   const [country, setCountry] = useState(ALL);
-  const [campaignFilter, setCampaignFilter] = useState<"any" | "not_in_any" | "not_in" | "in">(params.get("campaign") ? "not_in" : "any");
+  const [campaignFilter, setCampaignFilter] = useState<"any" | "in_any" | "not_in_any" | "not_in" | "in">(params.get("campaign") ? "not_in" : "any");
   const [campaignId, setCampaignId] = useState<string>(params.get("campaign") ?? "");
   const [usableOnly, setUsableOnly] = useState(false);
   const [quiet90, setQuiet90] = useState(false);
@@ -50,7 +50,7 @@ export default function CustomerCRM() {
     p_type: type === ALL ? null : type,
     p_country: country === ALL ? null : country,
     p_search: search.trim() || null,
-    p_campaign: campaignFilter === "in" || campaignFilter === "not_in" ? campaignId || null : null,
+    p_campaign: campaignFilter === "in_any" ? "*" : campaignFilter === "in" || campaignFilter === "not_in" ? campaignId || null : null,
     p_not_in_campaign: campaignFilter === "not_in" || campaignFilter === "not_in_any",
     p_not_contacted_days: quiet90 ? 90 : null,
     p_usable_only: usableOnly,
@@ -87,6 +87,17 @@ export default function CustomerCRM() {
 
   const types = Array.from(new Set([...DEFAULT_TYPES, ...Object.keys(summary?.types ?? {})])).sort();
   const notIn = summary ? Math.max(0, summary.total - summary.in_campaign) : null;
+  const plain = type === ALL && country === ALL && !search.trim() && !quiet90;
+  const kpi = !plain ? null
+    : campaignFilter === "any" && !usableOnly ? "total"
+    : campaignFilter === "any" && usableOnly ? "usable"
+    : campaignFilter === "in_any" && !usableOnly ? "in"
+    : campaignFilter === "not_in_any" && !usableOnly ? "not_in" : null;
+  function showKpi(k: "total" | "usable" | "in" | "not_in") {
+    setType(ALL); setCountry(ALL); setSearch(""); setQuiet90(false);
+    setUsableOnly(k === "usable");
+    setCampaignFilter(k === "in" ? "in_any" : k === "not_in" ? "not_in_any" : "any");
+  }
   const allOnPage = rows.length > 0 && rows.every((r) => selected.has(r.id));
 
   return (
@@ -105,10 +116,10 @@ export default function CustomerCRM() {
         </div>
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <Kpi tone="blue" label="Total people" value={fmt(summary?.total)} />
-          <Kpi tone="green" label="Usable (checked email)" value={fmt(summary?.usable)} />
-          <Kpi tone="violet" label="In a campaign" value={fmt(summary?.in_campaign)} />
-          <Kpi tone="amber" label="Not yet in a campaign" value={fmt(notIn)} />
+          <Kpi tone="blue" label="Total people" value={fmt(summary?.total)} active={kpi === "total"} onClick={() => showKpi("total")} />
+          <Kpi tone="green" label="Usable (checked email)" value={fmt(summary?.usable)} active={kpi === "usable"} onClick={() => showKpi("usable")} />
+          <Kpi tone="violet" label="In a campaign" value={fmt(summary?.in_campaign)} active={kpi === "in"} onClick={() => showKpi("in")} />
+          <Kpi tone="amber" label="Not yet in a campaign" value={fmt(notIn)} active={kpi === "not_in"} onClick={() => showKpi("not_in")} />
         </div>
 
         {summary && Object.keys(summary.types).length > 0 && (
@@ -129,6 +140,7 @@ export default function CustomerCRM() {
             <Select value={campaignFilter} onValueChange={(v) => setCampaignFilter(v as never)}><SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="any">Any campaign status</SelectItem>
+                <SelectItem value="in_any">In any campaign</SelectItem>
                 <SelectItem value="not_in_any">Not in any campaign</SelectItem>
                 <SelectItem value="not_in">Not in a chosen campaign</SelectItem>
                 <SelectItem value="in">In a chosen campaign</SelectItem>
@@ -226,10 +238,29 @@ export default function CustomerCRM() {
   );
 }
 
-function Kpi({ tone, label, value }: { tone: string; label: string; value: string }) {
-  return <div className={`tone-${tone} rounded-lg border border-[hsl(var(--tone)/0.4)] bg-[hsl(var(--tone)/0.1)] p-4 text-[hsl(var(--tone))]`}><div className="text-xs font-medium opacity-80">{label}</div><div className="text-3xl font-bold tabular-nums">{value}</div></div>;
+function Kpi({ tone, label, value, active, onClick }: { tone: string; label: string; value: string; active?: boolean; onClick?: () => void }) {
+  return <button type="button" onClick={onClick} aria-pressed={!!active} className={`tone-${tone} rounded-lg border bg-[hsl(var(--tone)/0.1)] p-4 text-left text-[hsl(var(--tone))] transition hover:bg-[hsl(var(--tone)/0.18)] ${active ? "border-[hsl(var(--tone))] ring-2 ring-[hsl(var(--tone)/0.5)]" : "border-[hsl(var(--tone)/0.4)]"}`}><div className="text-xs font-medium opacity-80">{label}</div><div className="text-3xl font-bold tabular-nums">{value}</div><div className="mt-1 text-xs opacity-70">{active ? "Showing these people" : "Click to show"}</div></button>;
 }
 
+type CampRow = { id: string; name: string; business: string; added: string | null; mailbox: string | null; status: string | null; step: number | null; sent: number; opened: boolean; replied: boolean; bounced: boolean; unsub: boolean; lastSent: string | null; checked: string | null };
+function statusLabel(c: CampRow) {
+  if (c.unsub) return "Unsubscribed";
+  if (c.bounced) return "Bounced — stopped";
+  if (c.replied) return "Replied — stopped";
+  const s = (c.status ?? "").toUpperCase();
+  if (s === "COMPLETED") return (c.step ?? 0) >= 4 ? "All emails sent" : `Finished early (after email ${c.step ?? c.sent})`;
+  if (s === "PAUSED") return "Paused";
+  if (s === "STOPPED" || s === "BLOCKED") return "Stopped";
+  return c.sent ? "In progress" : "Waiting for first email";
+}
+function notInReason(p: Pick<Person, "email_verified_status" | "hard_bounced" | "unsubscribed_at" | "do_not_contact_at" | "is_globally_suppressed">) {
+  if (p.unsubscribed_at) return "Unsubscribed.";
+  if (p.hard_bounced) return "Email bounced.";
+  if (p.do_not_contact_at || p.is_globally_suppressed) return "Marked do not contact.";
+  if (p.email_verified_status === "catch_all_risky" || p.email_verified_status === "catch_all") return "Catch-all address — held back.";
+  if (p.email_verified_status !== "verified") return "Email not verified.";
+  return "Never added to a campaign.";
+}
 type Ev = { at: string; what: string; detail?: string | null };
 const EVENT_LABEL: Record<string, string> = { sent: "Email sent", email_sent: "Email sent", open: "Opened", email_open: "Opened", opened: "Opened", click: "Clicked a link", reply: "Replied", replied: "Replied", email_reply: "Replied", bounce: "Bounced", bounced: "Bounced", unsubscribe: "Unsubscribed", unsubscribed: "Unsubscribed", added_to_campaign: "Added to campaign" };
 const label = (t?: string | null) => {
@@ -240,7 +271,7 @@ const label = (t?: string | null) => {
 
 function PersonSheet({ person, onClose }: { person: Person | null; onClose: () => void }) {
   const [events, setEvents] = useState<Ev[] | null>(null);
-  const [inCamps, setInCamps] = useState<{ id: string; status: string | null; sent: number; replies: number }[]>([]);
+  const [inCamps, setInCamps] = useState<CampRow[]>([]);
   useEffect(() => {
     if (!person) return;
     setEvents(null);
@@ -252,7 +283,16 @@ function PersonSheet({ person, onClose }: { person: Person | null; onClose: () =
         supabase.from("email_events").select("event_type, timestamp").eq("contact_id", person.id).limit(300),
         supabase.from("communications").select("direction, timestamp, message").eq("contact_id", person.id).limit(300),
       ]);
-      const { data: leads } = await supabase.from("smartlead_lead_snapshots").select("provider_lead_id, provider_campaign_id, lead_status, sent_count, reply_count").ilike("email", person.email).limit(20);
+      const { data: leadsAll } = await supabase.from("smartlead_lead_snapshots").select("business_id, provider_lead_id, provider_campaign_id, lead_status, sent_count, reply_count, open_count, current_step, sending_mailbox, is_bounced, is_unsubscribed, first_sent_at, last_sent_at, last_reply_at, reconciled_at, removed_from_provider_at").ilike("email", person.email).limit(20);
+      const leads = (leadsAll ?? []).filter((l: any) => !l.removed_from_provider_at);
+      const campIds = leads.map((l: any) => String(l.provider_campaign_id));
+      const [maps, csnap, biz] = await Promise.all([
+        campIds.length ? supabase.from("outbound_provider_campaign_mappings").select("provider_campaign_id, provider_campaign_name").in("provider_campaign_id", campIds) : Promise.resolve({ data: [] as any[] }),
+        campIds.length ? supabase.from("smartlead_campaign_snapshots").select("provider_campaign_id, name, status").in("provider_campaign_id", campIds) : Promise.resolve({ data: [] as any[] }),
+        leads.length ? supabase.from("businesses").select("id, name").in("id", leads.map((l: any) => l.business_id)) : Promise.resolve({ data: [] as any[] }),
+      ]);
+      const addedAt = new Map<string, string>();
+      for (const r of (led.data ?? []) as any[]) if (r.provider_campaign_id && /added|push/i.test(r.interaction_type ?? "")) { const k = String(r.provider_campaign_id); if (!addedAt.has(k) || r.occurred_at < addedAt.get(k)!) addedAt.set(k, r.occurred_at); }
       const leadIds = (leads ?? []).map((l: any) => l.provider_lead_id).filter(Boolean);
       const byLead = leadIds.length
         ? await supabase.from("smartlead_activity_events").select("event_type, occurred_at, provider_campaign_id").in("provider_lead_id", leadIds).order("occurred_at", { ascending: false }).limit(300)
@@ -269,7 +309,15 @@ function PersonSheet({ person, onClose }: { person: Person | null; onClose: () =
       for (const r of (cm.data ?? []) as any[]) push(r.direction === "inbound" ? "reply" : "sent", r.timestamp, String(r.message ?? "").slice(0, 80));
       out.sort((a, b) => (b.at ?? "").localeCompare(a.at ?? ""));
       setEvents(out);
-      setInCamps(((leads ?? []) as any[]).map((l) => ({ id: String(l.provider_campaign_id), status: l.lead_status, sent: l.sent_count ?? 0, replies: l.reply_count ?? 0 })));
+      setInCamps((leads as any[]).map((l) => {
+        const id = String(l.provider_campaign_id);
+        const cs = ((csnap.data ?? []) as any[]).find((c) => String(c.provider_campaign_id) === id);
+        const m = ((maps.data ?? []) as any[]).find((c) => String(c.provider_campaign_id) === id);
+        return { id, name: cs?.name ?? m?.provider_campaign_name ?? `Campaign ${id}`, business: ((biz.data ?? []) as any[]).find((b) => b.id === l.business_id)?.name ?? "—",
+          added: addedAt.get(id) ?? null, mailbox: l.sending_mailbox, status: l.lead_status, step: l.current_step, sent: l.sent_count ?? 0,
+          opened: (l.open_count ?? 0) > 0, replied: (l.reply_count ?? 0) > 0 || !!l.last_reply_at, bounced: !!l.is_bounced, unsub: !!l.is_unsubscribed,
+          lastSent: l.last_sent_at, checked: l.reconciled_at };
+      }));
     })();
   }, [person]);
   return (
@@ -282,10 +330,35 @@ function PersonSheet({ person, onClose }: { person: Person | null; onClose: () =
             <div className="text-muted-foreground">{[person.role, person.company, person.country].filter(Boolean).join(" · ")}</div>
             {person.blocked && <Badge variant="destructive">Do not contact</Badge>}
           </div>
-          {inCamps.length > 0 && (<>
-            <h3 className="mt-6 mb-2 font-semibold">Campaigns</h3>
-            <ul className="space-y-1 text-sm">{inCamps.map((c) => <li key={c.id}>Campaign {c.id}: {c.sent} email{c.sent === 1 ? "" : "s"} sent, {c.replies} repl{c.replies === 1 ? "y" : "ies"}{c.sent === 0 ? " — waiting for first email" : ""}</li>)}</ul>
-          </>)}
+          <h3 className="mt-6 mb-2 font-semibold">Campaigns</h3>
+          {events === null ? <p className="text-sm text-muted-foreground">Loading…</p> : inCamps.length === 0 ? (
+            <div className="tone-amber rounded-lg border border-[hsl(var(--tone)/0.4)] bg-[hsl(var(--tone)/0.08)] p-3 text-sm">
+              <div className="font-semibold text-[hsl(var(--tone))]">Not in campaign</div>
+              <div className="text-muted-foreground">{notInReason(person)}</div>
+            </div>
+          ) : (
+            <div className="space-y-3">{inCamps.map((c) => (
+              <div key={c.id} className="tone-violet rounded-lg border border-[hsl(var(--tone)/0.4)] p-3 text-sm">
+                <div className="flex items-center justify-between gap-2"><div className="font-semibold">{c.name}</div><Badge variant="secondary">In campaign</Badge></div>
+                <div className="mb-2 text-xs text-muted-foreground">{c.business}</div>
+                <dl className="grid grid-cols-2 gap-x-3 gap-y-1">
+                  <dt className="text-muted-foreground">Added</dt><dd>{day(c.added)}</dd>
+                  <dt className="text-muted-foreground">Status</dt><dd>{statusLabel(c)}</dd>
+                  <dt className="text-muted-foreground">On email</dt><dd>{c.step ? `${c.step} of 4` : c.sent ? "—" : "Not started"}</dd>
+                  <dt className="text-muted-foreground">Emails sent</dt><dd className="tabular-nums">{c.sent}</dd>
+                  <dt className="text-muted-foreground">Last sent</dt><dd>{day(c.lastSent)}</dd>
+                  <dt className="text-muted-foreground">Sending mailbox</dt><dd className="break-all">{c.mailbox ?? "Not reported yet"}</dd>
+                  <dt className="text-muted-foreground">Next email</dt><dd>Not provided by Smartlead</dd>
+                </dl>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  <Badge variant={c.opened ? "default" : "outline"}>{c.opened ? "Opened" : "Not opened"}</Badge>
+                  <Badge variant={c.replied ? "default" : "outline"}>{c.replied ? "Replied" : "No reply"}</Badge>
+                  {c.bounced && <Badge variant="destructive">Bounced</Badge>}
+                  {c.unsub && <Badge variant="destructive">Unsubscribed</Badge>}
+                </div>
+                <div className="mt-2 text-xs text-muted-foreground">Checked against Smartlead {c.checked ? new Date(c.checked).toLocaleString("en-GB") : "—"}</div>
+              </div>))}</div>
+          )}
           <h3 className="mt-6 mb-2 font-semibold">Journey</h3>
           {events === null ? <p className="text-sm text-muted-foreground">Loading…</p> : events.length === 0 ? <p className="text-sm text-muted-foreground">No contact with this person yet.</p> : (
             <ol className="space-y-3 border-l pl-4">

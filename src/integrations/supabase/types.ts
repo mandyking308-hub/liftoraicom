@@ -57036,9 +57036,11 @@ export type Database = {
           campaign_lead_map_id: string | null
           click_count: number | null
           company_name: string | null
+          current_step: number | null
           email: string | null
           first_name: string | null
           first_sent_at: string | null
+          is_bounced: boolean | null
           is_unsubscribed: boolean
           last_event_at: string | null
           last_name: string | null
@@ -57051,7 +57053,10 @@ export type Database = {
           open_count: number | null
           provider_campaign_id: string
           provider_lead_id: string
+          reconciled_at: string | null
+          removed_from_provider_at: string | null
           reply_count: number
+          sending_mailbox: string | null
           sent_count: number
           updated_at: string
         }
@@ -57060,9 +57065,11 @@ export type Database = {
           campaign_lead_map_id?: string | null
           click_count?: number | null
           company_name?: string | null
+          current_step?: number | null
           email?: string | null
           first_name?: string | null
           first_sent_at?: string | null
+          is_bounced?: boolean | null
           is_unsubscribed?: boolean
           last_event_at?: string | null
           last_name?: string | null
@@ -57075,7 +57082,10 @@ export type Database = {
           open_count?: number | null
           provider_campaign_id: string
           provider_lead_id: string
+          reconciled_at?: string | null
+          removed_from_provider_at?: string | null
           reply_count?: number
+          sending_mailbox?: string | null
           sent_count?: number
           updated_at?: string
         }
@@ -57084,9 +57094,11 @@ export type Database = {
           campaign_lead_map_id?: string | null
           click_count?: number | null
           company_name?: string | null
+          current_step?: number | null
           email?: string | null
           first_name?: string | null
           first_sent_at?: string | null
+          is_bounced?: boolean | null
           is_unsubscribed?: boolean
           last_event_at?: string | null
           last_name?: string | null
@@ -57099,7 +57111,10 @@ export type Database = {
           open_count?: number | null
           provider_campaign_id?: string
           provider_lead_id?: string
+          reconciled_at?: string | null
+          removed_from_provider_at?: string | null
           reply_count?: number
+          sending_mailbox?: string | null
           sent_count?: number
           updated_at?: string
         }
@@ -57227,6 +57242,7 @@ export type Database = {
           messages_seen: number | null
           new_messages: number | null
           provider_campaign_id: string
+          reconciliation: Json | null
           started_at: string
           status: string
           trigger: string
@@ -57245,6 +57261,7 @@ export type Database = {
           messages_seen?: number | null
           new_messages?: number | null
           provider_campaign_id: string
+          reconciliation?: Json | null
           started_at?: string
           status?: string
           trigger?: string
@@ -57263,6 +57280,7 @@ export type Database = {
           messages_seen?: number | null
           new_messages?: number | null
           provider_campaign_id?: string
+          reconciliation?: Json | null
           started_at?: string
           status?: string
           trigger?: string
