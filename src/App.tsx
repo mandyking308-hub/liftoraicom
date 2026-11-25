@@ -838,6 +838,8 @@ import FounderLegalConsole from "./pages/founder/FounderLegalConsole";
 import ComplianceDashboard from "./pages/founder/compliance/ComplianceDashboard";
 import ComplianceEvents from "./pages/founder/compliance/ComplianceEvents";
 import ComplianceRules from "./pages/founder/compliance/ComplianceRules";
+import CustomerCRM from "./pages/founder/CustomerCRM";
+import PRMarketingContacts from "./pages/founder/PRMarketingContacts";
 import CRMDashboard from "./pages/founder/CRMDashboard";
 import BillionaireAccessResearch from "./pages/founder/BillionaireAccessResearch";
 import PriorityDashboard from "./pages/founder/priority/PriorityDashboard";
@@ -1749,7 +1751,9 @@ const App = () => (
             <Route path="/founder/compliance" element={<FounderRoute><ComplianceDashboard /></FounderRoute>} />
             <Route path="/founder/compliance/events" element={<FounderRoute><ComplianceEvents /></FounderRoute>} />
             <Route path="/founder/compliance/rules" element={<FounderRoute><ComplianceRules /></FounderRoute>} />
-            <Route path="/founder/crm" element={<FounderRoute><CRMDashboard /></FounderRoute>} />
+            <Route path="/founder/crm" element={<FounderRoute><CustomerCRM /></FounderRoute>} />
+            <Route path="/founder/crm/details" element={<FounderRoute><CRMDashboard /></FounderRoute>} />
+            <Route path="/founder/pr-marketing" element={<FounderRoute><PRMarketingContacts /></FounderRoute>} />
             <Route path="/founder/crm/billionaire-access" element={<FounderRoute><BillionaireAccessResearch /></FounderRoute>} />
             <Route path="/founder/crm/contacts" element={<FounderRoute><CRMContacts /></FounderRoute>} />
             <Route path="/founder/crm/contacts/:id" element={<FounderRoute><CRMContactDetail /></FounderRoute>} />

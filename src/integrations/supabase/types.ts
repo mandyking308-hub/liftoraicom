@@ -50161,6 +50161,104 @@ export type Database = {
           },
         ]
       }
+      pr_media_contacts: {
+        Row: {
+          category: string | null
+          continent: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string | null
+          notes: string | null
+          organisation: string | null
+          phone: string | null
+          role: string | null
+          source: string | null
+          tags: string[]
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          category?: string | null
+          continent?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string | null
+          notes?: string | null
+          organisation?: string | null
+          phone?: string | null
+          role?: string | null
+          source?: string | null
+          tags?: string[]
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          category?: string | null
+          continent?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string | null
+          notes?: string | null
+          organisation?: string | null
+          phone?: string | null
+          role?: string | null
+          source?: string | null
+          tags?: string[]
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      pr_media_interactions: {
+        Row: {
+          channel: string
+          created_at: string
+          created_by: string | null
+          direction: string
+          id: string
+          occurred_at: string
+          pr_contact_id: string
+          subject: string | null
+          summary: string | null
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          direction?: string
+          id?: string
+          occurred_at?: string
+          pr_contact_id: string
+          subject?: string | null
+          summary?: string | null
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          direction?: string
+          id?: string
+          occurred_at?: string
+          pr_contact_id?: string
+          subject?: string | null
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pr_media_interactions_pr_contact_id_fkey"
+            columns: ["pr_contact_id"]
+            isOneToOne: false
+            referencedRelation: "pr_media_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pr_risk_events: {
         Row: {
           created_at: string
@@ -75569,6 +75667,10 @@ export type Database = {
       compute_intent_score: { Args: { _contact_id: string }; Returns: number }
       compute_system_health: { Args: never; Returns: undefined }
       country_to_timezone: { Args: { _country: string }; Returns: string }
+      crm_import_contacts: {
+        Args: { p_rows: Json; p_source?: string; p_type: string }
+        Returns: Json
+      }
       crm_match_interaction_preview: {
         Args: {
           p_business_id?: string
@@ -75580,6 +75682,22 @@ export type Database = {
         }
         Returns: Json
       }
+      crm_people_search: {
+        Args: {
+          p_campaign?: string
+          p_country?: string
+          p_ids_only?: boolean
+          p_limit?: number
+          p_not_contacted_days?: number
+          p_not_in_campaign?: boolean
+          p_offset?: number
+          p_search?: string
+          p_type?: string
+          p_usable_only?: boolean
+        }
+        Returns: Json
+      }
+      crm_summary: { Args: never; Returns: Json }
       current_worker_id: { Args: never; Returns: string }
       customer_sales_link_contact_by_email: {
         Args: { p_email: string }
@@ -76023,6 +76141,10 @@ export type Database = {
         Returns: string
       }
       pick_supplier_for_deal: { Args: { _deal_id: string }; Returns: string }
+      pr_media_import: {
+        Args: { p_rows: Json; p_source?: string }
+        Returns: Json
+      }
       priority_level_from_score: {
         Args: { _s: number }
         Returns: Database["public"]["Enums"]["priority_level"]

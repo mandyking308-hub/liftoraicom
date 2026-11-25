@@ -30,10 +30,12 @@ export const founderAreas: FounderArea[] = [
     s("/monday-launch", "Monday launch", "Earlier launch console.", true),
     s("/monday-readiness", "Monday readiness", "Earlier pre-launch checklist.", true),
   ]},
-  { key: "radars", n: 2, title: "Radars & prospecting", summary: "One CRM for all customer contacts.", sections: [
-    s("/crm", "CRM", "Shared contacts with business-specific safeguards, plus a Duplicate people tab."),
+  { key: "radars", n: 2, title: "Contacts", summary: "Customer CRM and the separate PR & Marketing contacts.", sections: [
+    s("/crm", "Customer CRM", "Every customer contact: upload, filter by type and country, add to campaigns, see each person's journey."),
+    s("/pr-marketing", "PR & Marketing", "Newspapers, journalists, agencies and marketing organisations by country and continent."),
+    s("/crm/details", "CRM details", "Earlier detailed CRM panels.", true),
     s("/funding-radar", "Funding radar", "Funded companies and build opportunities.", true),
-    s("/global-pr-radar", "PR radar", "Media opportunities, journalists and coverage.", true),
+    s("/global-pr-radar", "PR radar", "Older PR page; contacts now live in PR & Marketing.", true),
     s("/distressed-radar", "Distressed radar", "Distressed acquisitions and asset disposals.", true),
     s("/billionaire-intelligence", "Billionaire intelligence", "Billionaire coverage and research routes (research only).", true),
     s("/relationship-intelligence", "Relationship intelligence", "Your network memory, with Strategic organisations and Relationship health tabs.", true),

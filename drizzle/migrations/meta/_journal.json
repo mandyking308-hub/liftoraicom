@@ -351,6 +351,20 @@
       "when": 1795607573144,
       "tag": "0049_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1795608267803,
+      "tag": "0050_crm_import_and_pr_database",
+      "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1795608289989,
+      "tag": "0051_crm_people_search_volatile",
+      "breakpoints": true
     }
   ]
 }

@@ -37,13 +37,25 @@ async function sl(path: string, key: string, init?: RequestInit): Promise<unknow
 type Admin = ReturnType<typeof createClient>;
 
 /** Eligible CRM contacts for one business, with suppression/sendability safeguards applied. */
-async function eligibleContacts(admin: Admin, businessId: string) {
-  const { data: rels } = await admin.from("business_contact_relationships")
-    .select("id, contact_id, campaign_eligible, do_not_contact, contacts!inner(id, email, first_name, last_name, company, email_verified_status, sendable_status, status, compliance_status, is_globally_suppressed, hard_bounced, unsubscribed_at, do_not_contact_at, conversation_active)")
-    .eq("business_id", businessId);
+async function eligibleContacts(admin: Admin, businessId: string, contactIds?: string[]) {
+  const rels: Array<Record<string, any>> = [];
+  const sel = "id, contact_id, campaign_eligible, do_not_contact, contacts!inner(id, email, first_name, last_name, company, email_verified_status, sendable_status, status, compliance_status, is_globally_suppressed, hard_bounced, unsubscribed_at, do_not_contact_at, conversation_active)";
+  if (contactIds) {
+    for (let i = 0; i < contactIds.length; i += 200) {
+      const { data } = await admin.from("business_contact_relationships").select(sel).eq("business_id", businessId).in("contact_id", contactIds.slice(i, i + 200));
+      rels.push(...((data ?? []) as Array<Record<string, any>>));
+    }
+  } else {
+    for (let off = 0; ; off += 1000) {
+      const { data } = await admin.from("business_contact_relationships").select(sel).eq("business_id", businessId).range(off, off + 999);
+      const rows = (data ?? []) as Array<Record<string, any>>;
+      rels.push(...rows);
+      if (rows.length < 1000) break;
+    }
+  }
   const eligible: Array<{ relId: string; contact: Record<string, any>; email: string }> = [];
   const blockers: Record<string, number> = {};
-  for (const r of (rels ?? []) as Array<Record<string, any>>) {
+  for (const r of rels) {
     const c = r.contacts;
     const email = normEmail(c?.email);
     const relBlock: string[] = [];
@@ -54,7 +66,49 @@ async function eligibleContacts(admin: Admin, businessId: string) {
     if (all.length === 0 && email) eligible.push({ relId: r.id, contact: c, email });
     else for (const b of all) blockers[b] = (blockers[b] ?? 0) + 1;
   }
-  return { eligible, blockers, total: (rels ?? []).length };
+  return { eligible, blockers, total: rels.length };
+}
+
+/** Founder picked these people in the CRM: make sure each has a relationship with this business (never overrides do-not-contact). */
+async function ensureRelationships(admin: Admin, businessId: string, contactIds: string[]) {
+  const { data: biz } = await admin.from("businesses").select("name").eq("id", businessId).maybeSingle();
+  const name = (biz as { name?: string } | null)?.name;
+  if (!name) throw new ProviderError(400, "business_not_found");
+  for (let i = 0; i < contactIds.length; i += 200) {
+    const chunk = contactIds.slice(i, i + 200);
+    const { data: have } = await admin.from("business_contact_relationships").select("contact_id, do_not_contact").eq("business_id", businessId).in("contact_id", chunk);
+    const haveSet = new Set((have ?? []).map((h: { contact_id: string }) => h.contact_id));
+    const missing = chunk.filter((id) => !haveSet.has(id));
+    if (missing.length) {
+      await admin.from("business_contact_relationships").upsert(missing.map((id) => ({
+        contact_id: id, business_id: businessId, business_name: name, campaign_eligible: true,
+        qualification_reason: "Chosen by founder in CRM for campaign", relevance_category: "crm_selected",
+      })) as never[], { onConflict: "contact_id,business_name", ignoreDuplicates: true });
+    }
+    // founder selection = approval to be campaign eligible, unless this business marked them do-not-contact
+    await admin.from("business_contact_relationships").update({ campaign_eligible: true, updated_at: new Date().toISOString() } as never)
+      .eq("business_id", businessId).in("contact_id", chunk).eq("do_not_contact", false).eq("campaign_eligible", false);
+  }
+}
+
+async function recordJourney(admin: Admin, businessId: string, campaignId: string, leads: Array<{ relId: string; contact: Record<string, any>; email: string }>) {
+  const now = new Date().toISOString();
+  for (let i = 0; i < leads.length; i += 200) {
+    const chunk = leads.slice(i, i + 200);
+    const keys = chunk.map((l) => `added:${campaignId}:${l.email}`);
+    const { data: done } = await admin.from("crm_interaction_ledger").select("dedupe_key").in("dedupe_key", keys);
+    const doneSet = new Set((done ?? []).map((d: { dedupe_key: string }) => d.dedupe_key));
+    const todo = chunk.filter((l) => !doneSet.has(`added:${campaignId}:${l.email}`));
+    if (!todo.length) continue;
+    const { error } = await admin.from("crm_interaction_ledger").insert(todo.map((l) => ({
+      business_id: businessId, contact_id: l.contact.id, business_contact_relationship_id: l.relId,
+      source_system: "smartlead", source_channel: "email", interaction_type: "added_to_campaign", direction: "system",
+      provider_type: "smartlead", provider_campaign_id: campaignId, contact_email: l.email,
+      summary: `Added to campaign ${campaignId}`, occurred_at: now, dedupe_key: `added:${campaignId}:${l.email}`,
+      matched_status: "matched", processing_status: "processed",
+    })) as never[]);
+    if (error) console.error("journey record failed", error.message);
+  }
 }
 
 /** Emails already in this Smartlead campaign (from Liftor's own records). */
@@ -149,7 +203,13 @@ Deno.serve(async (req) => {
       const mapping = (maps ?? []).find((m) => m.mapping_status === "mapped" && m.is_active);
       if (!mapping) return json({ ok: false, error: "campaign_not_mapped" }, 400);
 
-      const { eligible, blockers, total } = await eligibleContacts(admin, businessId);
+      let contactIds: string[] | undefined;
+      if (Array.isArray(body.contact_ids)) {
+        contactIds = [...new Set((body.contact_ids as unknown[]).map(String).filter((x) => /^[0-9a-f-]{36}$/i.test(x)))].slice(0, 5000);
+        if (!contactIds.length) return json({ ok: false, error: "no_people_selected" }, 400);
+        if (action === "add_people") await ensureRelationships(admin, businessId, contactIds);
+      }
+      const { eligible, blockers, total } = await eligibleContacts(admin, businessId, contactIds);
       const existing = await existingCampaignEmails(admin, businessId, campaignId);
       const fresh = eligible.filter((l) => !existing.has(l.email));
       if (action === "preview_people") {
@@ -157,6 +217,7 @@ Deno.serve(async (req) => {
       }
       const toPush = fresh.slice(0, MAX_LEADS_PER_CALL);
       const pushed = await pushLeads(admin, KEY, businessId, campaignId, mapping.liftor_campaign_id ?? null, mapping.id, toPush);
+      await recordJourney(admin, businessId, campaignId, toPush.slice(0, pushed));
       await audit(admin, businessId, userId, `Added ${pushed} people to Smartlead campaign ${campaignId}`, { campaign_id: campaignId, pushed });
       return json({ ok: true, pushed, remaining: fresh.length - pushed });
     }

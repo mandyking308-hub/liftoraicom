@@ -480,6 +480,7 @@ function AddPeopleDialog({ c, onClose, onDone }: { c: Camp | null; onClose: () =
             <p className="text-xs text-muted-foreground">People who unsubscribed, bounced, opted out or aren't cleared are left out automatically.</p>
           </div>
         )}
+        {c?.campaignId && <a href={`/founder/crm?campaign=${c.campaignId}`} className="text-sm underline">Or choose exactly who to add from the Customer CRM (by type, country…)</a>}
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
           <Button disabled={!preview || preview.ready_to_add === 0 || busy} onClick={add}>

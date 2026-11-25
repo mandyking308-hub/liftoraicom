@@ -1,0 +1,1 @@
+ALTER FUNCTION public.crm_people_search(text,text,text,text,boolean,int,boolean,int,int,boolean) VOLATILE;
