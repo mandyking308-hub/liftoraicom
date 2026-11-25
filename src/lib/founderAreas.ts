@@ -30,13 +30,11 @@ export const founderAreas: FounderArea[] = [
     s("/monday-launch", "Monday launch", "Earlier launch console.", true),
     s("/monday-readiness", "Monday readiness", "Earlier pre-launch checklist.", true),
   ]},
-  { key: "radars", n: 2, title: "Radars & prospecting", summary: "CRM, retirement & succession research and the daily education harvest.", sections: [
+  { key: "radars", n: 2, title: "Radars & prospecting", summary: "One CRM for all customer contacts.", sections: [
     s("/crm", "CRM", "Shared contacts with business-specific safeguards, plus a Duplicate people tab."),
     s("/funding-radar", "Funding radar", "Funded companies and build opportunities.", true),
     s("/global-pr-radar", "PR radar", "Media opportunities, journalists and coverage.", true),
     s("/distressed-radar", "Distressed radar", "Distressed acquisitions and asset disposals.", true),
-    s("/retirement-succession", "Retirement & Succession", "Established UK businesses sold because the owner is retiring, incl. seller-finance evidence (research only)."),
-    s("/education-harvest", "Daily Education Harvest", "Private AM/PM research progress through open schools (research only, schedule runs in ChatGPT)."),
     s("/billionaire-intelligence", "Billionaire intelligence", "Billionaire coverage and research routes (research only).", true),
     s("/relationship-intelligence", "Relationship intelligence", "Your network memory, with Strategic organisations and Relationship health tabs.", true),
     s("/strategic-organisations", "Strategic organisations", "Now a tab in Relationship intelligence.", true),

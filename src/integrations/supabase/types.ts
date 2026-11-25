@@ -73195,6 +73195,27 @@ export type Database = {
           },
         ]
       }
+      winnr_sync_schedule: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: number
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: number
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: number
+          token?: string
+        }
+        Relationships: []
+      }
       worker_access_windows: {
         Row: {
           created_at: string

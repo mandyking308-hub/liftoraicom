@@ -144,8 +144,6 @@ import BusinessManualsPage from "./pages/founder/BusinessManuals";
 import EducationCommercialLayerPage from "./pages/founder/EducationCommercialLayer";
 import LiftorBrain from "./pages/founder/LiftorBrain";
 import PortfolioExitCommandCentre from "./pages/founder/PortfolioExitCommandCentre";
-import RetirementSuccession from "./pages/founder/RetirementSuccession";
-import EducationHarvest from "./pages/founder/EducationHarvest";
 import FounderLedExitSalesEngine from "./pages/founder/FounderLedExitSalesEngine";
 import FounderLedBuyerMarketEngine from "./pages/founder/FounderLedBuyerMarketEngine";
 import PortfolioExitAssetDetail from "./pages/founder/PortfolioExitAssetDetail";
@@ -1025,8 +1023,6 @@ const App = () => (
             <Route path="/founder/manuals-hub" element={<FounderRoute><ManualsHubPage /></FounderRoute>} />
             <Route path="/founder/business-manuals" element={<FounderRoute><BusinessManualsPage /></FounderRoute>} />
             <Route path="/founder/education-commercial" element={<FounderRoute><EducationCommercialLayerPage /></FounderRoute>} />
-            <Route path="/founder/retirement-succession" element={<FounderRoute><RetirementSuccession /></FounderRoute>} />
-            <Route path="/founder/education-harvest" element={<FounderRoute><EducationHarvest /></FounderRoute>} />
             <Route path="/founder/portfolio-exit" element={<FounderRoute><PortfolioExitCommandCentre /></FounderRoute>} />
             <Route path="/founder/portfolio-exit/:assetId" element={<FounderRoute><PortfolioExitAssetDetail /></FounderRoute>} />
             <Route path="/founder/founder-led-exit" element={<FounderRoute><FounderLedExitSalesEngine /></FounderRoute>} />
