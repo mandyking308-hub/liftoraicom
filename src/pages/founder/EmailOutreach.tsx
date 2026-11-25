@@ -18,6 +18,8 @@ import { toast } from "sonner";
 import { Building2, ChevronDown, Mail, MessageSquare, Plus, RefreshCw, Send, Server, Users, ChevronLeft, ChevronRight, Megaphone, Repeat, AlertTriangle } from "lucide-react";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { scheduleBetween, nextEmail, EMAILS_PER_ROUND, dailyEmailCapacity, newPeoplePerDay, MAILBOX_DAILY_LIMIT } from "@/lib/campaignSchedule";
+import CRMEmailConversations from "@/components/founder/crm/CRMEmailConversations";
+import { threadKey } from "../../../supabase/functions/_shared/crmReplyDrafting";
 
 type Row = Record<string, any>;
 const day = (t?: string | Date | null) => (t ? new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—");
@@ -64,6 +66,7 @@ export default function EmailOutreach() {
   const [syncing, setSyncing] = useState<string | null>(null);
   const [addPeople, setAddPeople] = useState<Camp | null>(null);
   const [launching, setLaunching] = useState(false);
+  const [conversation, setConversation] = useState<Row | null>(null);
 
   const launch = async (c: Camp) => {
     setLaunching(true);
@@ -119,7 +122,7 @@ export default function EmailOutreach() {
       supabase.from("smartlead_campaign_snapshots").select("*").in("business_id", ids),
       supabase.from("outreach_campaign_drafts").select("*").in("business_id", ids).eq("lead_criteria->>created_from", "email_outreach_dashboard").order("created_at", { ascending: false }),
       supabase.from("gsm_mailboxes").select("email, smtp_status, imap_status, quarantined_reason, warmup_status, readiness_state, health_score, last_provider_check_at").eq("estate_classification", "gsm").eq("active", true).eq("retired", false).limit(1000),
-      supabase.from("smartlead_activity_events").select("id, business_id, provider_campaign_id, provider_lead_id, details, occurred_at").in("business_id", ids).eq("event_type", "email_reply").order("occurred_at", { ascending: false }).limit(10),
+      supabase.from("smartlead_activity_events").select("id, business_id, provider_campaign_id, provider_lead_id, liftor_contact_id, details, occurred_at").in("business_id", ids).eq("event_type", "email_reply").order("occurred_at", { ascending: false }).limit(10),
       supabase.from("portfolio_send_bookings").select("business_id, campaign_label, sequence_step, recipients_planned").in("business_id", ids).eq("sequence_step", 1),
       supabase.from("portfolio_send_bookings").select("business_id, mailbox_id, starts_at, ends_at, emails_planned").gte("ends_at", new Date().toISOString()).lte("starts_at", new Date(Date.now() + 120 * 86400000).toISOString()).limit(10000),
       ...ids.map((id) => supabase.from("business_contact_relationships").select("id", { count: "exact", head: true }).eq("business_id", id)),
@@ -129,12 +132,12 @@ export default function EmailOutreach() {
     const leadIds = [...new Set(replyRows.map((r) => r.provider_lead_id).filter(Boolean))];
     let emailByLead: Record<string, string> = {};
     if (leadIds.length > 0) {
-      const { data: leadRows } = await supabase.from("smartlead_lead_snapshots").select("provider_lead_id, email").in("provider_lead_id", leadIds);
-      emailByLead = Object.fromEntries((leadRows ?? []).filter((l) => l.email).map((l) => [l.provider_lead_id, l.email]));
+      const { data: leadRows } = await supabase.from("smartlead_lead_snapshots").select("business_id, provider_campaign_id, provider_lead_id, email").in("business_id", ids).in("provider_lead_id", leadIds);
+      emailByLead = Object.fromEntries((leadRows ?? []).filter((l) => l.email).map((l) => [threadKey(l), l.email]));
     }
     setD({
       biz: biz ?? [], plans: plans.data ?? [], snaps: snaps.data ?? [], drafts: drafts.data ?? [], boxes: boxes.data ?? [],
-      replies: replyRows.map((r) => ({ ...r, lead_email: emailByLead[r.provider_lead_id] ?? (r.details as any)?.lead_email ?? (r.details as any)?.email ?? null })),
+      replies: replyRows.map((r) => ({ ...r, lead_email: emailByLead[threadKey(r)] ?? null })),
       books: books.data ?? [], usage: usage.data ?? [],
       rel: Object.fromEntries(ids.map((id, i) => [id, (counts[i] as any).count ?? 0])),
     });
@@ -278,6 +281,7 @@ export default function EmailOutreach() {
                 <li key={r.id} className="flex flex-wrap justify-between gap-2 py-2">
                   <span>{r.lead_email ?? "Someone"} · {camps.find((c) => d.plans.find((p) => p.id === c.key && p.source_campaign_id === r.provider_campaign_id))?.name ?? "Campaign"}</span>
                   <span className="text-muted-foreground">{day(r.occurred_at)}</span>
+                  <Button variant="outline" size="sm" disabled={!r.liftor_contact_id} onClick={() => setConversation(r)}><MessageSquare className="mr-2 h-4 w-4" />Open conversation</Button>
                 </li>))}</ul>
             )}
           </CardContent>
@@ -287,6 +291,11 @@ export default function EmailOutreach() {
       <DetailSheet c={detail} onClose={() => setDetail(null)} onApprove={approve} onLaunch={launch} launching={launching} onAddPeople={(c) => setAddPeople(c)} />
       {d && <NewCampaignDialog open={creating} onClose={() => setCreating(false)} businesses={d.biz} onSaved={live.refresh} />}
       <AddPeopleDialog c={addPeople} onClose={() => setAddPeople(null)} onDone={live.refresh} />
+      <Dialog open={!!conversation} onOpenChange={(open) => !open && setConversation(null)}>
+        <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto"><DialogHeader><DialogTitle>{conversation?.lead_email ?? "Customer conversation"}</DialogTitle></DialogHeader>
+          {conversation?.liftor_contact_id && <CRMEmailConversations key={threadKey(conversation as any)} contactId={conversation.liftor_contact_id} initialScope={conversation as any} />}
+        </DialogContent>
+      </Dialog>
     </FounderLayout>
   );
 }

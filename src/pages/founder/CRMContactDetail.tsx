@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ShieldCheck, ShieldAlert, FileText, Loader2, Gavel, Send } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
+import CRMEmailConversations from "@/components/founder/crm/CRMEmailConversations";
 import CustomerContinuityTimeline from "@/components/founder/customer/CustomerContinuityTimeline";
 import CRMContactSalesPanel from "@/components/founder/customer-sales/CRMContactSalesPanel";
 import CRMContactUpgradePanel from "@/components/founder/customer-upgrades/CRMContactUpgradePanel";
@@ -356,6 +357,7 @@ const CRMContactDetail = () => {
           <Button variant="outline" size="sm" onClick={() => runCheck(contact.id)}>Re-run sanity check</Button>
         </div>
 
+        <CRMEmailConversations key={contact.id} contactId={contact.id} />
         <CRMContact360Panel contactId={contact.id} />
         <CRMContactSalesPanel contactId={contact.id} />
         <CRMContactUpgradePanel contactId={contact.id} />

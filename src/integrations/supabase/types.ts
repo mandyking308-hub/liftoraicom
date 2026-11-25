@@ -57040,6 +57040,7 @@ export type Database = {
           email: string | null
           first_name: string | null
           first_sent_at: string | null
+          history_checked_at: string | null
           is_bounced: boolean | null
           is_unsubscribed: boolean
           last_event_at: string | null
@@ -57069,6 +57070,7 @@ export type Database = {
           email?: string | null
           first_name?: string | null
           first_sent_at?: string | null
+          history_checked_at?: string | null
           is_bounced?: boolean | null
           is_unsubscribed?: boolean
           last_event_at?: string | null
@@ -57098,6 +57100,7 @@ export type Database = {
           email?: string | null
           first_name?: string | null
           first_sent_at?: string | null
+          history_checked_at?: string | null
           is_bounced?: boolean | null
           is_unsubscribed?: boolean
           last_event_at?: string | null
@@ -57124,17 +57127,24 @@ export type Database = {
         Row: {
           agent_category: string | null
           agent_summary: string | null
+          approved_at: string | null
+          approved_by: string | null
           body: string
           business_id: string
+          contact_id: string | null
           created_at: string
           created_by: string | null
           id: string
           provider_campaign_id: string
           provider_lead_id: string
           provider_response: string | null
+          relationship_id: string | null
           reply_to_message_id: string | null
+          reviewed_at: string | null
+          revised_from: string | null
           sent_at: string | null
           sent_by: string | null
+          source_reply_row_id: string | null
           source_task_id: string | null
           status: string
           updated_at: string
@@ -57142,17 +57152,24 @@ export type Database = {
         Insert: {
           agent_category?: string | null
           agent_summary?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           body: string
           business_id: string
+          contact_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           provider_campaign_id: string
           provider_lead_id: string
           provider_response?: string | null
+          relationship_id?: string | null
           reply_to_message_id?: string | null
+          reviewed_at?: string | null
+          revised_from?: string | null
           sent_at?: string | null
           sent_by?: string | null
+          source_reply_row_id?: string | null
           source_task_id?: string | null
           status?: string
           updated_at?: string
@@ -57160,22 +57177,65 @@ export type Database = {
         Update: {
           agent_category?: string | null
           agent_summary?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
           body?: string
           business_id?: string
+          contact_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           provider_campaign_id?: string
           provider_lead_id?: string
           provider_response?: string | null
+          relationship_id?: string | null
           reply_to_message_id?: string | null
+          reviewed_at?: string | null
+          revised_from?: string | null
           sent_at?: string | null
           sent_by?: string | null
+          source_reply_row_id?: string | null
           source_task_id?: string | null
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "smartlead_reply_drafts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "smartlead_reply_drafts_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "smartlead_reply_drafts_relationship_id_fkey"
+            columns: ["relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "smartlead_reply_drafts_revised_from_fkey"
+            columns: ["revised_from"]
+            isOneToOne: false
+            referencedRelation: "smartlead_reply_drafts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "smartlead_reply_drafts_source_reply_row_id_fkey"
+            columns: ["source_reply_row_id"]
+            isOneToOne: false
+            referencedRelation: "smartlead_thread_messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       smartlead_send_dry_run_audit: {
         Row: {
@@ -57320,16 +57380,20 @@ export type Database = {
           body_html: string | null
           business_id: string
           click_count: number | null
+          contact_id: string | null
           created_at: string
           dedupe_key: string
           direction: string
           from_email: string | null
           id: string
+          match_status: string
           open_count: number | null
           provider_campaign_id: string
           provider_lead_id: string
           provider_message_id: string | null
           provider_stats_id: string | null
+          relationship_id: string | null
+          reply_kind: string | null
           sent_at: string | null
           sequence_number: number | null
           subject: string | null
@@ -57339,16 +57403,20 @@ export type Database = {
           body_html?: string | null
           business_id: string
           click_count?: number | null
+          contact_id?: string | null
           created_at?: string
           dedupe_key: string
           direction: string
           from_email?: string | null
           id?: string
+          match_status?: string
           open_count?: number | null
           provider_campaign_id: string
           provider_lead_id: string
           provider_message_id?: string | null
           provider_stats_id?: string | null
+          relationship_id?: string | null
+          reply_kind?: string | null
           sent_at?: string | null
           sequence_number?: number | null
           subject?: string | null
@@ -57358,22 +57426,48 @@ export type Database = {
           body_html?: string | null
           business_id?: string
           click_count?: number | null
+          contact_id?: string | null
           created_at?: string
           dedupe_key?: string
           direction?: string
           from_email?: string | null
           id?: string
+          match_status?: string
           open_count?: number | null
           provider_campaign_id?: string
           provider_lead_id?: string
           provider_message_id?: string | null
           provider_stats_id?: string | null
+          relationship_id?: string | null
+          reply_kind?: string | null
           sent_at?: string | null
           sequence_number?: number | null
           subject?: string | null
           to_email?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "smartlead_thread_messages_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "smartlead_thread_messages_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "high_intent_review_queue"
+            referencedColumns: ["contact_id"]
+          },
+          {
+            foreignKeyName: "smartlead_thread_messages_relationship_id_fkey"
+            columns: ["relationship_id"]
+            isOneToOne: false
+            referencedRelation: "business_contact_relationships"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       social_accounts: {
         Row: {
@@ -75685,6 +75779,10 @@ export type Database = {
       compute_intent_score: { Args: { _contact_id: string }; Returns: number }
       compute_system_health: { Args: never; Returns: undefined }
       country_to_timezone: { Args: { _country: string }; Returns: string }
+      crm_customer_conversations: {
+        Args: { p_contact_id: string }
+        Returns: Json
+      }
       crm_import_contacts: {
         Args: { p_rows: Json; p_source?: string; p_type: string }
         Returns: Json
@@ -75714,6 +75812,25 @@ export type Database = {
           p_usable_only?: boolean
         }
         Returns: Json
+      }
+      crm_review_reply: {
+        Args: {
+          p_decision: string
+          p_draft_id: string
+          p_expected_body: string
+        }
+        Returns: Json
+      }
+      crm_save_reply_version: {
+        Args: { p_body: string; p_draft_id: string; p_expected_body: string }
+        Returns: string
+      }
+      crm_smartlead_identity: {
+        Args: { p_business: string; p_campaign: string; p_lead: string }
+        Returns: {
+          contact_id: string
+          relationship_id: string
+        }[]
       }
       crm_summary: { Args: never; Returns: Json }
       current_worker_id: { Args: never; Returns: string }

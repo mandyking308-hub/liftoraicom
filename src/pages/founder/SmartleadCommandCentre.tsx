@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AlertTriangle, MessageSquare, RefreshCw } from "lucide-react";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import QuarterlyRoundsPanel from "@/components/founder/outreach/QuarterlyRoundsPanel";
+import CRMEmailConversations from "@/components/founder/crm/CRMEmailConversations";
 import { trackingFlags } from "../../../supabase/functions/_shared/smartleadCampaignSync";
 
 type Mapping = { business_id: string; provider_campaign_id: string; provider_campaign_name: string | null };
@@ -327,41 +328,15 @@ export default function SmartleadCommandCentre() {
         <Dialog open={!!thread} onOpenChange={(o) => !o && setThread(null)}>
           <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
             <DialogHeader><DialogTitle>{thread?.first_name} {thread?.last_name} — {thread?.company_name}</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              {messages.map((m) => (
-                <div key={m.id} className={`rounded-lg border p-3 ${m.direction === "REPLY" ? "border-primary/50" : "border-border"}`}>
-                  <div className="mb-1 text-xs text-muted-foreground">{m.direction === "REPLY" ? "Their reply" : "We sent"} · {fmtTime(m.sent_at)} · {m.subject}</div>
-                  <div className="whitespace-pre-wrap text-sm text-foreground">{(m.body_html ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()}</div>
-                </div>
-              ))}
-              {!messages.length && <p className="text-sm text-muted-foreground">No messages have been sent or received for this contact.</p>}
-
-              <div className="space-y-2 border-t border-border pt-3">
-                <div className="text-sm font-medium text-foreground">Reply drafts (never sent automatically)</div>
-                {drafts.map((d) => (
-                  <div key={d.id} className="rounded-md border border-border p-2 text-sm">
-                    {d.agent_category && (
-                      <div className="mb-2 text-xs text-muted-foreground">
-                        Inbox agent: <span className="font-medium text-foreground">{String(d.agent_category).replace(/_/g, " ")}</span>
-                        {d.agent_summary ? ` — ${d.agent_summary}` : ""}
-                      </div>
-                    )}
-                    <div className="whitespace-pre-wrap text-foreground">{d.body}</div>
-                    <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <Badge variant="outline">{d.status}</Badge>
-                      {d.status === "draft" && hasReplies && (
-                        <>
-                          <Button size="sm" onClick={() => { if (window.confirm("Send this reply now via Smartlead?")) sendDraft(d.id); }}>Approve & send</Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                <Textarea placeholder="Write a reply draft…" value={draftBody} onChange={(e) => setDraftBody(e.target.value)} />
-                <Button variant="outline" size="sm" onClick={saveDraft} disabled={!draftBody.trim()}>Save draft</Button>
-                {!hasReplies && <p className="text-xs text-muted-foreground">Sending is available only once this contact has replied.</p>}
-              </div>
-            </div>
+            {thread?.liftor_contact_id && <CRMEmailConversations key={`${thread.business_id}|${thread.provider_campaign_id}|${thread.provider_lead_id}`} contactId={thread.liftor_contact_id} initialScope={thread as any} />}
+            {!thread?.liftor_contact_id && <p className="text-sm text-muted-foreground">This conversation has not been matched to one CRM person.</p>}
+            {thread?.liftor_contact_id && <div className="space-y-2 border-t border-border pt-3">
+              <Button variant="ghost" size="sm" onClick={() => openThread(thread)}>Update approved responses</Button>
+              {drafts.filter((draft) => draft.status === "approved").map((draft) => <div key={draft.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                <span>Approved {fmtTime(draft.approved_at)} — not sent</span>
+                <Button size="sm" onClick={() => { if (window.confirm("Send this approved reply now via Smartlead?")) sendDraft(draft.id); }} disabled={!hasReplies}>Send approved response</Button>
+              </div>)}
+            </div>}
           </DialogContent>
         </Dialog>
         <section className="border-t border-border pt-6"><PortfolioCalendar embedded /></section>

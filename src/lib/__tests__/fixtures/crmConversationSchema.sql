@@ -1,0 +1,21 @@
+-- Disposable PostgreSQL fixture: only the existing columns used by these migrations.
+CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role;
+CREATE SCHEMA auth;
+CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+CREATE TABLE public.user_roles(user_id uuid,role text);
+CREATE FUNCTION public._is_founder_or_admin() RETURNS boolean LANGUAGE sql STABLE AS $$ SELECT EXISTS(SELECT 1 FROM public.user_roles WHERE user_id=auth.uid() AND role IN ('founder','admin')) $$;
+CREATE TABLE public.businesses(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),name text,portfolio_status text);
+CREATE TABLE public.contacts(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),email text UNIQUE,name text,source text,tags text[],is_globally_suppressed boolean,hard_bounced boolean,do_not_contact_at timestamptz,unsubscribed_at timestamptz);
+CREATE TABLE public.business_contact_relationships(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),business_id uuid,business_name text,contact_id uuid,do_not_contact boolean,campaign_eligible boolean);
+CREATE TABLE public.outbound_provider_campaign_mappings(business_id uuid,provider_campaign_id text,provider_type text,mapping_status text);
+CREATE TABLE public.smartlead_campaign_snapshots(business_id uuid,provider_campaign_id text,campaign_name text);
+CREATE TABLE public.smartlead_lead_snapshots(business_id uuid,provider_campaign_id text,provider_lead_id text,email text,liftor_contact_id uuid,PRIMARY KEY(business_id,provider_campaign_id,provider_lead_id));
+CREATE TABLE public.smartlead_thread_messages(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),business_id uuid,provider_campaign_id text,provider_lead_id text,dedupe_key text,provider_message_id text,provider_stats_id text,direction text,from_email text,to_email text,subject text,body_html text,sequence_number integer,sent_at timestamptz,created_at timestamptz DEFAULT now(),UNIQUE(business_id,provider_campaign_id,dedupe_key));
+CREATE TABLE public.smartlead_reply_drafts(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),business_id uuid,provider_campaign_id text,provider_lead_id text,reply_to_message_id text,body text,status text DEFAULT 'draft',created_by uuid,sent_by uuid,sent_at timestamptz,provider_response text,created_at timestamptz DEFAULT now(),updated_at timestamptz DEFAULT now(),agent_category text,agent_summary text,source_task_id uuid);
+CREATE TABLE public.crm_interaction_ledger(id uuid DEFAULT gen_random_uuid(),business_id uuid,contact_id uuid,business_contact_relationship_id uuid,source_system text,source_channel text,channel_key text,source_table text,source_id uuid,interaction_type text,direction text,provider_type text,provider_campaign_id text,provider_lead_id text,provider_message_id text,subject text,summary text,occurred_at timestamptz,matched_status text,dedupe_key text,founder_review_required boolean,metadata jsonb);
+CREATE UNIQUE INDEX crm_interaction_ledger_dedupe_uniq ON public.crm_interaction_ledger(dedupe_key) WHERE dedupe_key IS NOT NULL;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO authenticated;
+GRANT INSERT,UPDATE,DELETE ON public.smartlead_reply_drafts TO authenticated;
+INSERT INTO public.user_roles VALUES('00000000-0000-4000-8000-000000000001','founder');
+INSERT INTO public.businesses VALUES('640de582-a112-4d16-a221-03c27f00c6ec','Kindnesss','active');
+INSERT INTO public.outbound_provider_campaign_mappings VALUES('640de582-a112-4d16-a221-03c27f00c6ec','4664652','smartlead','mapped');

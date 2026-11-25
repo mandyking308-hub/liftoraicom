@@ -15,6 +15,7 @@ import { Upload, Send, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react
 import SpreadsheetImportDialog from "@/components/founder/contacts/SpreadsheetImportDialog";
 import AddToCampaignDialog from "@/components/founder/contacts/AddToCampaignDialog";
 import { CRM_FIELDS } from "@/lib/spreadsheetImport";
+import CRMEmailConversations from "@/components/founder/crm/CRMEmailConversations";
 
 type Person = { id: string; email: string; name: string | null; company: string | null; role: string | null; country: string | null; tags: string[] | null; email_verified_status: string | null; last_contacted_at: string | null; blocked: boolean; campaigns: string[]; hard_bounced?: boolean | null; unsubscribed_at?: string | null; do_not_contact_at?: string | null; is_globally_suppressed?: boolean | null };
 type Summary = { total: number; usable: number; in_campaign: number; types: Record<string, number>; countries: string[] };
@@ -359,6 +360,7 @@ function PersonSheet({ person, onClose }: { person: Person | null; onClose: () =
                 <div className="mt-2 text-xs text-muted-foreground">Checked against Smartlead {c.checked ? new Date(c.checked).toLocaleString("en-GB") : "—"}</div>
               </div>))}</div>
           )}
+          <div className="mt-6"><CRMEmailConversations key={person.id} contactId={person.id} /></div>
           <h3 className="mt-6 mb-2 font-semibold">Journey</h3>
           {events === null ? <p className="text-sm text-muted-foreground">Loading…</p> : events.length === 0 ? <p className="text-sm text-muted-foreground">No contact with this person yet.</p> : (
             <ol className="space-y-3 border-l pl-4">

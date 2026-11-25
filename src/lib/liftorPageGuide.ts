@@ -2,7 +2,7 @@
 // Pages come straight from founderAreas.ts, so every registered page is always covered.
 import { founderAreas, type FounderArea } from "./founderAreas";
 
-export const LIFTOR_PAGE_GUIDE_VERSION = "2.0 — 19 November 2026 · every Liftor HQ section and page";
+export const LIFTOR_PAGE_GUIDE_VERSION = "2.1 — 25 November 2026 · conversation workflow update; original reference retained";
 
 export type AreaGuide = { purpose: string; howTo: string[]; safety: string };
 
@@ -66,6 +66,14 @@ export const olderSections = (a: FounderArea) => a.sections.filter((s) => s.lega
 export const buildPageGuideMarkdown = () => {
   const lines = [`# Liftor User Guide — every section and page`, `_Version ${LIFTOR_PAGE_GUIDE_VERSION}_`, "", "## Getting started", ""];
   GETTING_STARTED.forEach((g) => lines.push(`**${g.title}.** ${g.body}`, ""));
+  lines.push("## Conversation workflow — 25 November 2026", "",
+    "Open a person in Customer CRM → Email conversations, or Email outreach → Latest replies → Open conversation. Each thread shows its business and campaign, full messages and saved response versions.", "",
+    "Use Sync conversation to read this person's latest messages from Smartlead. Hourly campaign updates continue; this control reads only and sends nothing.", "",
+    "Prepare AI reply is available only for a uniquely matched genuine customer reply. Automatic replies, delivery failures, ambiguous identities and suppressed people do not qualify. AI uses approved business claims and previous messages; uncertain questions are held for founder attention.", "",
+    "Review the response, edit it if needed, Save changes, then Approve or Reject. Earlier versions and decisions remain in the person's record. Approval means Approved — not sent, never an email. A newer incoming reply or changed identity blocks a stale approval.", "",
+    "The existing Smartlead reply-send control remains separate: it requires an already-approved response, an explicit send confirmation and the existing business gates. Actual sends are recorded only after provider confirmation; an uncertain outcome is held rather than retried automatically. No campaign is restarted and nobody is added by reviewing a conversation.", "",
+    "**Evidence:** database migrations and code describe the implemented workflow, not proof of live sending. Full UI/provider acceptance is recorded separately in the dated Build log.", "",
+    "## Original 19 November reference — historical", "");
   founderAreas.forEach((a) => {
     const g = AREA_GUIDES[a.key];
     lines.push(`## ${a.n}. ${a.title}`, "", a.summary, "");

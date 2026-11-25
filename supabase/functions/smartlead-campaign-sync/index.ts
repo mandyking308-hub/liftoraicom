@@ -1,10 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { corsHeaders as sdkCorsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { oldestConversationFirst } from "../_shared/crmReplyDrafting.ts";
 import {
   assertMapping, backoffMs, dedupeKey, isRetryable, mapCampaignSnapshot, normEmail, sanitizeSenders, summarizeHistory, buildReplyPayload, deriveActivityEvents, suppressionFor,
   type HistoryMsg,
 } from "../_shared/smartleadCampaignSync.ts";
 
 const corsHeaders = {
+  ...sdkCorsHeaders,
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-liftor-sync-token",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -29,6 +32,8 @@ async function sl(path: string, key: string, init?: RequestInit): Promise<unknow
     if (!isRetryable(res.status) || attempt === 3) {
       throw new ProviderError(res.status, res.status === 401 ? "provider_unauthorized" : `provider_http_${res.status}:${body.replace(/api_key=[^&\s"]+/g, "api_key=***")}`);
     }
+    // A reply POST has no proven provider idempotency key: never retry it.
+    if (init?.method && init.method !== "GET") throw new ProviderError(res.status, "provider_write_outcome_requires_review");
     await new Promise((r) => setTimeout(r, backoffMs(attempt)));
   }
   throw new ProviderError(0, "unreachable");
@@ -38,9 +43,10 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ ok: false, error: "method_not_allowed" }, 405);
 
-  const URL_ = Deno.env.get("SUPABASE_URL")!;
-  const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const URL_ = Deno.env.get("SUPABASE_URL");
+  const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const ANON = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!URL_ || !SERVICE || !ANON) return json({ ok: false, error: "server_configuration_missing" }, 503);
   const KEY = (Deno.env.get("SMARTLEAD_API_KEY") ?? "").trim();
 
   const auth = req.headers.get("Authorization") ?? "";
@@ -98,29 +104,65 @@ Deno.serve(async (req) => {
     const draftId = String(body.draft_id ?? "");
     const { data: d } = await admin.from("smartlead_reply_drafts").select("*").eq("id", draftId)
       .eq("business_id", businessId).eq("provider_campaign_id", campaignId).maybeSingle();
-    if (!d || d.status !== "draft") return json({ ok: false, error: "draft_not_found_or_not_draft" }, 400);
-    const { data: last } = await admin.from("smartlead_thread_messages").select("provider_message_id, sent_at")
+    if (!d || d.status !== "approved" || !d.approved_at || !d.approved_by) return json({ ok: false, error: "founder_approved_draft_required" }, 400);
+    const { data: identity, error: identityError } = await admin.rpc("crm_smartlead_identity", { p_business: businessId, p_campaign: campaignId, p_lead: d.provider_lead_id });
+    if (identityError || identity?.length !== 1 || identity[0].contact_id !== d.contact_id) return json({ ok: false, error: "conversation_identity_changed" }, 409);
+    const { data: person, error: personError } = await admin.from("contacts").select("is_globally_suppressed, hard_bounced, do_not_contact_at, unsubscribed_at").eq("id", d.contact_id).single();
+    const { data: relationship, error: relationshipError } = await admin.from("business_contact_relationships").select("do_not_contact").eq("id", d.relationship_id).single();
+    if (personError || relationshipError || !person || !relationship || person.is_globally_suppressed || person.hard_bounced || person.do_not_contact_at || person.unsubscribed_at || relationship.do_not_contact) return json({ ok: false, error: "contact_blocked_or_lookup_failed" }, 409);
+    const { data: last } = await admin.from("smartlead_thread_messages").select("id, provider_message_id, sent_at, reply_kind")
       .eq("business_id", businessId).eq("provider_campaign_id", campaignId).eq("provider_lead_id", d.provider_lead_id)
       .eq("direction", "REPLY").order("sent_at", { ascending: false }).limit(1).maybeSingle();
     if (!last?.provider_message_id || !last?.sent_at) return json({ ok: false, error: "reply_message_id_or_time_missing" }, 400);
+    if (last.id !== d.source_reply_row_id || last.reply_kind !== "reply") return json({ ok: false, error: "newer_reply_requires_review" }, 409);
     let payload: ReturnType<typeof buildReplyPayload>;
     try { payload = buildReplyPayload(d.provider_lead_id, d.body, last.provider_message_id, last.sent_at); }
     catch { return json({ ok: false, error: "reply_payload_incomplete" }, 400); }
+    const { data: claimed, error: claimError } = await admin.from("smartlead_reply_drafts").update({ status: "sending", updated_at: new Date().toISOString() }).eq("id", d.id).eq("status", "approved").select("id");
+    if (claimError || claimed?.length !== 1) return json({ ok: false, error: "reply_already_claimed_or_changed" }, 409);
     try {
       const r = await sl(`/campaigns/${campaignId}/reply-email-thread`, KEY, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      await admin.from("smartlead_reply_drafts").update({ status: "sent", sent_by: userId, sent_at: new Date().toISOString(), provider_response: JSON.stringify(r).slice(0, 500), updated_at: new Date().toISOString() }).eq("id", draftId);
+      if ((r as { success?: boolean } | null)?.success === false) throw new ProviderError(0, "provider_did_not_confirm_reply");
+      const { error: recordError } = await admin.from("smartlead_reply_drafts").update({ status: "sent", sent_by: userId, sent_at: new Date().toISOString(), provider_response: JSON.stringify(r).slice(0, 500), updated_at: new Date().toISOString() }).eq("id", draftId).eq("status", "sending");
+      if (recordError) return json({ ok: false, error: "provider_accepted_reply_record_needs_reconciliation", sent: true }, 502);
       return json({ ok: true, sent: true });
     } catch (e) {
       const code = e instanceof ProviderError ? e.code : "reply_failed";
-      await admin.from("smartlead_reply_drafts").update({ provider_response: code, updated_at: new Date().toISOString() }).eq("id", draftId);
+      await admin.from("smartlead_reply_drafts").update({ status: "send_unknown", provider_response: code, updated_at: new Date().toISOString() }).eq("id", draftId).eq("status", "sending");
       return json({ ok: false, error: code }, 502);
     }
   }
 
   // ---- Opt-in open/click tracking for this pilot only ----
+  if (action === "sync_thread") {
+    if (!userId) return json({ ok: false, error: "human_required" }, 403);
+    const leadId = String(body.lead_id ?? "");
+    if (!/^\d{1,20}$/.test(leadId)) return json({ ok: false, error: "invalid_lead_id" }, 400);
+    const { data: identities, error: identityError } = await admin.rpc("crm_smartlead_identity", { p_business: businessId, p_campaign: campaignId, p_lead: leadId });
+    if (identityError || identities?.length !== 1) return json({ ok: false, error: "conversation_identity_unmatched" }, 409);
+    try {
+      const hist = await sl(`/campaigns/${campaignId}/leads/${leadId}/message-history`, KEY) as { history?: HistoryMsg[] };
+      if (!Array.isArray(hist.history)) return json({ ok: false, error: "provider_history_unavailable" }, 502);
+      const rows = hist.history.map((msg) => ({
+        business_id: businessId, provider_campaign_id: campaignId, provider_lead_id: leadId,
+        dedupe_key: dedupeKey(msg), provider_message_id: msg.message_id ?? null, provider_stats_id: msg.stats_id ?? null,
+        direction: String(msg.type ?? "").toUpperCase() || "UNKNOWN", from_email: msg.from ?? null, to_email: msg.to ?? null,
+        subject: msg.subject ?? null, body_html: msg.email_body ?? null,
+        sequence_number: msg.email_seq_number != null ? Number(msg.email_seq_number) : null, sent_at: msg.time ?? null,
+      }));
+      if (rows.length) {
+        const { error: writeError } = await admin.from("smartlead_thread_messages").upsert(rows, { onConflict: "business_id,provider_campaign_id,dedupe_key", ignoreDuplicates: true });
+        if (writeError) throw new ProviderError(0, "thread_save_failed");
+      }
+      const { error: checkedError } = await admin.from("smartlead_lead_snapshots").update({ history_checked_at: new Date().toISOString() }).eq("business_id", businessId).eq("provider_campaign_id", campaignId).eq("provider_lead_id", leadId);
+      if (checkedError) throw new ProviderError(0, "thread_check_record_failed");
+      return json({ ok: true, messages: rows.length, sent: false });
+    } catch (error) { return json({ ok: false, error: error instanceof ProviderError ? error.code : "thread_sync_failed" }, 502); }
+  }
+  if (action !== "sync" && action !== "set_tracking") return json({ ok: false, error: "invalid_action" }, 400);
   if (action === "set_tracking") {
     if (!userId) return json({ ok: false, error: "human_required" }, 403);
     const opens = body.opens === true, clicks = body.clicks === true;
@@ -208,14 +250,26 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
       if ((page ?? []).length < 1000) break;
     }
     const relByEmail = new Map<string, { id: string; contact_id: string }>();
+    const ambiguousEmails = new Set<string>();
     for (const r of rels as Array<{ id: string; contact_id: string; contacts: { email: string | null } }>) {
-      const e = normEmail(r.contacts?.email); if (e) relByEmail.set(e, { id: r.id, contact_id: r.contact_id });
+      const e = normEmail(r.contacts?.email);
+      if (!e || ambiguousEmails.has(e)) continue;
+      if (relByEmail.has(e)) { relByEmail.delete(e); ambiguousEmails.add(e); }
+      else relByEmail.set(e, { id: r.id, contact_id: r.contact_id });
     }
     // Light read-back for large campaigns: Smartlead allows 200 requests/min, so
     // per-lead message history is only fetched for leads that can have meaningful
     // events (replied/categorised, unsubscribed, or no longer in progress). All
     // leads still get identity/status snapshots and state-based activity events.
     const light = body.mode === "light" || leads.length > 200;
+    const checks = new Map<string, string | null>();
+    for (let from = 0; from < 200000; from += 1000) {
+      const { data: checked, error: checkedError } = await admin.from("smartlead_lead_snapshots").select("provider_lead_id,history_checked_at")
+        .eq("business_id", businessId).eq("provider_campaign_id", campaignId).order("provider_lead_id").range(from, from + 999);
+      if (checkedError) throw new ProviderError(0, "conversation_refresh_lookup_failed");
+      for (const row of checked ?? []) checks.set(row.provider_lead_id, row.history_checked_at);
+      if ((checked ?? []).length < 1000) break;
+    }
     const LIGHT_HISTORY_CAP = 150;
     let historyFetches = 0;
     let messagesSeen = 0, newMessages = 0, newEvents = 0;
@@ -228,11 +282,11 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
     const evRows: Record<string, unknown>[] = [];
     const evMeta: EvMeta[] = [];
 
-    for (const row of leads) {
+    for (const row of oldestConversationFirst(leads, (row) => String((row.lead as Record<string, unknown>)?.id), checks)) {
       const lead = (row.lead ?? {}) as Record<string, unknown>;
       const leadId = String(lead.id);
       const st = String(row.status ?? "").toUpperCase();
-      const mayHaveEvents = lead.lead_category_id != null || lead.is_unsubscribed === true || (st !== "" && st !== "STARTED" && st !== "INPROGRESS");
+      const mayHaveEvents = stats.get(normEmail(lead.email) ?? "")?.replied === true || lead.lead_category_id != null || lead.is_unsubscribed === true || (st !== "" && st !== "STARTED" && st !== "INPROGRESS");
       const fetchHistory = !light || (mayHaveEvents && historyFetches < LIGHT_HISTORY_CAP);
       let history: HistoryMsg[] = [];
       if (fetchHistory) {
@@ -255,6 +309,7 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
         is_unsubscribed: lead.is_unsubscribed === true,
         // In light mode, leads without a history fetch keep their previous summary.
         ...(fetchHistory ? sum : {}),
+        ...(fetchHistory ? { history_checked_at: nowIso() } : {}),
         ...(fetchHistory && history.length ? { sending_mailbox: history.filter((m) => (m.type ?? "").toUpperCase() === "SENT").map((m) => m.from).filter(Boolean).pop() ?? null } : {}),
         ...(statsOk ? (() => { const s = stats.get(email ?? ""); return s ? {
           sent_count: s.sent, current_step: s.step, first_sent_at: s.first, last_sent_at: s.last,
@@ -322,8 +377,9 @@ const cur = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknow
       emails_sent_total: statsOk ? [...stats.values()].reduce((n, s) => n + s.sent, 0) : null,
     };
     for (let i = 0; i < msgRows.length; i += CHUNK) {
-      const { data: ins } = await admin.from("smartlead_thread_messages")
+      const { data: ins, error: messageError } = await admin.from("smartlead_thread_messages")
         .upsert(msgRows.slice(i, i + CHUNK), { onConflict: "business_id,provider_campaign_id,dedupe_key", ignoreDuplicates: true }).select("id");
+      if (messageError) throw new ProviderError(0, "conversation_message_save_failed");
       newMessages += ins?.length ?? 0;
     }
 

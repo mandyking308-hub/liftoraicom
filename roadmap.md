@@ -1,5 +1,10 @@
 # Roadmap
 
+## Approval-only CRM conversations — 25 Nov 2026
+- [x] Link Smartlead thread messages and reply drafts to an unambiguous business-scoped CRM identity; preserve full bodies and history.
+- [x] Add founder-only draft review/approval and show conversations inside customer records; never label approval as sending.
+- [x] Verify identity isolation, idempotency and approval-only rules: 29 isolated-database/helper tests, 2 guide tests, signed-in desktop/mobile draft → edit → approve → reload. Temporary fixtures removed; no email sent or campaign altered. Existing explicit send path hardened but not exercised.
+
 ## Kindness Habits private feed — 17 Nov 2026
 - [x] Connect Liftor to the read-only Kindness Habits summary feed with founder/admin authentication and the saved private key.
 - [x] Show validated sign-up totals and freshness on Liftor HQ and the Kindnesss business page; never import child personal data.
