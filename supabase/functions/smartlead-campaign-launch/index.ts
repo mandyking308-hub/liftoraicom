@@ -144,16 +144,19 @@ async function pushLeads(admin: Admin, key: string, businessId: string, campaign
     })) as Record<string, unknown>;
     pushed += batch.length;
     const now = new Date().toISOString();
-    await admin.from("outbound_provider_lead_mappings").upsert(
-      batch.map((l) => ({
-        business_id: businessId, liftor_contact_id: l.contact.id, liftor_campaign_id: liftorCampaignId,
-        campaign_mapping_id: mappingId, provider_type: "smartlead", provider_campaign_id: campaignId,
-        contact_email: l.email, push_status: "pushed", pushed_at: now,
-        provider_response: JSON.stringify(res).slice(0, 500),
-        business_contact_relationship_id: l.relId, updated_at: now,
-      })) as never[],
-      { onConflict: "business_id,provider_campaign_id,contact_email", ignoreDuplicates: false },
-    );
+    const { data: have } = await admin.from("outbound_provider_lead_mappings").select("id, contact_email")
+      .eq("provider_type", "smartlead").eq("provider_campaign_id", campaignId).in("contact_email", batch.map((l) => l.email));
+    const haveSet = new Set((have ?? []).map((h: { contact_email: string }) => normEmail(h.contact_email)));
+    const rows = batch.filter((l) => !haveSet.has(l.email)).map((l) => ({
+      business_id: businessId, liftor_contact_id: l.contact.id, liftor_campaign_id: liftorCampaignId,
+      campaign_mapping_id: mappingId, provider_type: "smartlead", provider_campaign_id: campaignId,
+      contact_email: l.email, push_status: "pushed", pushed_at: now,
+      provider_response: res ?? null, business_contact_relationship_id: l.relId, updated_at: now,
+    }));
+    if (rows.length && liftorCampaignId) {
+      const { error } = await admin.from("outbound_provider_lead_mappings").insert(rows as never[]);
+      if (error) console.error("lead mapping insert failed", error.message);
+    }
   }
   return pushed;
 }
