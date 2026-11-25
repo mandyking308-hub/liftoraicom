@@ -174,6 +174,20 @@ Deno.serve(async (req) => {
       return json({ ok: true, started: true });
     }
 
+    // ---------- Pause a mapped campaign (founder-approved; never starts, adds or deletes) ----------
+    if (action === "pause") {
+      const businessId = String(body.business_id ?? "");
+      const campaignId = String(body.campaign_id ?? "");
+      if (!/^[0-9a-f-]{36}$/i.test(businessId) || !/^\d{1,12}$/.test(campaignId)) return json({ ok: false, error: "invalid_business_or_campaign" }, 400);
+      const { data: maps } = await admin.from("outbound_provider_campaign_mappings")
+        .select("id").eq("provider_type", "smartlead").eq("provider_campaign_id", campaignId).eq("business_id", businessId);
+      if (!maps?.length) return json({ ok: false, error: "campaign_not_mapped" }, 400);
+      await sl(`/campaigns/${campaignId}/status`, KEY, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: "PAUSED" }) });
+      const after = (await sl(`/campaigns/${campaignId}`, KEY)) as Record<string, unknown>;
+      await audit(admin, businessId, userId, `Paused Smartlead campaign ${campaignId}`, { campaign_id: campaignId, reason: String(body.reason ?? "").slice(0, 300), status_after: after?.status ?? null });
+      return json({ ok: true, paused: true, status_after: after?.status ?? null });
+    }
+
     // ---------- Founder-approved provider test: paused, no people, deleted afterwards ----------
     if (action === "provider_test") {
       const steps: Record<string, string> = {};
