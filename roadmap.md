@@ -165,3 +165,5 @@
 - [ ] AI light rewording of next round's four emails
 - [ ] Press Sync all / watch hourly run; check older pages for dark patches
 - [ ] Signup legal acceptance IP capture (founder to confirm)
+
+- [ ] Live reply-send test: founder replies from test Gmail, draft, approve, Send, verify thread + CRM; then enable smartlead_reply_send_gate (waiting on founder reply)

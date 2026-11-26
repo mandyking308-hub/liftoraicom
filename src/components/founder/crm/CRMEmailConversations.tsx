@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Check, RefreshCw, Sparkles, X } from "lucide-react";
+import { Check, RefreshCw, Send, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { reviewableReply, threadKey } from "../../../../supabase/functions/_shared/crmReplyDrafting";
@@ -93,6 +93,34 @@ export default function CRMEmailConversations({ contactId, initialScope }: { con
     refresh();
   }
 
+  async function callSync(draft: Draft, action: "send_reply" | "verify_reply") {
+    if (!thread) return null;
+    const { data: result, error: failure } = await supabase.functions.invoke("smartlead-campaign-sync", { body: {
+      action, business_id: thread.business_id, campaign_id: thread.provider_campaign_id, draft_id: draft.id,
+      ...(action === "send_reply" ? { confirmation: "SEND THIS REPLY" } : {}),
+    } });
+    let detail: string | undefined = result?.error;
+    if (failure instanceof FunctionsHttpError) { const b = await failure.context.json().catch(() => ({})); detail = b.error ?? failure.message; }
+    if (failure || result?.ok === false) throw new Error(detail === "reply_sending_not_enabled" ? "Reply sending is not switched on yet." : detail ?? "Request failed");
+    return result;
+  }
+
+  async function send(draft: Draft) {
+    if (busy) return; // one click only
+    if (!window.confirm("Send this reply now from the original mailbox, in the same email thread?")) return;
+    setBusy(draft.id);
+    try { await callSync(draft, "send_reply"); toast.success("Reply sent — confirmed by Smartlead"); }
+    catch (f) { toast.error(f instanceof Error ? f.message : "Send failed"); }
+    finally { setBusy(null); refresh(); }
+  }
+
+  async function verify(draft: Draft) {
+    setBusy(draft.id);
+    try { const r = await callSync(draft, "verify_reply"); toast.success(r?.verified === "sent" ? "Confirmed: the reply was sent" : "Not sent — you can send it again"); }
+    catch (f) { toast.error(f instanceof Error ? f.message : "Check failed"); }
+    finally { setBusy(null); refresh(); }
+  }
+
   async function saveVersion(draft: Draft) {
     const body = edits[draft.id]?.trim();
     if (!body) return;
@@ -141,6 +169,8 @@ export default function CRMEmailConversations({ contactId, initialScope }: { con
             <Button size="sm" variant="outline" onClick={() => review(draft, "rejected")} disabled={!!busy}><X className="mr-2 h-4 w-4" />Reject</Button>
             {stale && <span className="text-xs text-muted-foreground">A newer reply has arrived.</span>}
           </div>}
+          {draft.status === "approved" && <Button size="sm" onClick={() => send(draft)} disabled={!!busy || stale}><Send className="mr-2 h-4 w-4" />{busy === draft.id ? "Sending…" : "Send"}</Button>}
+          {(draft.status === "send_unknown" || draft.status === "sending") && <Button size="sm" variant="outline" onClick={() => verify(draft)} disabled={!!busy}><RefreshCw className="mr-2 h-4 w-4" />Check if it was sent</Button>}
         </div>;
       })}
     </>}

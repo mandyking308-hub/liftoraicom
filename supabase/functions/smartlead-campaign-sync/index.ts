@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders as sdkCorsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { oldestConversationFirst } from "../_shared/crmReplyDrafting.ts";
 import {
-  assertMapping, backoffMs, dedupeKey, isRetryable, mapCampaignSnapshot, normEmail, sanitizeSenders, summarizeHistory, buildReplyPayload, deriveActivityEvents, suppressionFor,
+  assertMapping, backoffMs, dedupeKey, isRetryable, mapCampaignSnapshot, normEmail, sanitizeSenders, summarizeHistory, buildReplyPayload, deriveActivityEvents, suppressionFor, stripHtml,
   type HistoryMsg,
 } from "../_shared/smartleadCampaignSync.ts";
 
@@ -109,6 +109,11 @@ Deno.serve(async (req) => {
     if (identityError || identity?.length !== 1 || identity[0].contact_id !== d.contact_id) return json({ ok: false, error: "conversation_identity_changed" }, 409);
     const { data: person, error: personError } = await admin.from("contacts").select("is_globally_suppressed, hard_bounced, do_not_contact_at, unsubscribed_at").eq("id", d.contact_id).single();
     const { data: relationship, error: relationshipError } = await admin.from("business_contact_relationships").select("do_not_contact").eq("id", d.relationship_id).single();
+    // Reply-send gate: off = only the founder's own test address may receive a reply.
+    const { data: gate } = await admin.from("external_action_gates").select("enabled, metadata").eq("gate_key", "smartlead_reply_send_gate").maybeSingle();
+    const { data: recipient } = await admin.from("contacts").select("email").eq("id", d.contact_id).maybeSingle();
+    const testList = ((gate?.metadata as { test_recipients?: string[] } | null)?.test_recipients ?? []).map((e) => e.toLowerCase());
+    if (!gate || (!gate.enabled && !testList.includes(String(recipient?.email ?? "").toLowerCase()))) return json({ ok: false, error: "reply_sending_not_enabled" }, 403);
     if (personError || relationshipError || !person || !relationship || person.is_globally_suppressed || person.hard_bounced || person.do_not_contact_at || person.unsubscribed_at || relationship.do_not_contact) return json({ ok: false, error: "contact_blocked_or_lookup_failed" }, 409);
     const { data: last } = await admin.from("smartlead_thread_messages").select("id, provider_message_id, sent_at, reply_kind")
       .eq("business_id", businessId).eq("provider_campaign_id", campaignId).eq("provider_lead_id", d.provider_lead_id)
@@ -134,6 +139,31 @@ Deno.serve(async (req) => {
       await admin.from("smartlead_reply_drafts").update({ status: "send_unknown", provider_response: code, updated_at: new Date().toISOString() }).eq("id", draftId).eq("status", "sending");
       return json({ ok: false, error: code }, 502);
     }
+  }
+
+  // ---- Check an uncertain send against Smartlead before anyone may resend ----
+  if (action === "verify_reply") {
+    if (!userId) return json({ ok: false, error: "human_required" }, 403);
+    const draftId = String(body.draft_id ?? "");
+    const { data: d } = await admin.from("smartlead_reply_drafts").select("id, status, body, provider_lead_id, approved_at, updated_at")
+      .eq("id", draftId).eq("business_id", businessId).eq("provider_campaign_id", campaignId).maybeSingle();
+    if (!d || !["send_unknown", "sending"].includes(d.status)) return json({ ok: false, error: "nothing_to_verify" }, 400);
+    if (d.status === "sending" && Date.now() - new Date(d.updated_at).getTime() < 120000) return json({ ok: false, error: "send_in_progress" }, 409);
+    try {
+      const hist = await sl(`/campaigns/${campaignId}/leads/${d.provider_lead_id}/message-history`, KEY) as { history?: HistoryMsg[] };
+      if (!Array.isArray(hist.history)) return json({ ok: false, error: "provider_history_unavailable" }, 502);
+      const norm = (v: string) => stripHtml(v).replace(/\s+/g, " ").trim().toLowerCase();
+      const want = norm(d.body).slice(0, 120);
+      const since = new Date(d.approved_at ?? 0).getTime() - 60000;
+      const found = hist.history.find((m) => String(m.type ?? "").toUpperCase() === "SENT" && new Date(m.time ?? 0).getTime() >= since && want.length > 0 && norm(m.email_body ?? "").includes(want));
+      const nowIso = new Date().toISOString();
+      if (found) {
+        await admin.from("smartlead_reply_drafts").update({ status: "sent", sent_by: userId, sent_at: found.time ?? nowIso, provider_response: `verified_in_history:${found.message_id ?? ""}`.slice(0, 500), updated_at: nowIso }).eq("id", d.id).in("status", ["send_unknown", "sending"]);
+        return json({ ok: true, verified: "sent" });
+      }
+      await admin.from("smartlead_reply_drafts").update({ status: "approved", provider_response: "verified_not_in_history", updated_at: nowIso }).eq("id", d.id).in("status", ["send_unknown", "sending"]);
+      return json({ ok: true, verified: "not_sent" });
+    } catch (e) { return json({ ok: false, error: e instanceof ProviderError ? e.code : "verify_failed" }, 502); }
   }
 
   // ---- Opt-in open/click tracking for this pilot only ----

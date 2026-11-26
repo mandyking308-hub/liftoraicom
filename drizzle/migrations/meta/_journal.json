@@ -386,6 +386,13 @@
       "when": 1795618066845,
       "tag": "0054_crm_conversation_revision_and_history_safety",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1795705462455,
+      "tag": "0055_migration",
+      "breakpoints": true
     }
   ]
 }
