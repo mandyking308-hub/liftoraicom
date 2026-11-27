@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { ArrowLeft, ShieldCheck, ShieldAlert, FileText, Loader2, Gavel, Send } from "lucide-react";
 import FounderLayout from "@/components/founder/FounderLayout";
 import CRMContact360Panel from "@/components/founder/crm/CRMContact360Panel";
 import CRMEmailConversations from "@/components/founder/crm/CRMEmailConversations";
+import CRMRecordedCampaigns from "@/components/founder/crm/CRMRecordedCampaigns";
+import { readRecordedPages } from "@/lib/crmRecordedHistory";
 import CustomerContinuityTimeline from "@/components/founder/customer/CustomerContinuityTimeline";
 import CRMContactSalesPanel from "@/components/founder/customer-sales/CRMContactSalesPanel";
 import CRMContactUpgradePanel from "@/components/founder/customer-upgrades/CRMContactUpgradePanel";
@@ -55,7 +57,8 @@ function emailReadiness(c: Contact): { label: string; detail: string; tone: "ok"
   const v = (c.email_verified_status ?? "").toLowerCase();
   if (v === "reveal_required") return { label: "Reveal required", detail: "Apollo person known, work email not revealed. No sending possible.", tone: "warn" };
   if (!c.email) return { label: "No email on file", detail: "No usable email address stored for this contact.", tone: "muted" };
-  if (v === "" || v === "verified" || v === "exact" || v === "valid") return { label: "Exact / verified email", detail: c.email, tone: "ok" };
+  if (v === "") return { label: "Verification not recorded", detail: c.email, tone: "muted" };
+  if (v === "verified" || v === "exact" || v === "valid") return { label: "Exact / verified email", detail: c.email, tone: "ok" };
   return { label: v.replace(/_/g, " "), detail: c.email, tone: "warn" };
 }
 
@@ -67,12 +70,15 @@ const Info = ({ label, value }: { label: string; value?: string | null }) => (
 const CRMContactDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromOutreach = location.state?.from === "email-outreach";
   const [contact, setContact] = useState<Contact | null>(null);
   const [comms, setComms] = useState<{ id: string; channel: string; direction: string; message: string; timestamp: string; ai_generated: boolean }[]>([]);
   const [events, setEvents] = useState<{ id: string; event_type: string; timestamp: string; email_id: string }[]>([]);
   const [inboxes, setInboxes] = useState<{ id: string; email_address: string; business_name: string }[]>([]);
   const [check, setCheck] = useState<{ allowed: boolean; reason?: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [creatingDecision, setCreatingDecision] = useState(false);
 
@@ -105,19 +111,24 @@ const CRMContactDetail = () => {
   }, [id]);
 
   async function load() {
+    if (!id) return;
     setLoading(true);
-    const [c, m, e, ib] = await Promise.all([
-      supabase.from("contacts").select("*").eq("id", id!).maybeSingle(),
-      supabase.from("communications").select("*").eq("contact_id", id!).order("timestamp", { ascending: false }).limit(50),
-      supabase.from("email_events").select("*").eq("contact_id", id!).order("timestamp", { ascending: false }).limit(50),
-      supabase.from("inboxes").select("id, email_address, business_name").eq("active", true),
-    ]);
-    setContact(c.data as Contact);
-    setComms((m.data as typeof comms) ?? []);
-    setEvents((e.data as typeof events) ?? []);
-    setInboxes((ib.data as typeof inboxes) ?? []);
-    setLoading(false);
-    if (c.data) await runCheck(c.data.id);
+    setLoadError(null);
+    try {
+      const [c, m, e, ib] = await Promise.all([
+        supabase.from("contacts").select("*").eq("id", id).maybeSingle(),
+        readRecordedPages<(typeof comms)[number]>((from, to) => supabase.from("communications").select("*").eq("contact_id", id).order("timestamp", { ascending: false }).order("id").range(from, to)),
+        readRecordedPages<(typeof events)[number]>((from, to) => supabase.from("email_events").select("*").eq("contact_id", id).order("timestamp", { ascending: false }).order("id").range(from, to)),
+        supabase.from("inboxes").select("id, email_address, business_name").eq("active", true),
+      ]);
+      if (c.error || ib.error) throw new Error("Could not load contact details");
+      if (!c.data) { setContact(null); setLoadError("This CRM record was not found."); return; }
+      setContact(c.data as Contact);
+      setComms(m); setEvents(e);
+      setInboxes((ib.data as typeof inboxes) ?? []);
+      await runCheck(c.data.id);
+    } catch { setLoadError("Could not load the complete CRM record. Please try again."); }
+    finally { setLoading(false); }
   }
 
   async function runCheck(contactId: string) {
@@ -136,10 +147,13 @@ const CRMContactDetail = () => {
     void load();
   }
 
-  if (loading || !contact) {
+  if (loading || !contact || loadError) {
     return (
       <FounderLayout>
-        <p className="text-muted-foreground">Loading…</p>
+        <div className="space-y-3 p-4"><p role={loadError ? "alert" : undefined} className="text-muted-foreground">{loading ? "Loading…" : loadError ?? "This CRM record was not found."}</p>
+          {!loading && <Button variant="outline" onClick={() => void load()}>Try again</Button>}
+          <Button asChild variant="link"><Link to={fromOutreach ? "/founder/email-outreach" : "/founder/crm"}>{fromOutreach ? "Back to Email outreach" : "Back to Customer CRM"}</Link></Button>
+        </div>
       </FounderLayout>
     );
   }
@@ -148,10 +162,10 @@ const CRMContactDetail = () => {
 
   return (
     <FounderLayout>
-      <div className="max-w-5xl mx-auto space-y-6">
-        <Link to="/founder/crm/contacts" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-          <ArrowLeft className="h-4 w-4" /> Back to contacts
-        </Link>
+      <div className="max-w-5xl mx-auto space-y-6 p-4 md:p-8 break-words">
+        <Button asChild variant="link" className="h-auto p-0 text-muted-foreground"><Link to={fromOutreach ? "/founder/email-outreach" : "/founder/crm"}>
+          <ArrowLeft className="mr-1 h-4 w-4" /> {fromOutreach ? "Back to Email outreach" : "Back to Customer CRM"}
+        </Link></Button>
 
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
@@ -160,7 +174,7 @@ const CRMContactDetail = () => {
             </h1>
             <p className="text-sm text-muted-foreground mt-1">{contact.email || "No email on file"} · {contact.company || "—"}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button size="sm" variant="outline" onClick={() => navigate("/founder/outreach")} title="Campaign execution lives in Outreach, not on the master contact record">
               <Send className="h-4 w-4 mr-1" /> Open Outreach
             </Button>
@@ -304,6 +318,9 @@ const CRMContactDetail = () => {
         </div>
 
 
+        <CRMRecordedCampaigns key={contact.id} contactId={contact.id} />
+        <CRMEmailConversations key={contact.id} contactId={contact.id} />
+
         <Tabs defaultValue="comms">
           <TabsList>
             <TabsTrigger value="comms">Communications ({comms.length})</TabsTrigger>
@@ -322,7 +339,7 @@ const CRMContactDetail = () => {
                           <span className="capitalize">{m.direction} · {m.channel}{m.ai_generated ? " · AI" : ""}</span>
                           <span>{new Date(m.timestamp).toLocaleString()}</span>
                         </div>
-                        <p className="whitespace-pre-wrap">{m.message || <em className="text-muted-foreground">(no content)</em>}</p>
+                        <p className="whitespace-pre-wrap break-words">{m.message || <em className="text-muted-foreground">(no content)</em>}</p>
                       </li>
                     ))}
                   </ul>
@@ -357,7 +374,6 @@ const CRMContactDetail = () => {
           <Button variant="outline" size="sm" onClick={() => runCheck(contact.id)}>Re-run sanity check</Button>
         </div>
 
-        <CRMEmailConversations key={contact.id} contactId={contact.id} />
         <CRMContact360Panel contactId={contact.id} />
         <CRMContactSalesPanel contactId={contact.id} />
         <CRMContactUpgradePanel contactId={contact.id} />

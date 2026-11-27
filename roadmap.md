@@ -1,5 +1,10 @@
 # Roadmap
 
+## Latest replies → complete CRM record — 27 Nov 2026
+- [x] Link recorded reply names to exact CRM records; preserve Open conversation and add return to Email outreach.
+- [x] Show recorded contact details, business relationships, campaign membership and correspondence with truthful missing/error states; page through communications, email events and journey history without the old 50-row cutoff.
+- [x] Eleven focused tests passed; signed-in real reply → exact person record → back → email thread verified on desktop and narrow viewport with no runtime errors; automatic build OK. No sends, campaign changes or data writes.
+
 ## Email outreach pilot visibility — 27 Nov 2026
 - [x] Hide retired Kindnesss pilot from all dashboard figures, cards, warnings, calendar, mailbox-use projection and replies; preserve records and provider state.
 - [x] Eight focused tests passed; signed-in desktop and narrow page verified with one main campaign, two replies, no pilot and no runtime errors; automatic build OK.

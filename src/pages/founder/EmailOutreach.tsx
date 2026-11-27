@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import FounderLayout from "@/components/founder/FounderLayout";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -135,12 +136,20 @@ export default function EmailOutreach() {
       const { data: leadRows } = await supabase.from("smartlead_lead_snapshots").select("business_id, provider_campaign_id, provider_lead_id, email").in("business_id", ids).in("provider_lead_id", leadIds);
       emailByLead = Object.fromEntries((leadRows ?? []).filter((l) => l.email).map((l) => [threadKey(l), l.email]));
     }
+    const contactIds = [...new Set(replyRows.map((r) => r.liftor_contact_id).filter(Boolean))];
+    const { data: replyContacts } = contactIds.length
+      ? await supabase.from("contacts").select("id, name, first_name, last_name, email").in("id", contactIds)
+      : { data: [] };
+    const contactsById = new Map((replyContacts ?? []).map((c) => [c.id, c]));
     setD({
       biz: biz ?? [],
       plans: (plans.data ?? []).filter((p) => isEmailOutreachCampaignVisible(p.business_id, p.source_campaign_id)),
       snaps: (snaps.data ?? []).filter((s) => isEmailOutreachCampaignVisible(s.business_id, s.provider_campaign_id)),
       drafts: drafts.data ?? [], boxes: boxes.data ?? [],
-      replies: replyRows.map((r) => ({ ...r, lead_email: emailByLead[threadKey(r)] ?? null })),
+      replies: replyRows.map((r) => {
+        const contact = contactsById.get(r.liftor_contact_id ?? "");
+        return { ...r, crm_contact_id: contact?.id ?? null, contact_name: contact?.name || [contact?.first_name, contact?.last_name].filter(Boolean).join(" "), lead_email: contact?.email ?? emailByLead[threadKey(r)] ?? null };
+      }),
       books: (books.data ?? []).filter((b) => isEmailOutreachCampaignVisible(b.business_id, b.campaign_label)),
       usage: (usage.data ?? []).filter((b) => isEmailOutreachCampaignVisible(b.business_id, b.campaign_label)),
       rel: Object.fromEntries(ids.map((id, i) => [id, (counts[i] as any).count ?? 0])),
@@ -283,7 +292,16 @@ export default function EmailOutreach() {
             {!d ? "Loading…" : d.replies.length === 0 ? <p className="text-sm text-muted-foreground">No replies yet.</p> : (
               <ul className="divide-y divide-border text-sm">{d.replies.map((r) => (
                 <li key={r.id} className="flex flex-wrap justify-between gap-2 py-2">
-                  <span>{r.lead_email ?? "Someone"} · {camps.find((c) => d.plans.find((p) => p.id === c.key && p.source_campaign_id === r.provider_campaign_id))?.name ?? "Campaign"}</span>
+                  <div className="min-w-0 flex-1 basis-60 break-words">
+                    {r.crm_contact_id ? (
+                      <Button asChild variant="link" className="h-auto max-w-full whitespace-normal p-0 text-left font-semibold">
+                        <Link to={`/founder/crm/contacts/${r.crm_contact_id}`} state={{ from: "email-outreach" }}>{r.contact_name || r.lead_email || "Unnamed contact"}</Link>
+                      </Button>
+                    ) : <span>{r.lead_email ?? "Unmatched reply"}</span>}
+                    {r.contact_name && r.lead_email && <div className="text-xs text-muted-foreground">{r.lead_email}</div>}
+                    <div className="text-xs text-muted-foreground">{camps.find((c) => c.businessId === r.business_id && c.campaignId === String(r.provider_campaign_id))?.name ?? `Campaign ${r.provider_campaign_id}`}</div>
+                    {!r.crm_contact_id && <div className="text-xs text-muted-foreground">No linked CRM record</div>}
+                  </div>
                   <span className="text-muted-foreground">{day(r.occurred_at)}</span>
                   <Button variant="outline" size="sm" disabled={!r.liftor_contact_id} onClick={() => setConversation(r)}><MessageSquare className="mr-2 h-4 w-4" />Open conversation</Button>
                 </li>))}</ul>
