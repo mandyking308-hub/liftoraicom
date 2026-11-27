@@ -1,5 +1,9 @@
 # Roadmap
 
+## Email outreach pilot visibility — 27 Nov 2026
+- [x] Hide retired Kindnesss pilot from all dashboard figures, cards, warnings, calendar, mailbox-use projection and replies; preserve records and provider state.
+- [x] Eight focused tests passed; signed-in desktop and narrow page verified with one main campaign, two replies, no pilot and no runtime errors; automatic build OK.
+
 ## Approval-only CRM conversations — 25 Nov 2026
 - [x] Link Smartlead thread messages and reply drafts to an unambiguous business-scoped CRM identity; preserve full bodies and history.
 - [x] Add founder-only draft review/approval and show conversations inside customer records; never label approval as sending.

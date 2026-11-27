@@ -17,7 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Building2, ChevronDown, Mail, MessageSquare, Plus, RefreshCw, Send, Server, Users, ChevronLeft, ChevronRight, Megaphone, Repeat, AlertTriangle } from "lucide-react";
 import { FunctionsHttpError } from "@supabase/supabase-js";
-import { scheduleBetween, nextEmail, EMAILS_PER_ROUND, dailyEmailCapacity, newPeoplePerDay, MAILBOX_DAILY_LIMIT } from "@/lib/campaignSchedule";
+import { scheduleBetween, nextEmail, EMAILS_PER_ROUND, dailyEmailCapacity, newPeoplePerDay, MAILBOX_DAILY_LIMIT, isEmailOutreachCampaignVisible } from "@/lib/campaignSchedule";
 import CRMEmailConversations from "@/components/founder/crm/CRMEmailConversations";
 import { threadKey } from "../../../supabase/functions/_shared/crmReplyDrafting";
 
@@ -124,11 +124,11 @@ export default function EmailOutreach() {
       supabase.from("gsm_mailboxes").select("email, smtp_status, imap_status, quarantined_reason, warmup_status, readiness_state, health_score, last_provider_check_at").eq("estate_classification", "gsm").eq("active", true).eq("retired", false).limit(1000),
       supabase.from("smartlead_activity_events").select("id, business_id, provider_campaign_id, provider_lead_id, liftor_contact_id, details, occurred_at").in("business_id", ids).eq("event_type", "email_reply").order("occurred_at", { ascending: false }).limit(10),
       supabase.from("portfolio_send_bookings").select("business_id, campaign_label, sequence_step, recipients_planned").in("business_id", ids).eq("sequence_step", 1),
-      supabase.from("portfolio_send_bookings").select("business_id, mailbox_id, starts_at, ends_at, emails_planned").gte("ends_at", new Date().toISOString()).lte("starts_at", new Date(Date.now() + 120 * 86400000).toISOString()).limit(10000),
+      supabase.from("portfolio_send_bookings").select("business_id, campaign_label, mailbox_id, starts_at, ends_at, emails_planned").gte("ends_at", new Date().toISOString()).lte("starts_at", new Date(Date.now() + 120 * 86400000).toISOString()).limit(10000),
       ...ids.map((id) => supabase.from("business_contact_relationships").select("id", { count: "exact", head: true }).eq("business_id", id)),
     ]);
     // Attach the lead's email address to each reply so the list names real people.
-    const replyRows = replies.data ?? [];
+    const replyRows = (replies.data ?? []).filter((r) => isEmailOutreachCampaignVisible(r.business_id, r.provider_campaign_id));
     const leadIds = [...new Set(replyRows.map((r) => r.provider_lead_id).filter(Boolean))];
     let emailByLead: Record<string, string> = {};
     if (leadIds.length > 0) {
@@ -136,9 +136,13 @@ export default function EmailOutreach() {
       emailByLead = Object.fromEntries((leadRows ?? []).filter((l) => l.email).map((l) => [threadKey(l), l.email]));
     }
     setD({
-      biz: biz ?? [], plans: plans.data ?? [], snaps: snaps.data ?? [], drafts: drafts.data ?? [], boxes: boxes.data ?? [],
+      biz: biz ?? [],
+      plans: (plans.data ?? []).filter((p) => isEmailOutreachCampaignVisible(p.business_id, p.source_campaign_id)),
+      snaps: (snaps.data ?? []).filter((s) => isEmailOutreachCampaignVisible(s.business_id, s.provider_campaign_id)),
+      drafts: drafts.data ?? [], boxes: boxes.data ?? [],
       replies: replyRows.map((r) => ({ ...r, lead_email: emailByLead[threadKey(r)] ?? null })),
-      books: books.data ?? [], usage: usage.data ?? [],
+      books: (books.data ?? []).filter((b) => isEmailOutreachCampaignVisible(b.business_id, b.campaign_label)),
+      usage: (usage.data ?? []).filter((b) => isEmailOutreachCampaignVisible(b.business_id, b.campaign_label)),
       rel: Object.fromEntries(ids.map((id, i) => [id, (counts[i] as any).count ?? 0])),
     });
   }, []);

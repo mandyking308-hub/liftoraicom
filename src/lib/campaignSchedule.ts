@@ -3,6 +3,13 @@ export const EMAILS_PER_ROUND = 4;
 export const DAYS_BETWEEN_EMAILS = 7;
 export const MONTHS_BETWEEN_ROUNDS = 3;
 
+/** Page-only retirement: preserve the pilot's records, provider state and background sync. */
+export function isEmailOutreachCampaignVisible(businessId: string, campaignReference: string | number | null | undefined): boolean {
+  return businessId !== "640de582-a112-4d16-a221-03c27f00c6ec" ||
+    !(/(^|\D)4103531(\D|$)/.test(String(campaignReference ?? "")) ||
+      campaignReference === "Kindnesss pilot test (5 people)");
+}
+
 export type ScheduledEmail = { round: number; step: number; at: Date };
 
 const addDays = (d: Date, n: number) => new Date(d.getTime() + n * 86400000);

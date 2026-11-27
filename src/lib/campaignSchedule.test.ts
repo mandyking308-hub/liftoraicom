@@ -1,7 +1,21 @@
 import { describe, it, expect } from "vitest";
-import { scheduleBetween, nextEmail } from "./campaignSchedule";
+import { scheduleBetween, nextEmail, isEmailOutreachCampaignVisible } from "./campaignSchedule";
 
 const start = new Date("2026-11-24T10:00:00Z");
+
+describe("Email outreach pilot retirement", () => {
+  const kindnesss = "640de582-a112-4d16-a221-03c27f00c6ec";
+  it("excludes pilot 4103531 including its calendar booking references", () => {
+    expect(isEmailOutreachCampaignVisible(kindnesss, 4103531)).toBe(false);
+    expect(isEmailOutreachCampaignVisible(kindnesss, "Smartlead 4103531 — Pilot 6")).toBe(false);
+    expect(isEmailOutreachCampaignVisible(kindnesss, "Kindnesss pilot test (5 people)")).toBe(false);
+  });
+  it("keeps main campaign 4664652 and unrelated campaigns visible", () => {
+    expect(isEmailOutreachCampaignVisible(kindnesss, 4664652)).toBe(true);
+    expect(isEmailOutreachCampaignVisible("other-business", 4103531)).toBe(true);
+    expect(isEmailOutreachCampaignVisible(kindnesss, null)).toBe(true);
+  });
+});
 
 describe("campaign rhythm", () => {
   it("each round has 4 emails, 7 days apart", () => {
