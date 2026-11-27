@@ -1,5 +1,9 @@
 # Roadmap
 
+## Desktop/mobile reply-link verification — 27 Nov 2026
+- [x] Test both visible reply names, exact CRM records, return links and both conversation windows on desktop and mobile.
+- [x] Corrected read-only sales and continuity lookups that requested unavailable fields; both records and conversations passed again on desktop/mobile with no failed CRM data requests, no overflow and 11 focused tests passing.
+
 ## Latest replies → complete CRM record — 27 Nov 2026
 - [x] Link recorded reply names to exact CRM records; preserve Open conversation and add return to Email outreach.
 - [x] Show recorded contact details, business relationships, campaign membership and correspondence with truthful missing/error states; page through communications, email events and journey history without the old 50-row cutoff.

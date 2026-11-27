@@ -12,10 +12,10 @@ export default function CRMContactSalesPanel({ contactId }: { contactId: string 
     queryFn: async () => {
       const sb: any = supabase;
       const [convos, calls, closes, follow, handoff] = await Promise.all([
-        sb.from("customer_sales_conversations").select("id,call_outcome,close_probability,conversation_status,recommended_offer_id,started_at").eq("contact_id", contactId).order("started_at", { ascending: false }).limit(10),
+        sb.from("customer_sales_conversations").select("id,call_outcome,close_probability,conversation_status").eq("contact_id", contactId).limit(10),
         sb.from("customer_sales_call_logs").select("id,started_at,duration_seconds,consent_recorded,transcript_text").eq("contact_id", contactId).order("started_at", { ascending: false }).limit(5),
-        sb.from("customer_sales_close_actions").select("id,action_type,action_status,approval_status,estimated_pipeline_value").eq("contact_id", contactId).order("created_at", { ascending: false }).limit(10),
-        sb.from("customer_sales_follow_up_tasks").select("id,task_type,task_status,approval_status,due_at").eq("contact_id", contactId).order("created_at", { ascending: false }).limit(10),
+        sb.from("customer_sales_close_actions").select("id,action_status").eq("contact_id", contactId).limit(10),
+        sb.from("customer_sales_follow_up_tasks").select("id,task_status").eq("contact_id", contactId).limit(10),
         sb.from("customer_sales_human_handoff_tasks").select("id,task_status,risk_flags").eq("contact_id", contactId).order("created_at", { ascending: false }).limit(5),
       ].map((p: any) => Promise.resolve(p).catch(() => ({ data: [] }))));
       return {
